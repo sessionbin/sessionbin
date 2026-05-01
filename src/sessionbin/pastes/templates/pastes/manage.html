@@ -1,0 +1,48 @@
+{% extends "pastes/base.html" %}
+{% block title %}Manage {{ paste.slug }} — sessionbin{% endblock %}
+{% block extra_head %}
+<meta name="referrer" content="strict-origin-when-cross-origin">
+{% endblock %}
+{% block content %}
+<h1>Manage paste</h1>
+
+<dl>
+    <dt>Slug</dt>
+    <dd><code>{{ paste.slug }}</code></dd>
+
+    <dt>Uploaded</dt>
+    <dd>{{ paste.created_at }}</dd>
+
+    <dt>Paste URL</dt>
+    <dd>
+        {% if paste.deleted_at %}
+        <em>(deleted)</em>
+        {% else %}
+        <span class="copyable-url">
+            <a href="{{ paste.url }}">{{ paste.url }}</a>
+            <button type="button" class="btn-copy" onclick="navigator.clipboard.writeText(location.origin + '{{ paste.url }}')">Copy</button>
+        </span>
+        {% endif %}
+    </dd>
+
+    <dt>Manage URL</dt>
+    <dd><a href="{{ manage_url }}">{{ manage_url }}</a></dd>
+</dl>
+
+{% if paste.deleted_at %}
+<div class="notice notice--deleted">
+    This paste was deleted on {{ paste.deleted_at }}.
+</div>
+{% else %}
+<div class="notice notice--danger">
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            Deleting this paste is permanent. The URL will return 404 and the
+            transcript will no longer be accessible.
+        </p>
+        <button type="submit" class="btn-danger">Delete this paste</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

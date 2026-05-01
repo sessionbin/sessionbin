@@ -1,0 +1,18 @@
+{% extends "pastes/base.html" %}
+{% block title %}{{ paste.slug }} — sessionbin{% endblock %}
+{% block meta %}
+<meta property="og:title" content="{{ paste.slug }} — sessionbin">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:site_name" content="sessionbin">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ paste.slug }} — sessionbin">
+<meta name="twitter:description" content="{{ og_description }}">
+{% endblock %}
+{% block content %}
+<div class="paste-actions">
+  <a href="{% url 'raw-paste' paste.slug %}" class="download-link">Download raw JSONL</a>
+</div>
+{{ fragment|safe }}
+{% endblock %}
