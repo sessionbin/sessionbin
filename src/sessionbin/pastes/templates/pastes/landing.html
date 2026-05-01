@@ -1,0 +1,130 @@
+{% extends "pastes/base.html" %}
+{% block title %}sessionbin{% endblock %}
+{% block content %}
+<h1>sessionbin</h1>
+<p class="text-muted">
+    Share agentic coding session transcripts. Upload a session file, get a URL,
+    share it.
+</p>
+
+<form method="post" enctype="multipart/form-data" id="upload-form" data-max-size="{{ max_upload_bytes }}">
+    {% csrf_token %} {% if form.non_field_errors %}
+    <div class="errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div id="dropzone">
+        <p>Drag a file here, or click to browse.</p>
+        <input type="file" name="file" id="file-input" accept=".jsonl,.json" />
+        {% if form.file.errors %}
+        <div class="errors">{{ form.file.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="upload-row">
+        <button type="submit" id="upload-btn">Upload</button>
+        <span id="upload-warning" class="errors" hidden>No file selected</span>
+        <span id="size-warning" class="errors" hidden>File exceeds {{ max_upload_mb }} MB limit</span>
+    </div>
+</form>
+
+<p class="notice">
+    Sessions are scanned for tokens and credentials, which are automatically
+    replaced with <code>&lt;REDACTED&gt;</code> before storing them.
+    <strong>
+        Other sensitive data (usernames, paths, hostnames, internal URLs) are
+        not automatically scrubbed.
+    </strong>
+    Review your session before uploading and remove anything you don't want
+    shared. Max file size: {{ max_upload_mb }} MB.
+</p>
+
+<div class="cli-section">
+    <h2>Upload from the command line</h2>
+    <h3>CLI</h3>
+    <pre class="shell"><code><span>uv tool install sessionbin</span>
+<span>sessionbin upload session.jsonl</span></code></pre>
+    <h3>curl</h3>
+    <pre class="shell"><code><span>curl -F "file=@session.jsonl" {{ request.scheme }}://{{ request.get_host }}/api/upload</span></code></pre>
+    <h3>HTTPie</h3>
+    <pre class="shell"><code><span>http -f POST {{ request.scheme }}://{{ request.get_host }}/api/upload file@session.jsonl</span></code></pre>
+</div>
+
+<script>
+    (function () {
+        var dz = document.getElementById("dropzone");
+        var input = document.getElementById("file-input");
+        var form = document.getElementById("upload-form");
+        var btn = document.getElementById("upload-btn");
+        var prompt = dz.querySelector("p");
+        var warning = document.getElementById("upload-warning");
+        var sizeWarning = document.getElementById("size-warning");
+        var maxSize = parseInt(form.getAttribute("data-max-size"), 10);
+
+        function checkSize(file) {
+            if (file.size > maxSize) {
+                sizeWarning.hidden = false;
+                btn.disabled = true;
+                dz.classList.remove("has-file");
+                return false;
+            }
+            sizeWarning.hidden = true;
+            btn.disabled = false;
+            return true;
+        }
+
+        function showSelected(name) {
+            prompt.textContent = name;
+            dz.classList.add("has-file");
+            warning.hidden = true;
+        }
+
+        input.addEventListener("change", function () {
+            if (input.files.length > 0) {
+                if (checkSize(input.files[0])) {
+                    showSelected(input.files[0].name);
+                } else {
+                    prompt.textContent = input.files[0].name;
+                }
+            }
+        });
+
+        form.addEventListener("submit", function (e) {
+            if (input.files.length === 0) {
+                e.preventDefault();
+                warning.hidden = false;
+                return;
+            }
+            if (input.files[0].size > maxSize) {
+                e.preventDefault();
+            }
+        });
+
+        dz.addEventListener("click", function (e) {
+            if (e.target !== input) input.click();
+        });
+
+        dz.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            dz.classList.add("dragging");
+        });
+
+        dz.addEventListener("dragleave", function () {
+            dz.classList.remove("dragging");
+        });
+
+        dz.addEventListener("drop", function (e) {
+            e.preventDefault();
+            dz.classList.remove("dragging");
+            if (e.dataTransfer.files.length > 0) {
+                input.files = e.dataTransfer.files;
+                if (checkSize(input.files[0])) {
+                    form.submit();
+                } else {
+                    prompt.textContent = input.files[0].name;
+                }
+            }
+        });
+
+    })();
+</script>
+{% endblock %}
