@@ -1,0 +1,43 @@
+[build-system]
+requires = ["uv_build>=0.9.3,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
+name = "sessionbin"
+version = "0.0.1"
+description = "sessionbin CLI"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Martin Prpič", email = "martin.prpic@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/sessionbin/sessionbin-cli"
+Repository = "https://github.com/sessionbin/sessionbin-cli"
+
+[project.scripts]
+sessionbin = "sessionbin.cli:cli"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/rules/
+select = ["F", "E", "W", "I", "N"]
+
+[tool.mypy]
+python_version = "3.13"
+warn_unused_configs = true
+warn_unreachable = true
+warn_no_return = true
+warn_unused_ignores = true
