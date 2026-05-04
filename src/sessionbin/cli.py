@@ -79,6 +79,7 @@ def _pick_session() -> Path | None:
     result = questionary.select(
         "Select a session to upload:",
         choices=choices,
+        style=questionary.Style([("separator", "fg:#00d26a bold")]),
     ).unsafe_ask()
     return result
 
