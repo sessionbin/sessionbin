@@ -28,7 +28,9 @@ class _HighlightRenderer(mistune.HTMLRenderer):
         return pygments_highlight(code, lexer, _pygments_formatter)
 
 
-_markdown = mistune.create_markdown(escape=True, renderer=_HighlightRenderer(), plugins=["url"])
+_markdown = mistune.create_markdown(
+    escape=True, renderer=_HighlightRenderer(), plugins=["url", "table"]
+)
 
 
 @register.filter

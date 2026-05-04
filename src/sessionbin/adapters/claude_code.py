@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from datetime import datetime
 
 from sessionbin.schema.types import Block, Session, Turn
@@ -7,6 +8,10 @@ from sessionbin.schema.types import Block, Session, Turn
 ADAPTER_VERSION = 1
 
 logger = logging.getLogger(__name__)
+
+_ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+_COMMAND_NAME_RE = re.compile(r"<command-name>(.*?)</command-name>")
+_LOCAL_STDOUT_RE = re.compile(r"<local-command-stdout>(.*)</local-command-stdout>", re.DOTALL)
 
 
 def parse(raw: bytes) -> Session:
@@ -53,7 +58,14 @@ def parse(raw: bytes) -> Session:
             if model:
                 session.model = model
 
-        blocks = _parse_content(message.get("content", ""), lineno)
+        content = message.get("content", "")
+
+        if msg_type == "user" and isinstance(content, str):
+            content = _process_user_text(content)
+            if content is None:
+                continue
+
+        blocks = _parse_content(content, lineno)
 
         turn = Turn(
             index=len(turns),
@@ -67,6 +79,19 @@ def parse(raw: bytes) -> Session:
     return session
 
 
+def _process_user_text(text: str) -> str | None:
+    if text.startswith("<local-command-caveat>"):
+        return None
+
+    if m := _COMMAND_NAME_RE.search(text):
+        return f"`{m.group(1)}`"
+
+    if m := _LOCAL_STDOUT_RE.search(text):
+        return m.group(1)
+
+    return text
+
+
 def _parse_timestamp(raw: str | None) -> datetime | None:
     if not raw:
         return None
@@ -76,10 +101,14 @@ def _parse_timestamp(raw: str | None) -> datetime | None:
         return None
 
 
+def _strip_ansi(text: str) -> str:
+    return _ANSI_ESCAPE_RE.sub("", text)
+
+
 def _parse_content(content, lineno: int) -> list[Block]:
     if isinstance(content, str):
         if content:
-            return [Block(kind="text", text=content)]
+            return [Block(kind="text", text=_strip_ansi(content))]
         return []
 
     if not isinstance(content, list):
@@ -89,7 +118,7 @@ def _parse_content(content, lineno: int) -> list[Block]:
     for item in content:
         block_type = item.get("type")
         if block_type == "text":
-            blocks.append(Block(kind="text", text=item.get("text", "")))
+            blocks.append(Block(kind="text", text=_strip_ansi(item.get("text", ""))))
         elif block_type == "thinking":
             blocks.append(Block(kind="thinking", text=item.get("thinking", "")))
         elif block_type == "tool_use":
@@ -110,7 +139,7 @@ def _parse_content(content, lineno: int) -> list[Block]:
                 Block(
                     kind="tool_result",
                     tool_use_id=item.get("tool_use_id"),
-                    tool_output=output,
+                    tool_output=_strip_ansi(output),
                     is_error=item.get("is_error", False),
                 )
             )

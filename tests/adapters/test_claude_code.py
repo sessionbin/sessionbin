@@ -3,7 +3,13 @@ from collections import Counter
 
 import pytest
 
-from sessionbin.adapters.claude_code import _parse_content, _parse_timestamp, parse
+from sessionbin.adapters.claude_code import (
+    _parse_content,
+    _parse_timestamp,
+    _process_user_text,
+    _strip_ansi,
+    parse,
+)
 
 
 def _jsonl(*objs: dict) -> bytes:
@@ -172,6 +178,135 @@ class TestParseContent:
         blocks = _parse_content([{"type": "magic"}], 1)
         assert blocks == []
         assert "unknown block type" in caplog.text
+
+
+class TestProcessUserText:
+    def test_caveat_skipped(self):
+        text = (
+            "<local-command-caveat>Caveat: The messages below were generated"
+            " by the user while running local commands.</local-command-caveat>"
+        )
+        assert _process_user_text(text) is None
+
+    def test_command_name_extracted(self):
+        text = (
+            "<command-name>/model</command-name>"
+            " <command-message>model</command-message>"
+            " <command-args></command-args>"
+        )
+        assert _process_user_text(text) == "`/model`"
+
+    def test_command_name_with_args(self):
+        text = (
+            "<command-name>/effort</command-name>"
+            " <command-message>effort</command-message>"
+            " <command-args>max</command-args>"
+        )
+        assert _process_user_text(text) == "`/effort`"
+
+    def test_local_command_stdout_stripped(self):
+        text = "<local-command-stdout>Set effort level to max</local-command-stdout>"
+        assert _process_user_text(text) == "Set effort level to max"
+
+    def test_plain_text_unchanged(self):
+        assert _process_user_text("hello world") == "hello world"
+
+
+class TestStripAnsi:
+    def test_strips_bold(self):
+        assert _strip_ansi("\x1b[1mOpus 4.6\x1b[22m") == "Opus 4.6"
+
+    def test_strips_color(self):
+        assert _strip_ansi("\x1b[32mgreen\x1b[0m") == "green"
+
+    def test_no_ansi_unchanged(self):
+        assert _strip_ansi("plain text") == "plain text"
+
+    def test_multiple_sequences(self):
+        assert _strip_ansi("\x1b[1m\x1b[31mred bold\x1b[0m") == "red bold"
+
+
+class TestAnsiStrippingIntegration:
+    def test_ansi_stripped_from_string_content(self):
+        raw = _jsonl(_user_line(content="\x1b[1mhello\x1b[0m"))
+        session = parse(raw)
+        assert session.turns[0].blocks[0].text == "hello"
+
+    def test_ansi_stripped_from_text_block(self):
+        content = [{"type": "text", "text": "\x1b[32mgreen\x1b[0m"}]
+        raw = _jsonl(_assistant_line(content=content))
+        session = parse(raw)
+        assert session.turns[0].blocks[0].text == "green"
+
+    def test_ansi_stripped_from_tool_result(self):
+        content = [
+            {"type": "tool_result", "content": "\x1b[1mbold output\x1b[22m", "tool_use_id": "t1"}
+        ]
+        raw = _jsonl(_user_line(content=content))
+        session = parse(raw)
+        assert session.turns[0].blocks[0].tool_output == "bold output"
+
+    def test_ansi_stripped_from_command_stdout(self):
+        text = (
+            "<local-command-stdout>"
+            "Set model to \x1b[1mOpus 4.6 (1M context)\x1b[22m"
+            "</local-command-stdout>"
+        )
+        raw = _jsonl(_user_line(content=text))
+        session = parse(raw)
+        assert session.turns[0].blocks[0].text == "Set model to Opus 4.6 (1M context)"
+
+
+class TestLocalCommandIntegration:
+    def test_caveat_turn_skipped(self):
+        caveat = _user_line(
+            content="<local-command-caveat>Caveat: DO NOT respond.</local-command-caveat>"
+        )
+        raw = _jsonl(caveat, _assistant_line())
+        session = parse(raw)
+        assert len(session.turns) == 1
+        assert session.turns[0].role == "assistant"
+
+    def test_command_name_turn_rendered(self):
+        cmd = _user_line(
+            content=(
+                "<command-name>/model</command-name>"
+                " <command-message>model</command-message>"
+                " <command-args></command-args>"
+            ),
+        )
+        raw = _jsonl(cmd)
+        session = parse(raw)
+        assert len(session.turns) == 1
+        assert session.turns[0].blocks[0].text == "`/model`"
+
+    def test_stdout_turn_rendered(self):
+        stdout = _user_line(
+            content="<local-command-stdout>Set model to Opus 4.6</local-command-stdout>"
+        )
+        raw = _jsonl(stdout)
+        session = parse(raw)
+        assert len(session.turns) == 1
+        assert session.turns[0].blocks[0].text == "Set model to Opus 4.6"
+
+    def test_turn_indices_correct_after_skip(self):
+        caveat = _user_line(content="<local-command-caveat>Caveat: skip me.</local-command-caveat>")
+        cmd = _user_line(
+            content=(
+                "<command-name>/effort</command-name>"
+                " <command-message>effort</command-message>"
+                " <command-args></command-args>"
+            ),
+        )
+        stdout = _user_line(
+            content="<local-command-stdout>Set effort level to max</local-command-stdout>"
+        )
+        real = _user_line(content="Do something")
+        raw = _jsonl(caveat, cmd, stdout, real, _assistant_line())
+        session = parse(raw)
+        assert len(session.turns) == 4
+        for i, turn in enumerate(session.turns):
+            assert turn.index == i
 
 
 class TestFixtureSmokeSimple:
