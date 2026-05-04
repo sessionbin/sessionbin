@@ -1,5 +1,9 @@
 {% extends "pastes/base.html" %}
+{% load static %}
 {% block title %}{{ paste.slug }} — sessionbin{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/transcript.css' %}">
+{% endblock %}
 {% block meta %}
 <meta property="og:title" content="{{ paste.slug }} — sessionbin">
 <meta property="og:description" content="{{ og_description }}">
