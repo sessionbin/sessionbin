@@ -1,0 +1,572 @@
+{
+  "info": {
+    "id": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+    "slug": "glowing-panda",
+    "projectID": "global",
+    "directory": "/home/alice",
+    "path": "home/alice",
+    "title": "Basic addition",
+    "agent": "build",
+    "model": {
+      "id": "claude-sonnet-4-6@default",
+      "providerID": "google-vertex"
+    },
+    "version": "1.15.0",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0.23341515,
+    "tokens": {
+      "input": 10,
+      "output": 539,
+      "reasoning": 0,
+      "cache": {
+        "read": 63663,
+        "write": 54987
+      }
+    },
+    "time": {
+      "created": 1778871414347,
+      "updated": 1778871597909
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1778871414360
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "google-vertex",
+          "modelID": "claude-sonnet-4-6@default"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_e2cffae50001WPLA67CZ0dJjy5",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "whta is 2+2",
+          "id": "prt_e2cffae50002Ny5RAK82rmU4Kv",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2cffae50001WPLA67CZ0dJjy5"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2cffae50001WPLA67CZ0dJjy5",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0.0486765,
+        "tokens": {
+          "total": 12966,
+          "input": 3,
+          "output": 5,
+          "reasoning": 0,
+          "cache": {
+            "write": 12958,
+            "read": 0
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778871414371,
+          "completed": 1778871421645
+        },
+        "finish": "stop",
+        "id": "msg_e2cffae630017j6c2B5rC571lz",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "id": "prt_e2cffcaa0001m6UBwi6KT2st7B",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2cffae630017j6c2B5rC571lz"
+        },
+        {
+          "type": "text",
+          "text": "4",
+          "time": {
+            "start": 1778871421601,
+            "end": 1778871421607
+          },
+          "id": "prt_e2cffcaa10014KRZZwoPo3TGMP",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2cffae630017j6c2B5rC571lz"
+        },
+        {
+          "reason": "stop",
+          "type": "step-finish",
+          "tokens": {
+            "total": 12966,
+            "input": 3,
+            "output": 5,
+            "reasoning": 0,
+            "cache": {
+              "write": 12958,
+              "read": 0
+            }
+          },
+          "cost": 0.0486765,
+          "id": "prt_e2cffcac9001j4q4TtoVwZIvPL",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2cffae630017j6c2B5rC571lz"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1778871526261
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "google-vertex",
+          "modelID": "claude-sonnet-4-6@default"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_e2d01636f001t6yfTY6Gg4UJ1M",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "where does OpenCode store session data and in what format?",
+          "id": "prt_e2d01636f0029qnwSRA715xGzX",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01636f001t6yfTY6Gg4UJ1M"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2d01636f001t6yfTY6Gg4UJ1M",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0.0495915,
+        "tokens": {
+          "total": 13042,
+          "input": 3,
+          "output": 61,
+          "reasoning": 0,
+          "cache": {
+            "write": 12978,
+            "read": 0
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778871526268,
+          "completed": 1778871538499
+        },
+        "finish": "tool-calls",
+        "id": "msg_e2d01637c001s9q3MIXKdyyAKy",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "id": "prt_e2d018e42001MDYVv5s9Tnie9H",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01637c001s9q3MIXKdyyAKy"
+        },
+        {
+          "type": "tool",
+          "tool": "webfetch",
+          "callID": "toolu_vrtx_01Qi4jhP3n4TDSdd4bpHVmF6",
+          "state": {
+            "status": "completed",
+            "input": {
+              "url": "https://opencode.ai/docs"
+            },
+            "output": "Intro | AI coding agent built for the terminalIntro | OpenCode     [Skip to content](#_top)\n\n  [![](/docs/_astro/logo-dark.DOStV66V.svg) ![](/docs/_astro/logo-light.B0yzR0O5.svg) OpenCode](/docs/)\n\n[app.header.home](/)[app.header.docs](/docs/)\n\n[](https://github.com/anomalyco/opencode)[](https://opencode.ai/discord)\n\nSearch CtrlK\n\nCancel\n\n-   [Intro](/docs/)\n-   [Config](/docs/config/)\n-   [Providers](/docs/providers/)\n-   [Network](/docs/network/)\n-   [Enterprise](/docs/enterprise/)\n-   [Troubleshooting](/docs/troubleshooting/)\n-   [Windows](/docs/windows-wsl)\n-   Usage\n    \n    -   [Go](/docs/go/)\n    -   [TUI](/docs/tui/)\n    -   [CLI](/docs/cli/)\n    -   [Web](/docs/web/)\n    -   [IDE](/docs/ide/)\n    -   [Zen](/docs/zen/)\n    -   [Share](/docs/share/)\n    -   [GitHub](/docs/github/)\n    -   [GitLab](/docs/gitlab/)\n    \n-   Configure\n    \n    -   [Tools](/docs/tools/)\n    -   [Rules](/docs/rules/)\n    -   [Agents](/docs/agents/)\n    -   [Models](/docs/models/)\n    -   [Themes](/docs/themes/)\n    -   [Keybinds](/docs/keybinds/)\n    -   [Commands](/docs/commands/)\n    -   [Formatters](/docs/formatters/)\n    -   [Permissions](/docs/permissions/)\n    -   [LSP Servers](/docs/lsp/)\n    -   [MCP servers](/docs/mcp-servers/)\n    -   [ACP Support](/docs/acp/)\n    -   [Agent Skills](/docs/skills/)\n    -   [Custom Tools](/docs/custom-tools/)\n    \n-   Develop\n    \n    -   [SDK](/docs/sdk/)\n    -   [Server](/docs/server/)\n    -   [Plugins](/docs/plugins/)\n    -   [Ecosystem](/docs/ecosystem/)\n    \n\n[GitHub](https://github.com/anomalyco/opencode)[Discord](https://opencode.ai/discord)\n\nSelect theme DarkLightAuto   Select language EnglishالعربيةBosanskiDanskDeutschEspañolFrançaisItaliano日本語한국어Norsk BokmålPolskiPortuguês (Brasil)РусскийไทยTürkçe简体中文繁體中文\n\nOn this page\n\n-   [Overview](#_top)\n-   [Install](#install)\n-   [Configure](#configure)\n-   [Initialize](#initialize)\n-   [Usage](#usage)\n    -   [Ask questions](#ask-questions)\n    -   [Add features](#add-features)\n    -   [Make changes](#make-changes)\n    -   [Undo changes](#undo-changes)\n-   [Share](#share)\n-   [Customize](#customize)\n\n## On this page\n\n-   [Overview](#_top)\n-   [Install](#install)\n-   [Configure](#configure)\n-   [Initialize](#initialize)\n-   [Usage](#usage)\n    -   [Ask questions](#ask-questions)\n    -   [Add features](#add-features)\n    -   [Make changes](#make-changes)\n    -   [Undo changes](#undo-changes)\n-   [Share](#share)\n-   [Customize](#customize)\n\n# Intro\n\nGet started with OpenCode.\n\n[**OpenCode**](/) is an open source AI coding agent. It’s available as a terminal-based interface, desktop app, or IDE extension.\n\n![OpenCode TUI with the opencode theme](/docs/_astro/screenshot.CQjBbRyJ_1dLadc.webp)\n\nLet’s get started.\n\n---\n\n#### [Prerequisites](#prerequisites)\n\nTo use OpenCode in your terminal, you’ll need:\n\n1.  A modern terminal emulator like:\n    \n    -   [WezTerm](https://wezterm.org), cross-platform\n    -   [Alacritty](https://alacritty.org), cross-platform\n    -   [Ghostty](https://ghostty.org), Linux and macOS\n    -   [Kitty](https://sw.kovidgoyal.net/kitty/), Linux and macOS\n2.  API keys for the LLM providers you want to use.\n    \n\n---\n\n## [Install](#install)\n\nThe easiest way to install OpenCode is through the install script.\n\nTerminal window\n\n```\ncurl -fsSL https://opencode.ai/install | bash\n```\n\nYou can also install it with the following commands:\n\n-   **Using Node.js**\n    \n    -   [npm](#tab-panel-0)\n    -   [Bun](#tab-panel-1)\n    -   [pnpm](#tab-panel-2)\n    -   [Yarn](#tab-panel-3)\n    \n    Terminal window\n    \n    ```\n    npm install -g opencode-ai\n    ```\n    \n    Terminal window\n    \n    ```\n    bun install -g opencode-ai\n    ```\n    \n    Terminal window\n    \n    ```\n    pnpm install -g opencode-ai\n    ```\n    \n    Terminal window\n    \n    ```\n    yarn global add opencode-ai\n    ```\n    \n-   **Using Homebrew on macOS and Linux**\n    \n    Terminal window\n    \n    ```\n    brew install anomalyco/tap/opencode\n    ```\n    \n    > We recommend using the OpenCode tap for the most up to date releases. The official `brew install opencode` formula is maintained by the Homebrew team and is updated less frequently.\n    \n-   **Installing on Arch Linux**\n    \n    Terminal window\n    \n    ```\n    sudo pacman -S opencode           # Arch Linux (Stable)paru -S opencode-bin              # Arch Linux (Latest from AUR)\n    ```\n    \n\n#### [Windows](#windows)\n\nRecommended: Use WSL\n\nFor the best experience on Windows, we recommend using [Windows Subsystem for Linux (WSL)](/docs/windows-wsl). It provides better performance and full compatibility with OpenCode’s features.\n\n-   **Using Chocolatey**\n    \n    Terminal window\n    \n    ```\n    choco install opencode\n    ```\n    \n-   **Using Scoop**\n    \n    Terminal window\n    \n    ```\n    scoop install opencode\n    ```\n    \n-   **Using NPM**\n    \n    Terminal window\n    \n    ```\n    npm install -g opencode-ai\n    ```\n    \n-   **Using Mise**\n    \n    Terminal window\n    \n    ```\n    mise use -g github:anomalyco/opencode\n    ```\n    \n-   **Using Docker**\n    \n    Terminal window\n    \n    ```\n    docker run -it --rm ghcr.io/anomalyco/opencode\n    ```\n    \n\nSupport for installing OpenCode on Windows using Bun is currently in progress.\n\nYou can also grab the binary from the [Releases](https://github.com/anomalyco/opencode/releases).\n\n---\n\n## [Configure](#configure)\n\nWith OpenCode you can use any LLM provider by configuring their API keys.\n\nIf you are new to using LLM providers, we recommend using [OpenCode Zen](/docs/zen). It’s a curated list of models that have been tested and verified by the OpenCode team.\n\n1.  Run the `/connect` command in the TUI, select opencode, and head to [opencode.ai/auth](https://opencode.ai/auth).\n    \n    ```\n    /connect\n    ```\n    \n2.  Sign in, add your billing details, and copy your API key.\n    \n3.  Paste your API key.\n    \n    ```\n    ┌ API key││└ enter\n    ```\n    \n\nAlternatively, you can select one of the other providers. [Learn more](/docs/providers#directory).\n\n---\n\n## [Initialize](#initialize)\n\nNow that you’ve configured a provider, you can navigate to a project that you want to work on.\n\nTerminal window\n\n```\ncd /path/to/project\n```\n\nAnd run OpenCode.\n\nTerminal window\n\n```\nopencode\n```\n\nNext, initialize OpenCode for the project by running the following command.\n\n```\n/init\n```\n\nThis will get OpenCode to analyze your project and create an `AGENTS.md` file in the project root.\n\nTip\n\nYou should commit your project’s `AGENTS.md` file to Git.\n\nThis helps OpenCode understand the project structure and the coding patterns used.\n\n---\n\n## [Usage](#usage)\n\nYou are now ready to use OpenCode to work on your project. Feel free to ask it anything!\n\nIf you are new to using an AI coding agent, here are some examples that might help.\n\n---\n\n### [Ask questions](#ask-questions)\n\nYou can ask OpenCode to explain the codebase to you.\n\nTip\n\nUse the `@` key to fuzzy search for files in the project.\n\n```\nHow is authentication handled in @packages/functions/src/api/index.ts\n```\n\nThis is helpful if there’s a part of the codebase that you didn’t work on.\n\n---\n\n### [Add features](#add-features)\n\nYou can ask OpenCode to add new features to your project. Though we first recommend asking it to create a plan.\n\n1.  **Create a plan**\n    \n    OpenCode has a *Plan mode* that disables its ability to make changes and instead suggest *how* it’ll implement the feature.\n    \n    Switch to it using the **Tab** key. You’ll see an indicator for this in the lower right corner.\n    \n    ```\n    <TAB>\n    ```\n    \n    Now let’s describe what we want it to do.\n    \n    ```\n    When a user deletes a note, we'd like to flag it as deleted in the database.Then create a screen that shows all the recently deleted notes.From this screen, the user can undelete a note or permanently delete it.\n    ```\n    \n    You want to give OpenCode enough details to understand what you want. It helps to talk to it like you are talking to a junior developer on your team.\n    \n    Tip\n    \n    Give OpenCode plenty of context and examples to help it understand what you want.\n    \n2.  **Iterate on the plan**\n    \n    Once it gives you a plan, you can give it feedback or add more details.\n    \n    ```\n    We'd like to design this new screen using a design I've used before.[Image #1] Take a look at this image and use it as a reference.\n    ```\n    \n    Tip\n    \n    Drag and drop images into the terminal to add them to the prompt.\n    \n    OpenCode can scan any images you give it and add them to the prompt. You can do this by dragging and dropping an image into the terminal.\n    \n3.  **Build the feature**\n    \n    Once you feel comfortable with the plan, switch back to *Build mode* by hitting the **Tab** key again.\n    \n    ```\n    <TAB>\n    ```\n    \n    And asking it to make the changes.\n    \n    ```\n    Sounds good! Go ahead and make the changes.\n    ```\n    \n\n---\n\n### [Make changes](#make-changes)\n\nFor more straightforward changes, you can ask OpenCode to directly build it without having to review the plan first.\n\n```\nWe need to add authentication to the /settings route. Take a look at how this ishandled in the /notes route in @packages/functions/src/notes.ts and implementthe same logic in @packages/functions/src/settings.ts\n```\n\nYou want to make sure you provide a good amount of detail so OpenCode makes the right changes.\n\n---\n\n### [Undo changes](#undo-changes)\n\nLet’s say you ask OpenCode to make some changes.\n\n```\nCan you refactor the function in @packages/functions/src/api/index.ts?\n```\n\nBut you realize that it is not what you wanted. You **can undo** the changes using the `/undo` command.\n\n```\n/undo\n```\n\nOpenCode will now revert the changes you made and show your original message again.\n\n```\nCan you refactor the function in @packages/functions/src/api/index.ts?\n```\n\nFrom here you can tweak the prompt and ask OpenCode to try again.\n\nTip\n\nYou can run `/undo` multiple times to undo multiple changes.\n\nOr you **can redo** the changes using the `/redo` command.\n\n```\n/redo\n```\n\n---\n\n## [Share](#share)\n\nThe conversations that you have with OpenCode can be [shared with your team](/docs/share).\n\n```\n/share\n```\n\nThis will create a link to the current conversation and copy it to your clipboard.\n\nNote\n\nConversations are not shared by default.\n\nHere’s an [example conversation](https://opencode.ai/s/4XP1fce5) with OpenCode.\n\n---\n\n## [Customize](#customize)\n\nAnd that’s it! You are now a pro at using OpenCode.\n\nTo make it your own, we recommend [picking a theme](/docs/themes), [customizing the keybinds](/docs/keybinds), [configuring code formatters](/docs/formatters), [creating custom commands](/docs/commands), or playing around with the [OpenCode config](/docs/config).\n\n[Edit page](https://github.com/anomalyco/opencode/edit/dev/packages/web/src/content/docs/index.mdx)[Found a bug? Open an issue](https://github.com/anomalyco/opencode/issues/new)[Join our Discord community](https://opencode.ai/discord) Select language EnglishالعربيةBosanskiDanskDeutschEspañolFrançaisItaliano日本語한국어Norsk BokmålPolskiPortuguês (Brasil)РусскийไทยTürkçe简体中文繁體中文 \n\n© [Anomaly](https://anoma.ly)\n\nLast updated: May 15, 2026",
+            "metadata": {
+              "truncated": false
+            },
+            "title": "https://opencode.ai/docs (text/html)",
+            "time": {
+              "start": 1778871537224,
+              "end": 1778871538494
+            }
+          },
+          "id": "prt_e2d018e430015k69KKe2NTLH8o",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01637c001s9q3MIXKdyyAKy"
+        },
+        {
+          "reason": "tool-calls",
+          "type": "step-finish",
+          "tokens": {
+            "total": 13042,
+            "input": 3,
+            "output": 61,
+            "reasoning": 0,
+            "cache": {
+              "write": 12978,
+              "read": 0
+            }
+          },
+          "cost": 0.0495915,
+          "id": "prt_e2d019340001jiupTxvRxdW2dJ",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01637c001s9q3MIXKdyyAKy"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2d01636f001t6yfTY6Gg4UJ1M",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0.06279675,
+        "tokens": {
+          "total": 16557,
+          "input": 1,
+          "output": 63,
+          "reasoning": 0,
+          "cache": {
+            "write": 16493,
+            "read": 0
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778871538500,
+          "completed": 1778871565377
+        },
+        "finish": "tool-calls",
+        "id": "msg_e2d019344002qEtQ7Qxj6xbiFT",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "id": "prt_e2d01f6a7001gV2YDrU9SEuSgr",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d019344002qEtQ7Qxj6xbiFT"
+        },
+        {
+          "type": "tool",
+          "tool": "webfetch",
+          "callID": "toolu_vrtx_01U8bveW3FCyUxd73ExuSgtd",
+          "state": {
+            "status": "completed",
+            "input": {
+              "url": "https://opencode.ai/docs/config/"
+            },
+            "output": "Config | OpenCode     [Skip to content](#_top)\n\n  [![](/docs/_astro/logo-dark.DOStV66V.svg) ![](/docs/_astro/logo-light.B0yzR0O5.svg) OpenCode](/docs/)\n\n[app.header.home](/)[app.header.docs](/docs/)\n\n[](https://github.com/anomalyco/opencode)[](https://opencode.ai/discord)\n\nSearch CtrlK\n\nCancel\n\n-   [Intro](/docs/)\n-   [Config](/docs/config/)\n-   [Providers](/docs/providers/)\n-   [Network](/docs/network/)\n-   [Enterprise](/docs/enterprise/)\n-   [Troubleshooting](/docs/troubleshooting/)\n-   [Windows](/docs/windows-wsl)\n-   Usage\n    \n    -   [Go](/docs/go/)\n    -   [TUI](/docs/tui/)\n    -   [CLI](/docs/cli/)\n    -   [Web](/docs/web/)\n    -   [IDE](/docs/ide/)\n    -   [Zen](/docs/zen/)\n    -   [Share](/docs/share/)\n    -   [GitHub](/docs/github/)\n    -   [GitLab](/docs/gitlab/)\n    \n-   Configure\n    \n    -   [Tools](/docs/tools/)\n    -   [Rules](/docs/rules/)\n    -   [Agents](/docs/agents/)\n    -   [Models](/docs/models/)\n    -   [Themes](/docs/themes/)\n    -   [Keybinds](/docs/keybinds/)\n    -   [Commands](/docs/commands/)\n    -   [Formatters](/docs/formatters/)\n    -   [Permissions](/docs/permissions/)\n    -   [LSP Servers](/docs/lsp/)\n    -   [MCP servers](/docs/mcp-servers/)\n    -   [ACP Support](/docs/acp/)\n    -   [Agent Skills](/docs/skills/)\n    -   [Custom Tools](/docs/custom-tools/)\n    \n-   Develop\n    \n    -   [SDK](/docs/sdk/)\n    -   [Server](/docs/server/)\n    -   [Plugins](/docs/plugins/)\n    -   [Ecosystem](/docs/ecosystem/)\n    \n\n[GitHub](https://github.com/anomalyco/opencode)[Discord](https://opencode.ai/discord)\n\nSelect theme DarkLightAuto   Select language EnglishالعربيةBosanskiDanskDeutschEspañolFrançaisItaliano日本語한국어Norsk BokmålPolskiPortuguês (Brasil)РусскийไทยTürkçe简体中文繁體中文\n\nOn this page\n\n-   [Overview](#_top)\n-   [Format](#format)\n-   [Locations](#locations)\n    -   [Precedence order](#precedence-order)\n    -   [Remote](#remote)\n    -   [Global](#global)\n    -   [Per project](#per-project)\n    -   [Custom path](#custom-path)\n    -   [Custom directory](#custom-directory)\n    -   [Managed settings](#managed-settings)\n-   [Schema](#schema)\n    -   [TUI](#tui)\n    -   [Server](#server)\n    -   [Shell](#shell)\n    -   [Tools](#tools)\n    -   [Models](#models)\n    -   [Image attachments](#image-attachments)\n    -   [Themes](#themes)\n    -   [Agents](#agents)\n    -   [Default agent](#default-agent)\n    -   [Sharing](#sharing)\n    -   [Commands](#commands)\n    -   [Keybinds](#keybinds)\n    -   [Snapshot](#snapshot)\n    -   [Autoupdate](#autoupdate)\n    -   [Formatters](#formatters)\n    -   [LSP Servers](#lsp-servers)\n    -   [Permissions](#permissions)\n    -   [Compaction](#compaction)\n    -   [Watcher](#watcher)\n    -   [MCP servers](#mcp-servers)\n    -   [Plugins](#plugins)\n    -   [Instructions](#instructions)\n    -   [Disabled providers](#disabled-providers)\n    -   [Enabled providers](#enabled-providers)\n    -   [Experimental](#experimental)\n-   [Variables](#variables)\n    -   [Env vars](#env-vars)\n    -   [Files](#files)\n\n## On this page\n\n-   [Overview](#_top)\n-   [Format](#format)\n-   [Locations](#locations)\n    -   [Precedence order](#precedence-order)\n    -   [Remote](#remote)\n    -   [Global](#global)\n    -   [Per project](#per-project)\n    -   [Custom path](#custom-path)\n    -   [Custom directory](#custom-directory)\n    -   [Managed settings](#managed-settings)\n-   [Schema](#schema)\n    -   [TUI](#tui)\n    -   [Server](#server)\n    -   [Shell](#shell)\n    -   [Tools](#tools)\n    -   [Models](#models)\n    -   [Image attachments](#image-attachments)\n    -   [Themes](#themes)\n    -   [Agents](#agents)\n    -   [Default agent](#default-agent)\n    -   [Sharing](#sharing)\n    -   [Commands](#commands)\n    -   [Keybinds](#keybinds)\n    -   [Snapshot](#snapshot)\n    -   [Autoupdate](#autoupdate)\n    -   [Formatters](#formatters)\n    -   [LSP Servers](#lsp-servers)\n    -   [Permissions](#permissions)\n    -   [Compaction](#compaction)\n    -   [Watcher](#watcher)\n    -   [MCP servers](#mcp-servers)\n    -   [Plugins](#plugins)\n    -   [Instructions](#instructions)\n    -   [Disabled providers](#disabled-providers)\n    -   [Enabled providers](#enabled-providers)\n    -   [Experimental](#experimental)\n-   [Variables](#variables)\n    -   [Env vars](#env-vars)\n    -   [Files](#files)\n\n# Config\n\nUsing the OpenCode JSON config.\n\nYou can configure OpenCode using a JSON config file.\n\n---\n\n## [Format](#format)\n\nOpenCode supports both **JSON** and **JSONC** (JSON with Comments) formats.\n\nopencode.jsonc\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"model\": \"anthropic/claude-sonnet-4-5\",  \"autoupdate\": true,  \"server\": {    \"port\": 4096,  },}\n```\n\n---\n\n## [Locations](#locations)\n\nYou can place your config in a couple of different locations and they have a different order of precedence.\n\nNote\n\nConfiguration files are **merged together**, not replaced.\n\nConfiguration files are merged together, not replaced. Settings from the following config locations are combined. Later configs override earlier ones only for conflicting keys. Non-conflicting settings from all configs are preserved.\n\nFor example, if your global config sets `autoupdate: true` and your project config sets `model: \"anthropic/claude-sonnet-4-5\"`, the final configuration will include both settings.\n\n---\n\n### [Precedence order](#precedence-order)\n\nConfig sources are loaded in this order (later sources override earlier ones):\n\n1.  **Remote config** (from `.well-known/opencode`) - organizational defaults\n2.  **Global config** (`~/.config/opencode/opencode.json`) - user preferences\n3.  **Custom config** (`OPENCODE_CONFIG` env var) - custom overrides\n4.  **Project config** (`opencode.json` in project) - project-specific settings\n5.  **`.opencode` directories** - agents, commands, plugins\n6.  **Inline config** (`OPENCODE_CONFIG_CONTENT` env var) - runtime overrides\n7.  **Managed config files** (`/Library/Application Support/opencode/` on macOS) - admin-controlled\n8.  **macOS managed preferences** (`.mobileconfig` via MDM) - highest priority, not user-overridable\n\nThis means project configs can override global defaults, and global configs can override remote organizational defaults. Managed settings override everything.\n\nNote\n\nThe `.opencode` and `~/.config/opencode` directories use **plural names** for subdirectories: `agents/`, `commands/`, `modes/`, `plugins/`, `skills/`, `tools/`, and `themes/`. Singular names (e.g., `agent/`) are also supported for backwards compatibility.\n\n---\n\n### [Remote](#remote)\n\nOrganizations can provide default configuration via the `.well-known/opencode` endpoint. This is fetched automatically when you authenticate with a provider that supports it.\n\nRemote config is loaded first, serving as the base layer. All other config sources (global, project) can override these defaults.\n\nFor example, if your organization provides MCP servers that are disabled by default:\n\nRemote config from .well-known/opencode\n\n```\n{  \"mcp\": {    \"jira\": {      \"type\": \"remote\",      \"url\": \"https://jira.example.com/mcp\",      \"enabled\": false    }  }}\n```\n\nYou can enable specific servers in your local config:\n\nopencode.json\n\n```\n{  \"mcp\": {    \"jira\": {      \"type\": \"remote\",      \"url\": \"https://jira.example.com/mcp\",      \"enabled\": true    }  }}\n```\n\n---\n\n### [Global](#global)\n\nPlace your global OpenCode config in `~/.config/opencode/opencode.json`. Use global config for user-wide server/runtime preferences like providers, models, and permissions.\n\nFor TUI-specific settings, use `~/.config/opencode/tui.json`.\n\nGlobal config overrides remote organizational defaults.\n\n---\n\n### [Per project](#per-project)\n\nAdd `opencode.json` in your project root. Project config has the highest precedence among standard config files - it overrides both global and remote configs.\n\nFor project-specific TUI settings, add `tui.json` alongside it.\n\nTip\n\nPlace project specific config in the root of your project.\n\nWhen OpenCode starts up, it looks for a config file in the current directory or traverse up to the nearest Git directory.\n\nThis is also safe to be checked into Git and uses the same schema as the global one.\n\n---\n\n### [Custom path](#custom-path)\n\nSpecify a custom config file path using the `OPENCODE_CONFIG` environment variable.\n\nTerminal window\n\n```\nexport OPENCODE_CONFIG=/path/to/my/custom-config.jsonopencode run \"Hello world\"\n```\n\nCustom config is loaded between global and project configs in the precedence order.\n\n---\n\n### [Custom directory](#custom-directory)\n\nSpecify a custom config directory using the `OPENCODE_CONFIG_DIR` environment variable. This directory will be searched for agents, commands, modes, and plugins just like the standard `.opencode` directory, and should follow the same structure.\n\nTerminal window\n\n```\nexport OPENCODE_CONFIG_DIR=/path/to/my/config-directoryopencode run \"Hello world\"\n```\n\nThe custom directory is loaded after the global config and `.opencode` directories, so it **can override** their settings.\n\n---\n\n### [Managed settings](#managed-settings)\n\nOrganizations can enforce configuration that users cannot override. Managed settings are loaded at the highest priority tier.\n\n#### [File-based](#file-based)\n\nDrop an `opencode.json` or `opencode.jsonc` file in the system managed config directory:\n\nPlatform\n\nPath\n\nmacOS\n\n`/Library/Application Support/opencode/`\n\nLinux\n\n`/etc/opencode/`\n\nWindows\n\n`%ProgramData%\\opencode`\n\nThese directories require admin/root access to write, so users cannot modify them.\n\n#### [macOS managed preferences](#macos-managed-preferences)\n\nOn macOS, OpenCode reads managed preferences from the `ai.opencode.managed` preference domain. Deploy a `.mobileconfig` via MDM (Jamf, Kandji, FleetDM) and the settings are enforced automatically.\n\nOpenCode checks these paths:\n\n1.  `/Library/Managed Preferences/<user>/ai.opencode.managed.plist`\n2.  `/Library/Managed Preferences/ai.opencode.managed.plist`\n\nThe plist keys map directly to `opencode.json` fields. MDM metadata keys (`PayloadUUID`, `PayloadType`, etc.) are stripped automatically.\n\n**Creating a `.mobileconfig`**\n\nUse the `ai.opencode.managed` PayloadType. The OpenCode config keys go directly in the payload dict:\n\n```\n<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"  \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><dict>  <key>PayloadContent</key>  <array>    <dict>      <key>PayloadType</key>      <string>ai.opencode.managed</string>      <key>PayloadIdentifier</key>      <string>com.example.opencode.config</string>      <key>PayloadUUID</key>      <string>GENERATE-YOUR-OWN-UUID</string>      <key>PayloadVersion</key>      <integer>1</integer>      <key>share</key>      <string>disabled</string>      <key>server</key>      <dict>        <key>hostname</key>        <string>127.0.0.1</string>      </dict>      <key>permission</key>      <dict>        <key>*</key>        <string>ask</string>        <key>bash</key>        <dict>          <key>*</key>          <string>ask</string>          <key>rm -rf *</key>          <string>deny</string>        </dict>      </dict>    </dict>  </array>  <key>PayloadType</key>  <string>Configuration</string>  <key>PayloadIdentifier</key>  <string>com.example.opencode</string>  <key>PayloadUUID</key>  <string>GENERATE-YOUR-OWN-UUID</string>  <key>PayloadVersion</key>  <integer>1</integer></dict></plist>\n```\n\nGenerate unique UUIDs with `uuidgen`. Customize the settings to match your organization’s requirements.\n\n**Deploying via MDM**\n\n-   **Jamf Pro:** Computers > Configuration Profiles > Upload > scope to target devices or smart groups\n-   **FleetDM:** Add the `.mobileconfig` to your gitops repo under `mdm.macos_settings.custom_settings` and run `fleetctl apply`\n\n**Verifying on a device**\n\nDouble-click the `.mobileconfig` to install locally for testing (shows in System Settings > Privacy & Security > Profiles), then run:\n\nTerminal window\n\n```\nopencode debug config\n```\n\nAll managed preference keys appear in the resolved config and cannot be overridden by user or project configuration.\n\n---\n\n## [Schema](#schema)\n\nThe server/runtime config schema is defined in [**`opencode.ai/config.json`**](https://opencode.ai/config.json).\n\nTUI config uses [**`opencode.ai/tui.json`**](https://opencode.ai/tui.json).\n\nYour editor should be able to validate and autocomplete based on the schema.\n\n---\n\n### [TUI](#tui)\n\nUse a dedicated `tui.json` (or `tui.jsonc`) file for TUI-specific settings.\n\ntui.json\n\n```\n{  \"$schema\": \"https://opencode.ai/tui.json\",  \"scroll_speed\": 3,  \"scroll_acceleration\": {    \"enabled\": true  },  \"diff_style\": \"auto\",  \"mouse\": true,  \"attention\": {    \"enabled\": true,    \"notifications\": true,    \"sound\": true,    \"volume\": 0.4  }}\n```\n\nUse `OPENCODE_TUI_CONFIG` to point to a custom TUI config file.\n\nSet `attention.enabled` to turn on TUI desktop notifications and sounds. See [TUI attention](/docs/tui#attention).\n\nLegacy `theme`, `keybinds`, and `tui` keys in `opencode.json` are deprecated and automatically migrated when possible.\n\n---\n\n### [Server](#server)\n\nYou can configure server settings for the `opencode serve` and `opencode web` commands through the `server` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"server\": {    \"port\": 4096,    \"hostname\": \"0.0.0.0\",    \"mdns\": true,    \"mdnsDomain\": \"myproject.local\",    \"cors\": [\"http://localhost:5173\"]  }}\n```\n\nAvailable options:\n\n-   `port` - Port to listen on.\n-   `hostname` - Hostname to listen on. When `mdns` is enabled and no hostname is set, defaults to `0.0.0.0`.\n-   `mdns` - Enable mDNS service discovery. This allows other devices on the network to discover your OpenCode server.\n-   `mdnsDomain` - Custom domain name for mDNS service. Defaults to `opencode.local`. Useful for running multiple instances on the same network.\n-   `cors` - Additional origins to allow for CORS when using the HTTP server from a browser-based client. Values must be full origins (scheme + host + optional port), eg `https://app.example.com`.\n\n[Learn more about the server here](/docs/server).\n\n---\n\n### [Shell](#shell)\n\nYou can configure the shell used for the interactive terminal using the `shell` option. Compatible shells are also used for agent tool calls.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"shell\": \"pwsh\"}\n```\n\nIf not specified, OpenCode will automatically discover and use a sensible default based on your operating system (e.g. `pwsh` or `cmd.exe` on Windows, `/bin/zsh` or `/bin/bash` on macOS/Linux). You can provide an absolute path or a short name.\n\n---\n\n### [Tools](#tools)\n\nYou can manage the tools an LLM can use through the `tools` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"tools\": {    \"write\": false,    \"bash\": false  }}\n```\n\n[Learn more about tools here](/docs/tools).\n\n---\n\n### [Models](#models)\n\nYou can configure the providers and models you want to use in your OpenCode config through the `provider`, `model` and `small_model` options.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"provider\": {},  \"model\": \"anthropic/claude-sonnet-4-5\",  \"small_model\": \"anthropic/claude-haiku-4-5\"}\n```\n\nThe `small_model` option configures a separate model for lightweight tasks like title generation. By default, OpenCode tries to use a cheaper model if one is available from your provider, otherwise it falls back to your main model.\n\nProvider options can include `timeout`, `chunkTimeout`, and `setCacheKey`:\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"provider\": {    \"anthropic\": {      \"options\": {        \"timeout\": 600000,        \"chunkTimeout\": 30000,        \"setCacheKey\": true      }    }  }}\n```\n\n-   `timeout` - Request timeout in milliseconds (default: 300000). Set to `false` to disable.\n-   `chunkTimeout` - Timeout in milliseconds between streamed response chunks. If no chunk arrives in time, the request is aborted.\n-   `setCacheKey` - Ensure a cache key is always set for designated provider.\n\nYou can also configure [local models](/docs/models#local). [Learn more](/docs/models).\n\n---\n\n### [Image attachments](#image-attachments)\n\nOpenCode normalizes image attachments before sending them to the model. By default, images are resized when they exceed `2000x2000` pixels or `5242880` base64 bytes.\n\nConfigure image attachment limits with the `attachment.image` option:\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"attachment\": {    \"image\": {      \"auto_resize\": true,      \"max_width\": 2000,      \"max_height\": 2000,      \"max_base64_bytes\": 5242880    }  }}\n```\n\n-   `auto_resize` - Resize images that exceed the configured limits before provider requests. Set to `false` to reject oversized images instead.\n-   `max_width` - Maximum image width in pixels before resizing or rejection.\n-   `max_height` - Maximum image height in pixels before resizing or rejection.\n-   `max_base64_bytes` - Maximum encoded image payload size. This is the base64 payload size, not the original file size.\n\nIf an image still cannot fit after resizing, OpenCode omits oversized tool-result images or fails oversized user-provided images with an image size error.\n\n---\n\n#### [Provider-Specific Options](#provider-specific-options)\n\nSome providers support additional configuration options beyond the generic `timeout` and `apiKey` settings.\n\n##### [Amazon Bedrock](#amazon-bedrock)\n\nAmazon Bedrock supports AWS-specific configuration:\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"provider\": {    \"amazon-bedrock\": {      \"options\": {        \"region\": \"us-east-1\",        \"profile\": \"my-aws-profile\",        \"endpoint\": \"https://bedrock-runtime.us-east-1.vpce-xxxxx.amazonaws.com\"      }    }  }}\n```\n\n-   `region` - AWS region for Bedrock (defaults to `AWS_REGION` env var or `us-east-1`)\n-   `profile` - AWS named profile from `~/.aws/credentials` (defaults to `AWS_PROFILE` env var)\n-   `endpoint` - Custom endpoint URL for VPC endpoints. This is an alias for the generic `baseURL` option using AWS-specific terminology. If both are specified, `endpoint` takes precedence.\n\nNote\n\nBearer tokens (`AWS_BEARER_TOKEN_BEDROCK` or `/connect`) take precedence over profile-based authentication. See [authentication precedence](/docs/providers#authentication-precedence) for details.\n\n[Learn more about Amazon Bedrock configuration](/docs/providers#amazon-bedrock).\n\n---\n\n### [Themes](#themes)\n\nSet your UI theme in `tui.json`.\n\ntui.json\n\n```\n{  \"$schema\": \"https://opencode.ai/tui.json\",  \"theme\": \"tokyonight\"}\n```\n\n[Learn more here](/docs/themes).\n\n---\n\n### [Agents](#agents)\n\nYou can configure specialized agents for specific tasks through the `agent` option.\n\nopencode.jsonc\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"agent\": {    \"code-reviewer\": {      \"description\": \"Reviews code for best practices and potential issues\",      \"model\": \"anthropic/claude-sonnet-4-5\",      \"prompt\": \"You are a code reviewer. Focus on security, performance, and maintainability.\",      \"tools\": {        // Disable file modification tools for review-only agent        \"write\": false,        \"edit\": false,      },    },  },}\n```\n\nYou can also define agents using markdown files in `~/.config/opencode/agents/` or `.opencode/agents/`. [Learn more here](/docs/agents).\n\n---\n\n### [Default agent](#default-agent)\n\nYou can set the default agent using the `default_agent` option. This determines which agent is used when none is explicitly specified.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"default_agent\": \"plan\"}\n```\n\nThe default agent must be a primary agent (not a subagent). This can be a built-in agent like `\"build\"` or `\"plan\"`, or a [custom agent](/docs/agents) you’ve defined. If the specified agent doesn’t exist or is a subagent, OpenCode will fall back to `\"build\"` with a warning.\n\nThis setting applies across all interfaces: TUI, CLI (`opencode run`), desktop app, and GitHub Action.\n\n---\n\n### [Sharing](#sharing)\n\nYou can configure the [share](/docs/share) feature through the `share` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"share\": \"manual\"}\n```\n\nThis takes:\n\n-   `\"manual\"` - Allow manual sharing via commands (default)\n-   `\"auto\"` - Automatically share new conversations\n-   `\"disabled\"` - Disable sharing entirely\n\nBy default, sharing is set to manual mode where you need to explicitly share conversations using the `/share` command.\n\n---\n\n### [Commands](#commands)\n\nYou can configure custom commands for repetitive tasks through the `command` option.\n\nopencode.jsonc\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"command\": {    \"test\": {      \"template\": \"Run the full test suite with coverage report and show any failures.\\nFocus on the failing tests and suggest fixes.\",      \"description\": \"Run tests with coverage\",      \"agent\": \"build\",      \"model\": \"anthropic/claude-haiku-4-5\",    },    \"component\": {      \"template\": \"Create a new React component named $ARGUMENTS with TypeScript support.\\nInclude proper typing and basic structure.\",      \"description\": \"Create a new component\",    },  },}\n```\n\nYou can also define commands using markdown files in `~/.config/opencode/commands/` or `.opencode/commands/`. [Learn more here](/docs/commands).\n\n---\n\n### [Keybinds](#keybinds)\n\nCustomize TUI keyboard shortcuts in `tui.json` with `keybinds`.\n\ntui.json\n\n```\n{  \"$schema\": \"https://opencode.ai/tui.json\",  \"keybinds\": {    \"command_list\": \"ctrl+p\"  }}\n```\n\n`keybinds` is merged with built-in defaults, so you only need to configure the shortcuts you want to change.\n\n[Learn more here](/docs/keybinds).\n\n---\n\n### [Snapshot](#snapshot)\n\nOpenCode uses snapshots to track file changes during agent operations, enabling you to undo and revert changes within a session. Snapshots are enabled by default.\n\nFor large repositories or projects with many submodules, the snapshot system can cause slow indexing and significant disk usage as it tracks all changes using an internal git repository. You can disable snapshots using the `snapshot` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"snapshot\": false}\n```\n\nNote that disabling snapshots means changes made by the agent cannot be rolled back through the UI.\n\n---\n\n### [Autoupdate](#autoupdate)\n\nOpenCode will automatically download any new updates when it starts up. You can disable this with the `autoupdate` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"autoupdate\": false}\n```\n\nIf you don’t want updates but want to be notified when a new version is available, set `autoupdate` to `\"notify\"`. Notice that this only works if it was not installed using a package manager such as Homebrew.\n\n---\n\n### [Formatters](#formatters)\n\nYou can enable and configure code formatters through the `formatter` option. Omit it to keep formatters disabled.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"formatter\": true}\n```\n\nUse an object to keep built-ins enabled while configuring overrides or custom formatters.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"formatter\": {    \"prettier\": {      \"disabled\": true    },    \"custom-prettier\": {      \"command\": [\"npx\", \"prettier\", \"--write\", \"$FILE\"],      \"environment\": {        \"NODE_ENV\": \"development\"      },      \"extensions\": [\".js\", \".ts\", \".jsx\", \".tsx\"]    }  }}\n```\n\n[Learn more about formatters here](/docs/formatters).\n\n---\n\n### [LSP Servers](#lsp-servers)\n\nYou can enable and configure LSP servers through the `lsp` option. Omit it to keep LSP disabled.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"lsp\": true}\n```\n\nUse an object to keep built-ins enabled while configuring overrides or custom LSP servers.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"lsp\": {    \"typescript\": {      \"disabled\": true    }  }}\n```\n\n[Learn more about LSP servers here](/docs/lsp).\n\n---\n\n### [Permissions](#permissions)\n\nBy default, opencode **allows all operations** without requiring explicit approval. You can change this using the `permission` option.\n\nFor example, to ensure that the `edit` and `bash` tools require user approval:\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"permission\": {    \"edit\": \"ask\",    \"bash\": \"ask\"  }}\n```\n\n[Learn more about permissions here](/docs/permissions).\n\n---\n\n### [Compaction](#compaction)\n\nYou can control context compaction behavior through the `compaction` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"compaction\": {    \"auto\": true,    \"prune\": true,    \"reserved\": 10000  }}\n```\n\n-   `auto` - Automatically compact the session when context is full (default: `true`).\n-   `prune` - Remove old tool outputs to save tokens (default: `true`).\n-   `reserved` - Token buffer for compaction. Leaves enough window to avoid overflow during compaction\n\n---\n\n### [Watcher](#watcher)\n\nYou can configure file watcher ignore patterns through the `watcher` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"watcher\": {    \"ignore\": [\"node_modules/**\", \"dist/**\", \".git/**\"]  }}\n```\n\nPatterns follow glob syntax. Use this to exclude noisy directories from file watching.\n\n---\n\n### [MCP servers](#mcp-servers)\n\nYou can configure MCP servers you want to use through the `mcp` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"mcp\": {}}\n```\n\n[Learn more here](/docs/mcp-servers).\n\n---\n\n### [Plugins](#plugins)\n\n[Plugins](/docs/plugins) extend OpenCode with custom tools, hooks, and integrations.\n\nPlace plugin files in `.opencode/plugins/` or `~/.config/opencode/plugins/`. You can also load plugins from npm through the `plugin` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"plugin\": [\"opencode-helicone-session\", \"@my-org/custom-plugin\"]}\n```\n\n[Learn more here](/docs/plugins).\n\n---\n\n### [Instructions](#instructions)\n\nYou can configure the instructions for the model you’re using through the `instructions` option.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"instructions\": [\"CONTRIBUTING.md\", \"docs/guidelines.md\", \".cursor/rules/*.md\"]}\n```\n\nThis takes an array of paths and glob patterns to instruction files. [Learn more about rules here](/docs/rules).\n\n---\n\n### [Disabled providers](#disabled-providers)\n\nYou can disable providers that are loaded automatically through the `disabled_providers` option. This is useful when you want to prevent certain providers from being loaded even if their credentials are available.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"disabled_providers\": [\"openai\", \"gemini\"]}\n```\n\nNote\n\nThe `disabled_providers` takes priority over `enabled_providers`.\n\nThe `disabled_providers` option accepts an array of provider IDs. When a provider is disabled:\n\n-   It won’t be loaded even if environment variables are set.\n-   It won’t be loaded even if API keys are configured through the `/connect` command.\n-   The provider’s models won’t appear in the model selection list.\n\n---\n\n### [Enabled providers](#enabled-providers)\n\nYou can specify an allowlist of providers through the `enabled_providers` option. When set, only the specified providers will be enabled and all others will be ignored.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"enabled_providers\": [\"anthropic\", \"openai\"]}\n```\n\nThis is useful when you want to restrict OpenCode to only use specific providers rather than disabling them one by one.\n\nNote\n\nThe `disabled_providers` takes priority over `enabled_providers`.\n\nIf a provider appears in both `enabled_providers` and `disabled_providers`, the `disabled_providers` takes priority for backwards compatibility.\n\n---\n\n### [Experimental](#experimental)\n\nThe `experimental` key contains options that are under active development.\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"experimental\": {}}\n```\n\nCaution\n\nExperimental options are not stable. They may change or be removed without notice.\n\n---\n\n## [Variables](#variables)\n\nYou can use variable substitution in your config files to reference environment variables and file contents.\n\n---\n\n### [Env vars](#env-vars)\n\nUse `{env:VARIABLE_NAME}` to substitute environment variables:\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"model\": \"{env:OPENCODE_MODEL}\",  \"provider\": {    \"anthropic\": {      \"models\": {},      \"options\": {        \"apiKey\": \"{env:ANTHROPIC_API_KEY}\"      }    }  }}\n```\n\nIf the environment variable is not set, it will be replaced with an empty string.\n\n---\n\n### [Files](#files)\n\nUse `{file:path/to/file}` to substitute the contents of a file:\n\nopencode.json\n\n```\n{  \"$schema\": \"https://opencode.ai/config.json\",  \"instructions\": [\"./custom-instructions.md\"],  \"provider\": {    \"openai\": {      \"options\": {        \"apiKey\": \"{file:~/.secrets/openai-key}\"      }    }  }}\n```\n\nFile paths can be:\n\n-   Relative to the config file directory\n-   Or absolute paths starting with `/` or `~`\n\nThese are useful for:\n\n-   Keeping sensitive data like API keys in separate files.\n-   Including large instruction files without cluttering your config.\n-   Sharing common configuration snippets across multiple config files.\n\n[Edit page](https://github.com/anomalyco/opencode/edit/dev/packages/web/src/content/docs/config.mdx)[Found a bug? Open an issue](https://github.com/anomalyco/opencode/issues/new)[Join our Discord community](https://opencode.ai/discord) Select language EnglishالعربيةBosanskiDanskDeutschEspañolFrançaisItaliano日本語한국어Norsk BokmålPolskiPortuguês (Brasil)РусскийไทยTürkçe简体中文繁體中文 \n\n© [Anomaly](https://anoma.ly)\n\nLast updated: May 15, 2026",
+            "metadata": {
+              "truncated": false
+            },
+            "title": "https://opencode.ai/docs/config/ (text/html)",
+            "time": {
+              "start": 1778871563951,
+              "end": 1778871565373
+            }
+          },
+          "id": "prt_e2d01f6a9001IpO5dRUMZ0Itpo",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d019344002qEtQ7Qxj6xbiFT"
+        },
+        {
+          "reason": "tool-calls",
+          "type": "step-finish",
+          "tokens": {
+            "total": 16557,
+            "input": 1,
+            "output": 63,
+            "reasoning": 0,
+            "cache": {
+              "write": 16493,
+              "read": 0
+            }
+          },
+          "cost": 0.06279675,
+          "id": "prt_e2d01fc3f001yWfWVf1JTyC3uF",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d019344002qEtQ7Qxj6xbiFT"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2d01636f001t6yfTY6Gg4UJ1M",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0.05187015,
+        "tokens": {
+          "total": 25388,
+          "input": 1,
+          "output": 128,
+          "reasoning": 0,
+          "cache": {
+            "write": 12281,
+            "read": 12978
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778871565379,
+          "completed": 1778871587027
+        },
+        "finish": "tool-calls",
+        "id": "msg_e2d01fc43001A5kBMJql3F0mWH",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "id": "prt_e2d024a370010kjcFPm92dLA68",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01fc43001A5kBMJql3F0mWH"
+        },
+        {
+          "type": "text",
+          "text": "The docs cover configuration well but don't explicitly detail where session data is stored. Let me check the actual filesystem.",
+          "time": {
+            "start": 1778871585337,
+            "end": 1778871586675
+          },
+          "id": "prt_e2d024a39001GT9kVnyoxwyRu0",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01fc43001A5kBMJql3F0mWH"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "toolu_vrtx_018up8YgPAf8dQQRoroqaf3z",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "ls ~/.local/share/opencode 2>/dev/null || ls ~/.config/opencode 2>/dev/null || echo \"not found\"",
+              "description": "Check OpenCode data directories"
+            },
+            "output": "log\nopencode.db\nopencode.db-shm\nopencode.db-wal\nrepos\nstorage\n",
+            "metadata": {
+              "output": "log\nopencode.db\nopencode.db-shm\nopencode.db-wal\nrepos\nstorage\n",
+              "exit": 0,
+              "description": "Check OpenCode data directories",
+              "truncated": false
+            },
+            "title": "Check OpenCode data directories",
+            "time": {
+              "start": 1778871587021,
+              "end": 1778871587024
+            }
+          },
+          "id": "prt_e2d024f75001I39Vh1fk7TtQkE",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01fc43001A5kBMJql3F0mWH"
+        },
+        {
+          "reason": "tool-calls",
+          "type": "step-finish",
+          "tokens": {
+            "total": 25388,
+            "input": 1,
+            "output": 128,
+            "reasoning": 0,
+            "cache": {
+              "write": 12281,
+              "read": 12978
+            }
+          },
+          "cost": 0.05187015,
+          "id": "prt_e2d0250d1001jGyqxe81BzJpqV",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d01fc43001A5kBMJql3F0mWH"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2d01636f001t6yfTY6Gg4UJ1M",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0.00937695,
+        "tokens": {
+          "total": 25505,
+          "input": 1,
+          "output": 78,
+          "reasoning": 0,
+          "cache": {
+            "write": 167,
+            "read": 25259
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778871587029,
+          "completed": 1778871590454
+        },
+        "finish": "tool-calls",
+        "id": "msg_e2d0250d5001cY7Ay3ycc9xgDQ",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "id": "prt_e2d025aed001m78hSHdV1v2yo3",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d0250d5001cY7Ay3ycc9xgDQ"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "toolu_vrtx_011Mv6gnNkAA1DZmes3UNCbH",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "ls ~/.config/opencode/",
+              "description": "List OpenCode config directory"
+            },
+            "output": "node_modules\nopencode.jsonc\npackage.json\npackage-lock.json\n",
+            "metadata": {
+              "output": "node_modules\nopencode.jsonc\npackage.json\npackage-lock.json\n",
+              "exit": 0,
+              "description": "List OpenCode config directory",
+              "truncated": false
+            },
+            "title": "List OpenCode config directory",
+            "time": {
+              "start": 1778871590449,
+              "end": 1778871590451
+            }
+          },
+          "id": "prt_e2d025af0001anVI7v5nWSA5A4",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d0250d5001cY7Ay3ycc9xgDQ"
+        },
+        {
+          "reason": "tool-calls",
+          "type": "step-finish",
+          "tokens": {
+            "total": 25505,
+            "input": 1,
+            "output": 78,
+            "reasoning": 0,
+            "cache": {
+              "write": 167,
+              "read": 25259
+            }
+          },
+          "cost": 0.00937695,
+          "id": "prt_e2d025e340010QCprQjHm1ZYp2",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d0250d5001cY7Ay3ycc9xgDQ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2d01636f001t6yfTY6Gg4UJ1M",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0.0111033,
+        "tokens": {
+          "total": 25741,
+          "input": 1,
+          "output": 204,
+          "reasoning": 0,
+          "cache": {
+            "write": 110,
+            "read": 25426
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778871590457,
+          "completed": 1778871597905
+        },
+        "finish": "stop",
+        "id": "msg_e2d025e38001Oums9IJIDM7Oj4",
+        "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "id": "prt_e2d026b74001VayOX01RcIYlLs",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d025e38001Oums9IJIDM7Oj4"
+        },
+        {
+          "type": "text",
+          "text": "OpenCode stores session data in `~/.local/share/opencode/` in a **SQLite database**:\n\n| File | Purpose |\n|---|---|\n| `opencode.db` | Main SQLite database (sessions, messages, tool calls) |\n| `opencode.db-shm` | Shared memory file (SQLite WAL mode) |\n| `opencode.db-wal` | Write-ahead log (SQLite WAL mode) |\n| `repos/` | Snapshot repositories for undo/redo tracking |\n| `storage/` | Additional file storage |\n| `log/` | Log files |\n\nThe sessions (conversation history, messages, tool results) are stored in the SQLite database (`opencode.db`). You can inspect it with any SQLite client, e.g. `sqlite3 ~/.local/share/opencode/opencode.db`.",
+          "time": {
+            "start": 1778871593846,
+            "end": 1778871597900
+          },
+          "id": "prt_e2d026b76001ExcqgWb1DQ12xe",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d025e38001Oums9IJIDM7Oj4"
+        },
+        {
+          "reason": "stop",
+          "type": "step-finish",
+          "tokens": {
+            "total": 25741,
+            "input": 1,
+            "output": 204,
+            "reasoning": 0,
+            "cache": {
+              "write": 110,
+              "read": 25426
+            }
+          },
+          "cost": 0.0111033,
+          "id": "prt_e2d027b4e001E8dg3yPTCVOKKG",
+          "sessionID": "ses_1d30051b4ffeMJtisiCHFrUpAH",
+          "messageID": "msg_e2d025e38001Oums9IJIDM7Oj4"
+        }
+      ]
+    }
+  ]
+}

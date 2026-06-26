@@ -4,7 +4,7 @@
 <h1>sessionbin</h1>
 <p class="text-muted">
     Share agentic coding session transcripts. Upload a session file, get a URL,
-    share it.
+    share it. Supports <strong>Claude Code</strong> and <strong>OpenCode</strong>.
 </p>
 
 <form method="post" enctype="multipart/form-data" id="upload-form" data-max-size="{{ max_upload_bytes }}">
@@ -40,13 +40,26 @@
 
 <div class="cli-section">
     <h2>Upload from the command line</h2>
-    <h3>CLI</h3>
-    <pre class="shell"><code><span>uv tool install sessionbin</span>
-<span>sessionbin upload session.jsonl</span></code></pre>
+
+    <h3>Claude Code</h3>
+    <p class="text-muted">
+        Session files are stored as <code>.jsonl</code> in
+        <code>~/.claude/projects/</code>. Upload directly:
+    </p>
+    <pre class="shell"><code><span>sessionbin upload session.jsonl</span></code></pre>
+
+    <h3>OpenCode</h3>
+    <p class="text-muted">
+        Sessions are stored in a local database. Export first, then upload:
+    </p>
+    <pre class="shell"><code><span>opencode export &lt;sessionID&gt; &gt; session.json</span>
+<span>sessionbin upload session.json</span></code></pre>
+
+    <h3>Install the CLI</h3>
+    <pre class="shell"><code><span>uv tool install sessionbin</span></code></pre>
+
     <h3>curl</h3>
     <pre class="shell"><code><span>curl -F "file=@session.jsonl" {{ request.scheme }}://{{ request.get_host }}/api/upload</span></code></pre>
-    <h3>HTTPie</h3>
-    <pre class="shell"><code><span>http -f POST {{ request.scheme }}://{{ request.get_host }}/api/upload file@session.jsonl</span></code></pre>
 </div>
 
 <script>

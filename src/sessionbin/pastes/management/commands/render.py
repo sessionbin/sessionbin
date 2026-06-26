@@ -4,7 +4,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from sessionbin.adapters.claude_code import parse
+from sessionbin.adapters import parse as adapter_parse
 from sessionbin.pastes.render import render
 
 
@@ -41,6 +41,6 @@ class Command(BaseCommand):
 
     def _render_file(self, src: Path, dest: Path) -> None:
         raw = gzip.decompress(src.read_bytes())
-        session = parse(raw)
+        session, _ = adapter_parse(raw)
         dest.write_text(render(session))
         self.stderr.write(f"  {dest.name}\n")

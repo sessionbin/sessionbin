@@ -1,0 +1,396 @@
+{
+  "info": {
+    "id": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+    "slug": "stellar-engine",
+    "projectID": "9c3304ac17d42afbe8cf3f556ec4923e5d89d41a",
+    "directory": "/home/alice/repos/github.com/alice/my-project",
+    "path": "",
+    "title": "Change git origin and remove upstream",
+    "agent": "build",
+    "model": {
+      "id": "claude-sonnet-4-6@default",
+      "providerID": "google-vertex"
+    },
+    "version": "1.15.0",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0.0721779,
+    "tokens": {
+      "input": 6,
+      "output": 298,
+      "reasoning": 0,
+      "cache": {
+        "read": 42983,
+        "write": 14612
+      }
+    },
+    "time": {
+      "created": 1779108548423,
+      "updated": 1779108560418
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1779108548444
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "google-vertex",
+          "modelID": "claude-sonnet-4-6@default"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_e3b220f55001PbhKH5rXxDneIY",
+        "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "Change my local git config to use git@github.com:example-org/my-project.git as the origin and remove the upstream remote.",
+          "id": "prt_e3b220f550029rn7ZPlrejJgKL",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b220f55001PbhKH5rXxDneIY"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e3b220f55001PbhKH5rXxDneIY",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice/repos/github.com/alice/my-project",
+          "root": "/home/alice/repos/github.com/alice/my-project"
+        },
+        "cost": 0.054249,
+        "tokens": {
+          "total": 14239,
+          "input": 3,
+          "output": 76,
+          "reasoning": 0,
+          "cache": {
+            "write": 14160,
+            "read": 0
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1779108548461,
+          "completed": 1779108550987
+        },
+        "finish": "tool-calls",
+        "id": "msg_e3b220f6d001mlKTc2SCg0D1oT",
+        "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI"
+      },
+      "parts": [
+        {
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-start",
+          "id": "prt_e3b221681001oyyM0p6CztewV7",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b220f6d001mlKTc2SCg0D1oT"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "toolu_vrtx_01WBVqD3BfPsmzpmkbby8x52",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git remote -v",
+              "description": "Show current git remotes"
+            },
+            "output": "origin\tgit@github.com:alice/my-project.git (fetch)\norigin\tgit@github.com:alice/my-project.git (push)\nupstream\thttps://github.com/example-org/my-project.git (fetch)\nupstream\thttps://github.com/example-org/my-project.git (push)\n",
+            "metadata": {
+              "output": "origin\tgit@github.com:alice/my-project.git (fetch)\norigin\tgit@github.com:alice/my-project.git (push)\nupstream\thttps://github.com/example-org/my-project.git (fetch)\nupstream\thttps://github.com/example-org/my-project.git (push)\n",
+              "exit": 0,
+              "description": "Show current git remotes",
+              "truncated": false
+            },
+            "title": "Show current git remotes",
+            "time": {
+              "start": 1779108550945,
+              "end": 1779108550949
+            }
+          },
+          "id": "prt_e3b221683001lxdVrkKj0ut5RZ",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b220f6d001mlKTc2SCg0D1oT"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-finish",
+          "tokens": {
+            "total": 14239,
+            "input": 3,
+            "output": 76,
+            "reasoning": 0,
+            "cache": {
+              "write": 14160,
+              "read": 0
+            }
+          },
+          "cost": 0.054249,
+          "id": "prt_e3b221938001iqzLx8rmwVMQ0E",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b220f6d001mlKTc2SCg0D1oT"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e3b220f55001PbhKH5rXxDneIY",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice/repos/github.com/alice/my-project",
+          "root": "/home/alice/repos/github.com/alice/my-project"
+        },
+        "cost": 0.006546,
+        "tokens": {
+          "total": 14458,
+          "input": 1,
+          "output": 105,
+          "reasoning": 0,
+          "cache": {
+            "write": 192,
+            "read": 14160
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1779108550991,
+          "completed": 1779108554588
+        },
+        "finish": "tool-calls",
+        "id": "msg_e3b22194f0018amP5tqygkRCcN",
+        "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI"
+      },
+      "parts": [
+        {
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-start",
+          "id": "prt_e3b222711001ipdxqzJu27iTEL",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b22194f0018amP5tqygkRCcN"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "toolu_vrtx_014Zzd3B6PFj7LNqYA99MwoV",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git remote set-url origin git@github.com:example-org/my-project.git && git remote remove upstream",
+              "description": "Update origin URL and remove upstream remote"
+            },
+            "output": "(no output)",
+            "metadata": {
+              "output": "(no output)",
+              "exit": 0,
+              "description": "Update origin URL and remove upstream remote",
+              "truncated": false
+            },
+            "title": "Update origin URL and remove upstream remote",
+            "time": {
+              "start": 1779108554553,
+              "end": 1779108554562
+            }
+          },
+          "id": "prt_e3b222713001HYT11mOpWlhUKz",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b22194f0018amP5tqygkRCcN"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-finish",
+          "tokens": {
+            "total": 14458,
+            "input": 1,
+            "output": 105,
+            "reasoning": 0,
+            "cache": {
+              "write": 192,
+              "read": 14160
+            }
+          },
+          "cost": 0.006546,
+          "id": "prt_e3b22274b001PnP3vUjvQpOhmh",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b22194f0018amP5tqygkRCcN"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e3b220f55001PbhKH5rXxDneIY",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice/repos/github.com/alice/my-project",
+          "root": "/home/alice/repos/github.com/alice/my-project"
+        },
+        "cost": 0.00587985,
+        "tokens": {
+          "total": 14547,
+          "input": 1,
+          "output": 75,
+          "reasoning": 0,
+          "cache": {
+            "write": 119,
+            "read": 14352
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1779108554590,
+          "completed": 1779108557795
+        },
+        "finish": "tool-calls",
+        "id": "msg_e3b22275e001KWuur3sSUOykLq",
+        "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI"
+      },
+      "parts": [
+        {
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-start",
+          "id": "prt_e3b2231f2001asLw6XKlgM6f4U",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b22275e001KWuur3sSUOykLq"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "toolu_vrtx_016is1njwVmyF8NfQTpkG9iq",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "git remote -v",
+              "description": "Verify updated remotes"
+            },
+            "output": "origin\tgit@github.com:example-org/my-project.git (fetch)\norigin\tgit@github.com:example-org/my-project.git (push)\n",
+            "metadata": {
+              "output": "origin\tgit@github.com:example-org/my-project.git (fetch)\norigin\tgit@github.com:example-org/my-project.git (push)\n",
+              "exit": 0,
+              "description": "Verify updated remotes",
+              "truncated": false
+            },
+            "title": "Verify updated remotes",
+            "time": {
+              "start": 1779108557735,
+              "end": 1779108557737
+            }
+          },
+          "id": "prt_e3b2231fb001xCElnNU7rzYhHC",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b22275e001KWuur3sSUOykLq"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-finish",
+          "tokens": {
+            "total": 14547,
+            "input": 1,
+            "output": 75,
+            "reasoning": 0,
+            "cache": {
+              "write": 119,
+              "read": 14352
+            }
+          },
+          "cost": 0.00587985,
+          "id": "prt_e3b2233d20018jxFeJWOUY0r9n",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b22275e001KWuur3sSUOykLq"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e3b220f55001PbhKH5rXxDneIY",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice/repos/github.com/alice/my-project",
+          "root": "/home/alice/repos/github.com/alice/my-project"
+        },
+        "cost": 0.00550305,
+        "tokens": {
+          "total": 14655,
+          "input": 1,
+          "output": 42,
+          "reasoning": 0,
+          "cache": {
+            "write": 141,
+            "read": 14471
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1779108557797,
+          "completed": 1779108560403
+        },
+        "finish": "stop",
+        "id": "msg_e3b2233e5001j15gu2KJV0I6gd",
+        "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI"
+      },
+      "parts": [
+        {
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-start",
+          "id": "prt_e3b223d76001cKosB7GePhMRFx",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b2233e5001j15gu2KJV0I6gd"
+        },
+        {
+          "type": "text",
+          "text": "Done. `origin` now points to `git@github.com:example-org/my-project.git` and `upstream` has been removed.",
+          "time": {
+            "start": 1779108560248,
+            "end": 1779108560327
+          },
+          "id": "prt_e3b223d77001jx44z7IxAyafA3",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b2233e5001j15gu2KJV0I6gd"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "11236eb349b14d6c738282e1ab89f46982715047",
+          "type": "step-finish",
+          "tokens": {
+            "total": 14655,
+            "input": 1,
+            "output": 42,
+            "reasoning": 0,
+            "cache": {
+              "write": 141,
+              "read": 14471
+            }
+          },
+          "cost": 0.00550305,
+          "id": "prt_e3b223e070017pxUZ1E4riLevC",
+          "sessionID": "ses_1c4ddf0b8ffeHWkuI1O2wNqPjI",
+          "messageID": "msg_e3b2233e5001j15gu2KJV0I6gd"
+        }
+      ]
+    }
+  ]
+}

@@ -3,7 +3,8 @@ import hashlib
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
-from sessionbin.adapters.claude_code import ADAPTER_VERSION, parse
+from sessionbin.adapters import Harness
+from sessionbin.adapters import parse as adapter_parse
 from sessionbin.pastes.models import DELETE_TOKEN_LENGTH, Paste, hash_token
 from sessionbin.pastes.render import RENDERER_VERSION, render
 from sessionbin.security.redact import redact_secrets
@@ -14,9 +15,10 @@ def create_paste_from_upload(
     *,
     raw: bytes,
     uploader_ip: str | None,
+    harness: Harness | None = None,
 ) -> tuple[Paste, str]:
     redacted = redact_secrets(raw)
-    session = parse(redacted)
+    session, adapter_version = adapter_parse(redacted, harness=harness)
     html = render(session)
 
     token = get_random_string(DELETE_TOKEN_LENGTH)
@@ -24,7 +26,7 @@ def create_paste_from_upload(
         sha256=hashlib.sha256(redacted).hexdigest(),
         size_bytes=len(redacted),
         renderer_version=RENDERER_VERSION,
-        adapter_version=ADAPTER_VERSION,
+        adapter_version=adapter_version,
         uploader_ip=uploader_ip,
         harness=session.harness,
         session_model=session.model,

@@ -1,0 +1,309 @@
+{
+  "info": {
+    "id": "ses_1d4007aadfferRuA05B88MVO46",
+    "slug": "tidy-star",
+    "projectID": "global",
+    "directory": "/home/alice",
+    "path": "home/alice",
+    "title": "2+2 calculation",
+    "agent": "build",
+    "model": {
+      "id": "claude-sonnet-4-6@default",
+      "providerID": "google-vertex",
+      "variant": "default"
+    },
+    "version": "1.15.0",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0,
+    "tokens": {
+      "input": 12199,
+      "output": 2,
+      "reasoning": 9,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    "time": {
+      "created": 1778854626643,
+      "updated": 1778855145720
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1778854626658
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode",
+          "modelID": "big-pickle"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_e2bff85580015iVVH1Q1C6lvwN",
+        "sessionID": "ses_1d4007aadfferRuA05B88MVO46"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "what's 2+2",
+          "id": "prt_e2bff8558002yFlftI5xPdmn5i",
+          "sessionID": "ses_1d4007aadfferRuA05B88MVO46",
+          "messageID": "msg_e2bff85580015iVVH1Q1C6lvwN"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2bff85580015iVVH1Q1C6lvwN",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 12210,
+          "input": 12199,
+          "output": 2,
+          "reasoning": 9,
+          "cache": {
+            "write": 0,
+            "read": 0
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1778854626671,
+          "completed": 1778854630786
+        },
+        "finish": "stop",
+        "id": "msg_e2bff856f001zV2n13cRqOOa7I",
+        "sessionID": "ses_1d4007aadfferRuA05B88MVO46"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "id": "prt_e2bff90cd001ZtEum1VpBRAxMh",
+          "sessionID": "ses_1d4007aadfferRuA05B88MVO46",
+          "messageID": "msg_e2bff856f001zV2n13cRqOOa7I"
+        },
+        {
+          "type": "reasoning",
+          "text": "The user is asking a simple math question.",
+          "time": {
+            "start": 1778854630201,
+            "end": 1778854630747
+          },
+          "id": "prt_e2bff93390015Ig1LcSjvLXaIT",
+          "sessionID": "ses_1d4007aadfferRuA05B88MVO46",
+          "messageID": "msg_e2bff856f001zV2n13cRqOOa7I"
+        },
+        {
+          "type": "text",
+          "text": "4",
+          "time": {
+            "start": 1778854630749,
+            "end": 1778854630778
+          },
+          "id": "prt_e2bff955d001OZ8pkfYII3Hrif",
+          "sessionID": "ses_1d4007aadfferRuA05B88MVO46",
+          "messageID": "msg_e2bff856f001zV2n13cRqOOa7I"
+        },
+        {
+          "reason": "stop",
+          "type": "step-finish",
+          "tokens": {
+            "total": 12210,
+            "input": 12199,
+            "output": 2,
+            "reasoning": 9,
+            "cache": {
+              "write": 0,
+              "read": 0
+            }
+          },
+          "cost": 0,
+          "id": "prt_e2bff957e001kkHTyCPE6SaTKS",
+          "sessionID": "ses_1d4007aadfferRuA05B88MVO46",
+          "messageID": "msg_e2bff856f001zV2n13cRqOOa7I"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1778854650497
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "google-vertex",
+          "modelID": "claude-sonnet-4-6@default"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_e2bffe274001GKtSmpNxO2ReiW",
+        "sessionID": "ses_1d4007aadfferRuA05B88MVO46"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "what's 2+2",
+          "id": "prt_e2bffe274002Gg4z4LF1fY2Lk2",
+          "sessionID": "ses_1d4007aadfferRuA05B88MVO46",
+          "messageID": "msg_e2bffe274001GKtSmpNxO2ReiW"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2bffe274001GKtSmpNxO2ReiW",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778854650509,
+          "completed": 1778854652063
+        },
+        "error": {
+          "name": "APIError",
+          "data": {
+            "message": "Forbidden: [{\n  \"error\": {\n    \"code\": 403,\n    \"message\": \"Permission 'aiplatform.endpoints.predict' denied on resource '//aiplatform.googleapis.com/projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default' (or it may not exist).\",\n    \"status\": \"PERMISSION_DENIED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"IAM_PERMISSION_DENIED\",\n        \"domain\": \"aiplatform.googleapis.com\",\n        \"metadata\": {\n          \"permission\": \"aiplatform.endpoints.predict\",\n          \"resource\": \"projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default\"\n        }\n      }\n    ]\n  }\n}\n]",
+            "statusCode": 403,
+            "isRetryable": false,
+            "responseHeaders": {
+              "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+              "content-encoding": "gzip",
+              "content-type": "application/json; charset=UTF-8",
+              "date": "Fri, 15 May 2026 14:17:32 GMT",
+              "server": "scaffolding on HTTPServer2",
+              "transfer-encoding": "chunked",
+              "vary": "Origin, X-Origin, Referer",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "SAMEORIGIN",
+              "x-xss-protection": "0"
+            },
+            "responseBody": "[{\n  \"error\": {\n    \"code\": 403,\n    \"message\": \"Permission 'aiplatform.endpoints.predict' denied on resource '//aiplatform.googleapis.com/projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default' (or it may not exist).\",\n    \"status\": \"PERMISSION_DENIED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"IAM_PERMISSION_DENIED\",\n        \"domain\": \"aiplatform.googleapis.com\",\n        \"metadata\": {\n          \"permission\": \"aiplatform.endpoints.predict\",\n          \"resource\": \"projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default\"\n        }\n      }\n    ]\n  }\n}\n]",
+            "metadata": {
+              "url": "https://aiplatform.googleapis.com/v1/projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default:streamRawPredict"
+            }
+          }
+        },
+        "id": "msg_e2bffe28d001nwBtpViiStbGV6",
+        "sessionID": "ses_1d4007aadfferRuA05B88MVO46"
+      },
+      "parts": []
+    },
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1778855145709
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "google-vertex",
+          "modelID": "claude-sonnet-4-6@default"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_e2c0770dd001jdVXFylj087c0S",
+        "sessionID": "ses_1d4007aadfferRuA05B88MVO46"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "what's 2+2",
+          "id": "prt_e2c0770dd002Yh55uhJBka0N9g",
+          "sessionID": "ses_1d4007aadfferRuA05B88MVO46",
+          "messageID": "msg_e2c0770dd001jdVXFylj087c0S"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_e2c0770dd001jdVXFylj087c0S",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/alice",
+          "root": "/"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "modelID": "claude-sonnet-4-6@default",
+        "providerID": "google-vertex",
+        "time": {
+          "created": 1778855145716,
+          "completed": 1778855147370
+        },
+        "error": {
+          "name": "APIError",
+          "data": {
+            "message": "Forbidden: [{\n  \"error\": {\n    \"code\": 403,\n    \"message\": \"Permission 'aiplatform.endpoints.predict' denied on resource '//aiplatform.googleapis.com/projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default' (or it may not exist).\",\n    \"status\": \"PERMISSION_DENIED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"IAM_PERMISSION_DENIED\",\n        \"domain\": \"aiplatform.googleapis.com\",\n        \"metadata\": {\n          \"permission\": \"aiplatform.endpoints.predict\",\n          \"resource\": \"projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default\"\n        }\n      }\n    ]\n  }\n}\n]",
+            "statusCode": 403,
+            "isRetryable": false,
+            "responseHeaders": {
+              "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+              "content-encoding": "gzip",
+              "content-type": "application/json; charset=UTF-8",
+              "date": "Fri, 15 May 2026 14:25:46 GMT",
+              "server": "scaffolding on HTTPServer2",
+              "transfer-encoding": "chunked",
+              "vary": "Origin, X-Origin, Referer",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "SAMEORIGIN",
+              "x-xss-protection": "0"
+            },
+            "responseBody": "[{\n  \"error\": {\n    \"code\": 403,\n    \"message\": \"Permission 'aiplatform.endpoints.predict' denied on resource '//aiplatform.googleapis.com/projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default' (or it may not exist).\",\n    \"status\": \"PERMISSION_DENIED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"IAM_PERMISSION_DENIED\",\n        \"domain\": \"aiplatform.googleapis.com\",\n        \"metadata\": {\n          \"permission\": \"aiplatform.endpoints.predict\",\n          \"resource\": \"projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default\"\n        }\n      }\n    ]\n  }\n}\n]",
+            "metadata": {
+              "url": "https://aiplatform.googleapis.com/v1/projects/my-gcp-project/locations/global/publishers/anthropic/models/claude-sonnet-4-6@default:streamRawPredict"
+            }
+          }
+        },
+        "id": "msg_e2c0770f4001jjRZAk2DON2f34",
+        "sessionID": "ses_1d4007aadfferRuA05B88MVO46"
+      },
+      "parts": []
+    }
+  ]
+}
