@@ -7,6 +7,7 @@ from django.utils.crypto import constant_time_compare
 from ninja import File, Header, Router, Status
 from ninja.files import UploadedFile
 
+from sessionbin.adapters import ADAPTERS, Harness
 from sessionbin.pastes.models import Paste, hash_token
 from sessionbin.pastes.services import create_paste_from_upload, delete_paste
 
@@ -14,7 +15,16 @@ router = Router()
 
 
 @router.post("/upload")
-def upload(request: HttpRequest, file: UploadedFile = File(...)):
+def upload(
+    request: HttpRequest,
+    file: UploadedFile = File(...),
+    harness: Harness | None = None,
+):
+    if harness is not None and harness not in ADAPTERS:
+        return JsonResponse(
+            {"error": f"unknown harness: {harness}", "valid": list(ADAPTERS)},
+            status=400,
+        )
     max_bytes = cast(int, settings.SESSIONBIN["MAX_UPLOAD_BYTES"])
     if file.size and file.size > max_bytes:
         return JsonResponse({"error": "file too large", "max_bytes": max_bytes}, status=413)
@@ -22,6 +32,7 @@ def upload(request: HttpRequest, file: UploadedFile = File(...)):
     paste, delete_token = create_paste_from_upload(
         raw=raw,
         uploader_ip=request.META.get("REMOTE_ADDR"),
+        harness=harness,
     )
     return {
         "slug": paste.slug,

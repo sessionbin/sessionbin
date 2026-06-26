@@ -37,10 +37,10 @@ Data flows: raw bytes → redaction → adapter → `Session` → renderer → H
 uv sync                                                # install/update dependencies
 uv run python src/sessionbin/manage.py render           # re-render all stored pastes
 uv run python src/sessionbin/manage.py render <slug>    # re-render a single paste
-uv run tox run -e py314                                # run all tests
-uv run tox run -e lint                                 # ruff lint
-uv run tox run -e check-format                        # ruff format check
-uv run tox run -e typecheck                            # mypy
+uv run -p 3.14 tox run -e py314                        # run all tests
+uv run -p 3.14 tox run -e lint                         # ruff lint
+uv run -p 3.14 tox run -e check-format                # ruff format check
+uv run -p 3.14 tox run -e typecheck                    # mypy
 ```
 
 ## Re-rendering stored pastes
@@ -56,10 +56,10 @@ uv run python src/sessionbin/manage.py render
 After every code change, you MUST run all four checks before reporting the task as done:
 
 ```bash
-uv run tox run -e py314            # tests
-uv run tox run -e lint             # ruff lint
-uv run tox run -e check-format    # ruff format check
-uv run tox run -e typecheck        # mypy
+uv run -p 3.14 tox run -e py314            # tests
+uv run -p 3.14 tox run -e lint             # ruff lint
+uv run -p 3.14 tox run -e check-format    # ruff format check
+uv run -p 3.14 tox run -e typecheck        # mypy
 ```
 
 Fix any failures before moving on. Do not skip any of these checks.

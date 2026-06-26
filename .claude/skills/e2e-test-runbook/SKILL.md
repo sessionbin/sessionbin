@@ -12,7 +12,9 @@ Run all functional tests against a running local dev server at `http://127.0.0.1
 uv run python src/sessionbin/manage.py runserver
 ```
 
-**Fixture files:** `tests/fixtures/claude_code/*.jsonl` — use whichever are available. You need at least two distinct files (one for web upload, one for API upload).
+**Fixture files:** Use fixtures from both harnesses:
+- `tests/fixtures/claude_code/*.jsonl` — Claude Code sessions (JSONL). Need at least two (one for web upload, one for API upload).
+- `tests/fixtures/opencode/*.json` — OpenCode sessions (JSON). Need at least one.
 
 ## Test Procedure
 
@@ -24,10 +26,10 @@ Work through each section in order. Record pass/fail for every check. Stop and r
 2. Take a snapshot and verify:
    - [ ] Page title is "sessionbin"
    - [ ] Heading "sessionbin" is visible
-   - [ ] Description text about sharing transcripts is present
+   - [ ] Description text about sharing transcripts is present, mentioning **Claude Code** and **OpenCode**
    - [ ] Drag-and-drop upload zone with "Drag a file here, or click to browse" text exists
    - [ ] "Upload" button exists
-   - [ ] "Upload from the command line" section with curl/httpie examples exists
+   - [ ] "Upload from the command line" section with per-harness instructions (Claude Code, OpenCode) and curl examples exists
    - [ ] Navbar has "sessionbin" link, GitHub link, and theme toggle button
    - [ ] No console errors besides favicon 404
 
@@ -106,7 +108,56 @@ On the manage page from step 3, take a snapshot and verify:
    curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/p/<slug>/
    ```
 
-### 9. Error Handling
+### 9. OpenCode Upload (API)
+
+1. Use curl to upload an OpenCode fixture:
+   ```
+   curl -s -F "file=@tests/fixtures/opencode/agents_md_symlink.json" http://127.0.0.1:8000/api/upload
+   ```
+2. Verify response is JSON with fields: `slug`, `url`, `delete_token`
+3. Navigate to the returned `url` in the browser
+4. Take a screenshot and verify:
+   - [ ] Session metadata header shows **"opencode"** as the harness name
+   - [ ] Model name is displayed (e.g., "claude-sonnet-4-6@default")
+   - [ ] User turn renders with the prompt text
+   - [ ] Assistant turn renders with tool-use blocks (read, write, bash) and tool-result blocks
+   - [ ] Final assistant text response is visible
+5. **Save the slug** and delete the paste to clean up:
+   ```
+   curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+     -H "X-Delete-Token: <delete_token>" \
+     http://127.0.0.1:8000/api/p/<slug>
+   ```
+
+### 10. OpenCode Upload with Harness Parameter
+
+1. Upload an OpenCode fixture with the explicit `harness` query parameter:
+   ```
+   curl -s -F "file=@tests/fixtures/opencode/basic_addition.json" "http://127.0.0.1:8000/api/upload?harness=opencode"
+   ```
+2. Verify response is JSON with `slug`, `url`, `delete_token`
+3. Navigate to the paste and verify it renders with **"opencode"** harness in the header
+4. Clean up by deleting the paste
+
+### 11. Invalid Harness Parameter
+
+1. Upload with an invalid harness value:
+   ```
+   curl -s -w "\n%{http_code}" -F "file=@tests/fixtures/claude_code/3ad58276-e4e5-44fb-87ee-5bfc3ac716dd.jsonl" "http://127.0.0.1:8000/api/upload?harness=bogus"
+   ```
+2. Verify response status is **400**
+3. Verify response JSON contains `"error"` field mentioning "unknown harness"
+
+### 12. OpenCode Web Upload
+
+1. Navigate to `http://127.0.0.1:8000/`
+2. Upload an OpenCode fixture file (`.json` from `tests/fixtures/opencode/`) via the drop zone
+3. Click "Upload"
+4. Verify redirect to manage page
+5. Click the View URL and verify the paste renders with **"opencode"** harness
+6. Clean up by deleting the paste via the manage page
+
+### 13. Error Handling (unchanged from Claude Code tests)
 
 Run these curl checks and verify the expected status codes:
 
@@ -146,4 +197,8 @@ After all sections pass, report a summary table:
 | API upload | |
 | API delete | |
 | Web delete | |
+| OpenCode upload (API) | |
+| OpenCode upload with harness param | |
+| Invalid harness parameter | |
+| OpenCode web upload | |
 | Error handling | |
