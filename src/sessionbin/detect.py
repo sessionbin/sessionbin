@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Literal
+
+import platformdirs
 
 CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
+OPENCODE_DB_PATH = platformdirs.user_data_path("opencode") / "opencode.db"
 
 
 @dataclass
@@ -15,6 +19,9 @@ class SessionInfo:
     project: str
     title: str | None
     summary: str | None
+    harness: Literal["claude-code", "opencode"]
+    session_id: str | None = None
+    worktree: Path | None = None
 
 
 def _claude_extract_first_user_message(obj: dict) -> str | None:
@@ -83,18 +90,52 @@ def find_claude_sessions() -> list[SessionInfo]:
                         project=project,
                         title=title,
                         summary=summary,
+                        harness="claude-code",
+                        session_id=f.stem,
                     )
                 )
     results.sort(key=lambda x: x.mtime, reverse=True)
     return results
 
 
-# Extension point: add detector functions for other harnesses here.
-# E.g. find_codex_sessions() for ~/.codex/sessions/,
-#      find_opencode_sessions() for ~/.local/share/opencode/storage/,
-#      find_gemini_sessions() for ~/.gemini/tmp/.
+def find_opencode_sessions() -> list[SessionInfo]:
+    if not OPENCODE_DB_PATH.is_file():
+        return []
+    try:
+        conn = sqlite3.connect(f"file:{OPENCODE_DB_PATH}?mode=ro", uri=True)
+    except sqlite3.OperationalError:
+        return []
+    try:
+        rows = conn.execute(
+            "SELECT s.id, s.title, s.directory, s.time_updated, p.worktree "
+            "FROM session s "
+            "JOIN project p ON s.project_id = p.id "
+            "WHERE s.time_archived IS NULL"
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return []
+    finally:
+        conn.close()
+    results: list[SessionInfo] = []
+    for sid, title, directory, time_updated, worktree in rows:
+        project = Path(directory).name if directory else Path(worktree).name
+        results.append(
+            SessionInfo(
+                path=Path(directory or worktree),
+                mtime=time_updated / 1000,
+                project=project,
+                title=title,
+                summary=None,
+                session_id=sid,
+                worktree=Path(worktree),
+                harness="opencode",
+            )
+        )
+    return results
+
+
 Detector = Callable[[], list[SessionInfo]]
-DETECTORS: list[Detector] = [find_claude_sessions]
+DETECTORS: list[Detector] = [find_claude_sessions, find_opencode_sessions]
 
 
 def find_all_sessions() -> list[SessionInfo]:
@@ -106,5 +147,7 @@ def find_all_sessions() -> list[SessionInfo]:
 
 
 def most_recent() -> SessionInfo | None:
-    sessions = find_all_sessions()
-    return sessions[0] if sessions else None
+    results: list[SessionInfo] = []
+    for detector in DETECTORS:
+        results.extend(detector())
+    return max(results, key=lambda s: s.mtime, default=None)

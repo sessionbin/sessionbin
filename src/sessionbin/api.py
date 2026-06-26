@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pathlib
-
 import httpx
 
 
@@ -16,9 +14,9 @@ class SessionbinClient:
     def __init__(self, base_url: str, timeout: float = 60.0) -> None:
         self.client = httpx.Client(base_url=base_url, timeout=timeout)
 
-    def upload(self, path: pathlib.Path) -> dict:
-        with open(path, "rb") as f:
-            resp = self.client.post("/api/upload", files={"file": (path.name, f)})
+    def upload(self, data: bytes, filename: str, harness: str | None = None) -> dict:
+        params = {"harness": harness} if harness else {}
+        resp = self.client.post("/api/upload", files={"file": (filename, data)}, params=params)
         if resp.status_code != 200:
             raise self._error(resp)
         return resp.json()

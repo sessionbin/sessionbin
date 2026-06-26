@@ -1,8 +1,9 @@
 import json
 import os
+import sqlite3
 import time
 
-from sessionbin.detect import find_claude_sessions, most_recent
+from sessionbin.detect import find_claude_sessions, find_opencode_sessions, most_recent
 
 
 def _make_project(tmp_path, name, files):
@@ -52,6 +53,7 @@ def test_sorted_by_mtime_descending(tmp_path, monkeypatch):
 
 def test_most_recent(tmp_path, monkeypatch):
     monkeypatch.setattr("sessionbin.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects")
+    monkeypatch.setattr("sessionbin.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
     paths = _make_project(tmp_path, "-home-user-repos-proj", ["old.jsonl", "new.jsonl"])
     os.utime(paths[0], (time.time() - 100, time.time() - 100))
     os.utime(paths[1], (time.time(), time.time()))
@@ -62,6 +64,7 @@ def test_most_recent(tmp_path, monkeypatch):
 
 def test_most_recent_empty(tmp_path, monkeypatch):
     monkeypatch.setattr("sessionbin.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects")
+    monkeypatch.setattr("sessionbin.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
     (tmp_path / ".claude" / "projects").mkdir(parents=True)
     assert most_recent() is None
 
@@ -111,3 +114,90 @@ def test_reads_custom_title(tmp_path, monkeypatch):
     results = find_claude_sessions()
     assert results[0].title == "My session"
     assert results[0].summary == "do something"
+
+
+def _create_opencode_db(db_path):
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(db_path))
+    conn.execute("CREATE TABLE project (  id TEXT PRIMARY KEY,  worktree TEXT NOT NULL)")
+    conn.execute(
+        "CREATE TABLE session ("
+        "  id TEXT PRIMARY KEY,"
+        "  title TEXT,"
+        "  directory TEXT,"
+        "  time_updated INTEGER,"
+        "  time_archived INTEGER,"
+        "  project_id TEXT REFERENCES project(id)"
+        ")"
+    )
+    conn.commit()
+    return conn
+
+
+def test_claude_sessions_have_claude_code_harness(tmp_path, monkeypatch):
+    monkeypatch.setattr("sessionbin.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects")
+    _make_project(tmp_path, "-home-user-repos-proj", ["session.jsonl"])
+    results = find_claude_sessions()
+    assert results[0].harness == "claude-code"
+
+
+def test_opencode_finds_sessions(tmp_path, monkeypatch):
+    db_path = tmp_path / "opencode.db"
+    conn = _create_opencode_db(db_path)
+    conn.execute("INSERT INTO project VALUES ('proj1', '/home/user/repos/myapp')")
+    conn.execute(
+        "INSERT INTO session VALUES "
+        "('ses_abc123', 'Fix login bug', '/home/user/repos/myapp', 1700000000000, NULL, 'proj1')"
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setattr("sessionbin.detect.OPENCODE_DB_PATH", db_path)
+
+    results = find_opencode_sessions()
+
+    assert len(results) == 1
+    s = results[0]
+    assert s.session_id == "ses_abc123"
+    assert s.title == "Fix login bug"
+    assert s.project == "myapp"
+    assert s.mtime == 1700000000.0
+    assert s.harness == "opencode"
+    assert s.worktree is not None
+    assert str(s.worktree) == "/home/user/repos/myapp"
+
+
+def test_opencode_excludes_archived(tmp_path, monkeypatch):
+    db_path = tmp_path / "opencode.db"
+    conn = _create_opencode_db(db_path)
+    conn.execute("INSERT INTO project VALUES ('proj1', '/home/user/repos/myapp')")
+    conn.execute(
+        "INSERT INTO session VALUES "
+        "('ses_active', 'Active', '/home/user/repos/myapp', 1700000000000, NULL, 'proj1')"
+    )
+    conn.execute(
+        "INSERT INTO session VALUES "
+        "('ses_archived', 'Archived', '/home/user/repos/myapp',"
+        " 1700000000000, 1700001000000, 'proj1')"
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setattr("sessionbin.detect.OPENCODE_DB_PATH", db_path)
+
+    results = find_opencode_sessions()
+
+    assert len(results) == 1
+    assert results[0].session_id == "ses_active"
+
+
+def test_opencode_empty_db(tmp_path, monkeypatch):
+    db_path = tmp_path / "opencode.db"
+    conn = _create_opencode_db(db_path)
+    conn.close()
+    monkeypatch.setattr("sessionbin.detect.OPENCODE_DB_PATH", db_path)
+
+    assert find_opencode_sessions() == []
+
+
+def test_opencode_missing_db(tmp_path, monkeypatch):
+    monkeypatch.setattr("sessionbin.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
+    assert find_opencode_sessions() == []

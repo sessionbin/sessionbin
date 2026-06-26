@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import subprocess
+import tempfile
 import time
+from pathlib import Path
 from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from sessionbin.api import APIError
+from sessionbin.api import APIError, SessionbinClient
 from sessionbin.cli import _human_size, _time_ago, cli
+from sessionbin.detect import SessionInfo
 
 
 class TestHumanSize:
@@ -95,10 +99,13 @@ class TestUploadCommand:
         f = tmp_path / "session.jsonl"
         f.write_text("{}")
 
-        from sessionbin.detect import SessionInfo
-
         info = SessionInfo(
-            path=f, mtime=f.stat().st_mtime, project="proj", title=None, summary=None
+            path=f,
+            mtime=f.stat().st_mtime,
+            project="proj",
+            title=None,
+            summary=None,
+            harness="claude-code",
         )
 
         with patch("sessionbin.cli.most_recent", return_value=info):
@@ -111,10 +118,13 @@ class TestUploadCommand:
         f = tmp_path / "session.jsonl"
         f.write_text("{}")
 
-        from sessionbin.detect import SessionInfo
-
         info = SessionInfo(
-            path=f, mtime=f.stat().st_mtime, project="proj", title=None, summary=None
+            path=f,
+            mtime=f.stat().st_mtime,
+            project="proj",
+            title=None,
+            summary=None,
+            harness="claude-code",
         )
 
         with (
@@ -212,3 +222,196 @@ class TestDeleteCommand:
 
         assert result.exit_code == 0
         mock_client_cls.assert_called_once_with("https://new.example.com")
+
+
+class TestOpenCodeUpload:
+    def _make_session(self, tmp_path):
+        return SessionInfo(
+            path=Path(tmp_path),
+            mtime=time.time(),
+            project="myapp",
+            title="Fix login bug",
+            summary=None,
+            session_id="ses_abc123",
+            worktree=Path(tmp_path),
+            harness="opencode",
+        )
+
+    def test_upload_opencode_session(self, tmp_path):
+        session = self._make_session(tmp_path)
+        export_json = b'{"info": {}, "messages": []}'
+
+        def fake_run(cmd, *, stdout, stderr, cwd, timeout):
+            stdout.write(export_json.decode())
+            return subprocess.CompletedProcess(cmd, returncode=0, stderr=b"")
+
+        with (
+            patch("sessionbin.cli.most_recent", return_value=session),
+            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin.cli.session_save"),
+            patch("shutil.which", return_value="opencode"),
+            patch("subprocess.run", side_effect=fake_run),
+        ):
+            mock_client_cls.return_value.upload.return_value = {
+                "slug": "oc1",
+                "url": "https://example.com/p/oc1/",
+                "delete_token": "tok-oc",
+            }
+            result = CliRunner().invoke(cli, ["upload", "--latest", "-y"])
+
+        assert result.exit_code == 0, result.output
+        assert "Uploaded" in result.output
+        mock_client_cls.return_value.upload.assert_called_once_with(
+            export_json, "ses_abc123.json", harness="opencode"
+        )
+
+    def test_upload_opencode_export_fails(self, tmp_path):
+        session = self._make_session(tmp_path)
+
+        def fake_run(cmd, *, stdout, stderr, cwd, timeout):
+            return subprocess.CompletedProcess(cmd, returncode=1, stderr=b"session not found")
+
+        with (
+            patch("sessionbin.cli.most_recent", return_value=session),
+            patch("shutil.which", return_value="opencode"),
+            patch("subprocess.run", side_effect=fake_run),
+        ):
+            result = CliRunner().invoke(cli, ["upload", "--latest", "-y"])
+
+        assert result.exit_code != 0
+        assert "opencode export failed" in result.output
+
+    def test_upload_opencode_cleans_up_temp_file_on_failure(self, tmp_path):
+        session = self._make_session(tmp_path)
+        created_temps: list[str] = []
+        original_mkstemp = tempfile.mkstemp
+
+        def tracking_mkstemp(**kwargs):
+            fd, path = original_mkstemp(**kwargs)
+            created_temps.append(path)
+            return fd, path
+
+        def fake_run(cmd, *, stdout, stderr, cwd, timeout):
+            return subprocess.CompletedProcess(cmd, returncode=1, stderr=b"fail")
+
+        with (
+            patch("sessionbin.cli.most_recent", return_value=session),
+            patch("shutil.which", return_value="opencode"),
+            patch("subprocess.run", side_effect=fake_run),
+            patch("sessionbin.cli.tempfile.mkstemp", side_effect=tracking_mkstemp),
+        ):
+            result = CliRunner().invoke(cli, ["upload", "--latest", "-y"])
+
+        assert result.exit_code != 0
+        assert len(created_temps) == 1
+        assert not Path(created_temps[0]).exists()
+
+    def test_upload_opencode_binary_not_found(self, tmp_path):
+        session = self._make_session(tmp_path)
+
+        with (
+            patch("sessionbin.cli.most_recent", return_value=session),
+            patch("shutil.which", return_value=None),
+            patch("pathlib.Path.home", return_value=tmp_path),
+        ):
+            result = CliRunner().invoke(cli, ["upload", "--latest", "-y"])
+
+        assert result.exit_code != 0
+        assert "opencode binary not found" in result.output
+
+
+class TestHarnessParameter:
+    def test_upload_sends_harness_for_claude_session(self, tmp_path):
+        f = tmp_path / "session.jsonl"
+        f.write_text("{}")
+
+        info = SessionInfo(
+            path=f,
+            mtime=f.stat().st_mtime,
+            project="proj",
+            title=None,
+            summary=None,
+            harness="claude-code",
+        )
+
+        with (
+            patch("sessionbin.cli.most_recent", return_value=info),
+            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin.cli.session_save"),
+        ):
+            mock_client_cls.return_value.upload.return_value = {
+                "slug": "s1",
+                "url": "https://example.com/p/s1/",
+                "delete_token": "tok",
+            }
+            result = CliRunner().invoke(cli, ["upload", "--latest", "-y"])
+
+        assert result.exit_code == 0
+        mock_client_cls.return_value.upload.assert_called_once_with(
+            f.read_bytes(), "session.jsonl", harness="claude-code"
+        )
+
+    def test_upload_sends_no_harness_for_file_path(self, tmp_path):
+        f = tmp_path / "session.jsonl"
+        f.write_text("{}")
+
+        with (
+            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin.cli.session_save"),
+        ):
+            mock_client_cls.return_value.upload.return_value = {
+                "slug": "s1",
+                "url": "https://example.com/p/s1/",
+                "delete_token": "tok",
+            }
+            result = CliRunner().invoke(cli, ["upload", str(f)])
+
+        assert result.exit_code == 0
+        mock_client_cls.return_value.upload.assert_called_once_with(
+            f.read_bytes(), "session.jsonl", harness=None
+        )
+
+
+class TestApiUploadHarnessParam:
+    def test_upload_includes_harness_query_param(self):
+        client = SessionbinClient("https://example.com")
+        mock_resp = patch.object(
+            client.client,
+            "post",
+            return_value=type(
+                "R",
+                (),
+                {
+                    "status_code": 200,
+                    "json": lambda self: {"slug": "s1", "url": "u", "delete_token": "t"},
+                },
+            )(),
+        )
+        with mock_resp as mock_post:
+            client.upload(b"data", "file.jsonl", harness="claude-code")
+
+        _, kwargs = mock_post.call_args
+        assert kwargs["params"] == {"harness": "claude-code"}
+
+    def test_upload_omits_harness_when_none(self):
+        client = SessionbinClient("https://example.com")
+        mock_resp = patch.object(
+            client.client,
+            "post",
+            return_value=type(
+                "R",
+                (),
+                {
+                    "status_code": 200,
+                    "json": lambda self: {"slug": "s1", "url": "u", "delete_token": "t"},
+                },
+            )(),
+        )
+        with mock_resp as mock_post:
+            client.upload(b"data", "file.jsonl")
+
+        _, kwargs = mock_post.call_args
+        assert kwargs["params"] == {}
