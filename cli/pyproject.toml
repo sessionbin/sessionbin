@@ -20,11 +20,16 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/sessionbin/sessionbin-cli"
-Repository = "https://github.com/sessionbin/sessionbin-cli"
+Homepage = "https://github.com/sessionbin/sessionbin"
+Repository = "https://github.com/sessionbin/sessionbin"
 
 [project.scripts]
-sessionbin = "sessionbin.cli:cli"
+sessionbin = "sessionbin_cli.cli:cli"
+
+# The distribution is published as `sessionbin`, but the import package is
+# `sessionbin_cli` so it cannot collide with the backend's `sessionbin` package.
+[tool.uv.build-backend]
+module-name = "sessionbin_cli"
 
 [dependency-groups]
 dev = [
@@ -37,6 +42,11 @@ line-length = 100
 [tool.ruff.lint]
 # https://docs.astral.sh/ruff/rules/
 select = ["F", "E", "W", "I", "N"]
+
+# Present so pytest stops here and does not inherit the backend's Django settings
+# from the repo-root pyproject.toml.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.mypy]
 python_version = "3.13"

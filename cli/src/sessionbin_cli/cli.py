@@ -11,13 +11,13 @@ from pathlib import Path
 import click
 import questionary
 
-from sessionbin.api import APIError, SessionbinClient
-from sessionbin.config import resolve_server_url
-from sessionbin.detect import SessionInfo, find_all_sessions, most_recent
-from sessionbin.sessions import all as sessions_all
-from sessionbin.sessions import get as session_get
-from sessionbin.sessions import remove as session_remove
-from sessionbin.sessions import save as session_save
+from sessionbin_cli.api import APIError, SessionbinClient
+from sessionbin_cli.config import resolve_server_url
+from sessionbin_cli.detect import SessionInfo, find_all_sessions, most_recent
+from sessionbin_cli.sessions import all as sessions_all
+from sessionbin_cli.sessions import get as session_get
+from sessionbin_cli.sessions import remove as session_remove
+from sessionbin_cli.sessions import save as session_save
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 

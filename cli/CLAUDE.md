@@ -6,9 +6,13 @@ The CLI client for [sessionbin](https://sessionbin.dev), a transcript pastebin f
 agentic coding sessions. `sessionbin upload` sends a session file to the server and
 prints a share URL.
 
-Published on PyPI as `sessionbin` — note the package name matches the *backend* repo's
-name, not this one. The backend lives in a separate `sessionbin` repo and is not a PyPI
-package.
+Published on PyPI as `sessionbin`. The backend lives in the repo root and is a separate
+uv project that is not published.
+
+**The distribution is `sessionbin` but the import package is `sessionbin_cli`.** They
+differ because the backend also ships a `sessionbin` import package, and the two must not
+collide. Keep the distribution name as-is — it is what users `pip install`, and the
+console script is what they actually invoke.
 
 ## Invariants
 
@@ -24,26 +28,27 @@ package.
   though discovery succeeded.
 - `detect.py`'s `DETECTORS` list is the extension point for new harnesses.
 
-## Running it locally
-
-```bash
-uv run --with . sessionbin --help
-```
-
 ## Commands
 
+Run these from the **repo root**, not from `cli/` — tox is configured there and knows to
+install `./cli` for these envs.
+
 ```bash
-tox -e py313          # tests
-tox -e lint           # ruff lint
-tox -e check-format   # ruff format check
-tox -e typecheck      # mypy
+tox run -e cli             # tests
+tox run -e cli-typecheck   # mypy
+tox run -e lint            # ruff, both packages
+tox run -e check-format    # format check
 ```
 
-`lint-fix` and `format` are the autofixing variants.
+To run the CLI itself: `uv run --project cli sessionbin --help`.
+
+Inside the dev container the CLI is already installed as a uv tool, so just run
+`sessionbin`. Do not `uv run` from `cli/` there — it re-syncs the shared environment and
+breaks the running backend.
 
 ## Verification
 
-Run all four checks after every code change and fix what fails. Do not skip any.
+Run `tox run` from the repo root after every code change and fix what fails.
 
 ## Conventions
 

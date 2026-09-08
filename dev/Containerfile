@@ -1,0 +1,58 @@
+# Development container for the whole project: backend + CLI + the tooling needed to
+# produce and upload real session files. Not a production image.
+#
+# Build and run from the repo root:
+#   podman build -t sessionbin-dev -f dev/Containerfile dev/
+#   podman run --rm -it -p 8000:8000 -v "$PWD":/repo:Z --name sessionbin-dev sessionbin-dev
+FROM quay.io/fedora/fedora:44
+
+# python3 is 3.14 on F44 and matches the backend's floor; python3.13 backs the CLI's
+# tox envs. gitleaks is a hard runtime dependency: the backend raises at settings import
+# without it, taking down both the test suite and mypy with errors that never mention it.
+RUN dnf install -y --setopt=install_weak_deps=False \
+        python3 \
+        python3.13 \
+        python-unversioned-command \
+        gitleaks \
+        tox \
+        uv \
+        git \
+        tar \
+        unzip \
+        procps-ng \
+    && dnf clean all \
+    && gitleaks version
+
+# `uv tool install` drops executables here, which is where the CLI ends up.
+ENV PATH="/root/.local/bin:${PATH}"
+
+# Agent harnesses, so a real session of every supported kind can be produced in here.
+# Neither is packaged by Fedora.
+#
+# KEEP THIS IN SYNC: when the project gains support for a new harness, install that
+# harness here too, or the dev container can no longer produce a real session to test
+# the new adapter and detector against.
+RUN curl -fsSL https://opencode.ai/install | bash
+ENV PATH="/root/.opencode/bin:${PATH}"
+
+RUN curl -fsSL https://claude.ai/install.sh | bash
+ENV PATH="/root/.local/bin:${PATH}"
+
+# Keep writable state out of the mounted repo so the container never leaves a database
+# or stored pastes in your checkout.
+#
+# UV_PROJECT_ENVIRONMENT is deliberately NOT set here. It is global, but this repo holds
+# two uv projects, so a shared value means any `uv` command run from cli/ re-syncs the
+# same environment and evicts the backend package from under the running server. The
+# entrypoint scopes it to the backend instead.
+ENV SESSIONBIN_DB_PATH=/state/db.sqlite3 \
+    SESSIONBIN_DATA_DIR=/state/pastes \
+    DJANGO_SETTINGS_MODULE=sessionbin.conf.settings.local
+RUN mkdir -p /state
+
+COPY entrypoint.sh /usr/local/bin/sessionbin-dev
+RUN chmod +x /usr/local/bin/sessionbin-dev
+
+WORKDIR /repo
+EXPOSE 8000
+CMD ["sessionbin-dev"]

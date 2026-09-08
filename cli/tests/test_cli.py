@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from sessionbin.api import APIError, SessionbinClient
-from sessionbin.cli import _human_size, _time_ago, cli
-from sessionbin.detect import SessionInfo
+from sessionbin_cli.api import APIError, SessionbinClient
+from sessionbin_cli.cli import _human_size, _time_ago, cli
+from sessionbin_cli.detect import SessionInfo
 
 
 class TestHumanSize:
@@ -47,9 +47,9 @@ class TestUploadCommand:
         f.write_text("{}")
 
         with (
-            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
-            patch("sessionbin.cli.session_save") as mock_save,
+            patch("sessionbin_cli.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_save") as mock_save,
         ):
             mock_client_cls.return_value.upload.return_value = {
                 "slug": "abc123",
@@ -79,8 +79,8 @@ class TestUploadCommand:
         f.write_text("{}")
 
         with (
-            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
         ):
             mock_client_cls.return_value.upload.side_effect = APIError(413, "too large")
             result = CliRunner().invoke(cli, ["upload", str(f)])
@@ -89,7 +89,7 @@ class TestUploadCommand:
         assert "too large" in result.output
 
     def test_upload_latest_no_sessions(self):
-        with patch("sessionbin.cli.most_recent", return_value=None):
+        with patch("sessionbin_cli.cli.most_recent", return_value=None):
             result = CliRunner().invoke(cli, ["upload", "--latest"])
 
         assert result.exit_code != 0
@@ -108,7 +108,7 @@ class TestUploadCommand:
             harness="claude-code",
         )
 
-        with patch("sessionbin.cli.most_recent", return_value=info):
+        with patch("sessionbin_cli.cli.most_recent", return_value=info):
             result = CliRunner().invoke(cli, ["upload", "--latest"], input="n\n")
 
         assert result.exit_code == 0
@@ -128,10 +128,10 @@ class TestUploadCommand:
         )
 
         with (
-            patch("sessionbin.cli.most_recent", return_value=info),
-            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
-            patch("sessionbin.cli.session_save"),
+            patch("sessionbin_cli.cli.most_recent", return_value=info),
+            patch("sessionbin_cli.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_save"),
         ):
             mock_client_cls.return_value.upload.return_value = {
                 "slug": "s1",
@@ -146,7 +146,7 @@ class TestUploadCommand:
 
 class TestListCommand:
     def test_list_empty(self):
-        with patch("sessionbin.cli.sessions_all", return_value=[]):
+        with patch("sessionbin_cli.cli.sessions_all", return_value=[]):
             result = CliRunner().invoke(cli, ["list"])
 
         assert result.exit_code == 0
@@ -162,7 +162,7 @@ class TestListCommand:
                 "url": "https://example.com/p/abc123/",
             },
         ]
-        with patch("sessionbin.cli.sessions_all", return_value=entries):
+        with patch("sessionbin_cli.cli.sessions_all", return_value=entries):
             result = CliRunner().invoke(cli, ["list"])
 
         assert result.exit_code == 0
@@ -176,9 +176,9 @@ class TestDeleteCommand:
         entry = {"delete_token": "tok", "server": "https://example.com"}
 
         with (
-            patch("sessionbin.cli.session_get", return_value=entry),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
-            patch("sessionbin.cli.session_remove") as mock_remove,
+            patch("sessionbin_cli.cli.session_get", return_value=entry),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_remove") as mock_remove,
         ):
             mock_client_cls.return_value.delete.return_value = None
             result = CliRunner().invoke(cli, ["delete", "abc123"])
@@ -188,7 +188,7 @@ class TestDeleteCommand:
         mock_remove.assert_called_once_with("abc123")
 
     def test_delete_no_local_record(self):
-        with patch("sessionbin.cli.session_get", return_value=None):
+        with patch("sessionbin_cli.cli.session_get", return_value=None):
             result = CliRunner().invoke(cli, ["delete", "abc123"])
 
         assert result.exit_code != 0
@@ -198,8 +198,8 @@ class TestDeleteCommand:
         entry = {"delete_token": "tok", "server": "https://example.com"}
 
         with (
-            patch("sessionbin.cli.session_get", return_value=entry),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_get", return_value=entry),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
         ):
             mock_client_cls.return_value.delete.side_effect = APIError(404, "not found")
             result = CliRunner().invoke(cli, ["delete", "abc123"])
@@ -211,9 +211,9 @@ class TestDeleteCommand:
         entry = {"delete_token": "tok", "server": "https://old.example.com"}
 
         with (
-            patch("sessionbin.cli.session_get", return_value=entry),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
-            patch("sessionbin.cli.session_remove"),
+            patch("sessionbin_cli.cli.session_get", return_value=entry),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_remove"),
         ):
             mock_client_cls.return_value.delete.return_value = None
             result = CliRunner().invoke(
@@ -246,10 +246,10 @@ class TestOpenCodeUpload:
             return subprocess.CompletedProcess(cmd, returncode=0, stderr=b"")
 
         with (
-            patch("sessionbin.cli.most_recent", return_value=session),
-            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
-            patch("sessionbin.cli.session_save"),
+            patch("sessionbin_cli.cli.most_recent", return_value=session),
+            patch("sessionbin_cli.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_save"),
             patch("shutil.which", return_value="opencode"),
             patch("subprocess.run", side_effect=fake_run),
         ):
@@ -273,7 +273,7 @@ class TestOpenCodeUpload:
             return subprocess.CompletedProcess(cmd, returncode=1, stderr=b"session not found")
 
         with (
-            patch("sessionbin.cli.most_recent", return_value=session),
+            patch("sessionbin_cli.cli.most_recent", return_value=session),
             patch("shutil.which", return_value="opencode"),
             patch("subprocess.run", side_effect=fake_run),
         ):
@@ -296,10 +296,10 @@ class TestOpenCodeUpload:
             return subprocess.CompletedProcess(cmd, returncode=1, stderr=b"fail")
 
         with (
-            patch("sessionbin.cli.most_recent", return_value=session),
+            patch("sessionbin_cli.cli.most_recent", return_value=session),
             patch("shutil.which", return_value="opencode"),
             patch("subprocess.run", side_effect=fake_run),
-            patch("sessionbin.cli.tempfile.mkstemp", side_effect=tracking_mkstemp),
+            patch("sessionbin_cli.cli.tempfile.mkstemp", side_effect=tracking_mkstemp),
         ):
             result = CliRunner().invoke(cli, ["upload", "--latest", "-y"])
 
@@ -311,7 +311,7 @@ class TestOpenCodeUpload:
         session = self._make_session(tmp_path)
 
         with (
-            patch("sessionbin.cli.most_recent", return_value=session),
+            patch("sessionbin_cli.cli.most_recent", return_value=session),
             patch("shutil.which", return_value=None),
             patch("pathlib.Path.home", return_value=tmp_path),
         ):
@@ -336,10 +336,10 @@ class TestHarnessParameter:
         )
 
         with (
-            patch("sessionbin.cli.most_recent", return_value=info),
-            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
-            patch("sessionbin.cli.session_save"),
+            patch("sessionbin_cli.cli.most_recent", return_value=info),
+            patch("sessionbin_cli.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_save"),
         ):
             mock_client_cls.return_value.upload.return_value = {
                 "slug": "s1",
@@ -358,9 +358,9 @@ class TestHarnessParameter:
         f.write_text("{}")
 
         with (
-            patch("sessionbin.cli.resolve_server_url", return_value="https://example.com"),
-            patch("sessionbin.cli.SessionbinClient") as mock_client_cls,
-            patch("sessionbin.cli.session_save"),
+            patch("sessionbin_cli.cli.resolve_server_url", return_value="https://example.com"),
+            patch("sessionbin_cli.cli.SessionbinClient") as mock_client_cls,
+            patch("sessionbin_cli.cli.session_save"),
         ):
             mock_client_cls.return_value.upload.return_value = {
                 "slug": "s1",

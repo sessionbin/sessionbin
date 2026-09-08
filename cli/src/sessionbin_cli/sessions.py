@@ -5,7 +5,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from sessionbin.config import config_dir
+from sessionbin_cli.config import config_dir
 
 SESSIONS_FILE = "sessions.json"
 
