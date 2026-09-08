@@ -65,5 +65,7 @@ Fix any failures before moving on. Do not skip any of these checks.
 - Python 3.10+, uv for everything. No `requirements.txt`.
 - `ruff` for lint and format. Config in `pyproject.toml`. `mypy` for type checking. `tox` orchestrates all checks.
 - Fix lint errors at the source. Don't suppress with `# noqa` or exclude files from linting.
+- **No underscore-prefixed "private" function names.** This is an application, not a published library, so there is no external API surface for the convention to protect. Use plain names.
+- **Type annotations should describe what the code actually accepts.** If you reach for `typing.cast()` to bridge two things you control, the annotation is wrong — widen or correct it instead. A `cast` on genuinely untyped external data is fine.
 - All tests live under `tests/`.
 - `pytest` for tests.
