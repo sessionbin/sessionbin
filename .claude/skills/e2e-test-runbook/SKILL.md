@@ -5,14 +5,32 @@ description: Use when you need to manually test sessionbin end-to-end — after 
 
 # End-to-End Test Runbook
 
-Run all functional tests against a running local dev server at `http://127.0.0.1:8000/`. Uses Playwright MCP for browser tests and curl for API tests.
+Run all functional tests against the dev container from `dev/`, which serves the mounted checkout at `http://127.0.0.1:8000/`. Uses Playwright MCP for browser tests and curl for API tests.
 
-**Prerequisite:** The dev server must be running. If it isn't, start it:
-```
-uv run python src/sessionbin/manage.py runserver
-```
+## Setup
 
-**Fixture files:** Use fixtures from both harnesses:
+Run everything below from the repo root, on the host. The container mounts the checkout at `/repo`, so edits are live and no rebuild is needed after a code change.
+
+1. Check whether the container is already running:
+   ```bash
+   podman ps --filter name=sessionbin-dev --format '{{.Names}} {{.Status}}'
+   ```
+
+2. If it isn't, build and start it detached:
+   ```bash
+   podman build -t sessionbin-dev -f dev/Containerfile dev/
+   podman run -d --rm -p 8000:8000 -v "$PWD":/repo:Z --name sessionbin-dev sessionbin-dev
+   ```
+
+3. Wait for it to serve — the entrypoint syncs dependencies, installs the CLI, and migrates first:
+   ```bash
+   until curl -sf -o /dev/null http://127.0.0.1:8000/; do sleep 2; done
+   ```
+   If this does not settle within a couple of minutes, read `podman logs sessionbin-dev` and stop.
+
+The database and stored pastes live in `/state` inside the container, so a fresh container starts empty and nothing lands in the checkout.
+
+**Fixture files:** This runbook uses checked-in fixtures only. Do not run `claude` or `opencode` inside the container to capture a fresh session — that needs credentials the runbook does not have and must not go looking for. curl runs on the host, so fixture paths are repo-relative. Use fixtures from both harnesses:
 - `tests/fixtures/claude_code/*.jsonl` — Claude Code sessions (JSONL). Need at least two (one for web upload, one for API upload).
 - `tests/fixtures/opencode/*.json` — OpenCode sessions (JSON). Need at least one.
 
@@ -182,6 +200,16 @@ Run these curl checks and verify the expected status codes:
      -H "X-Delete-Token: wrongtoken" \
      http://127.0.0.1:8000/api/p/<any-valid-slug>
    ```
+
+## Teardown
+
+Only if this runbook started the container (step 2 of Setup), stop it:
+
+```bash
+podman stop sessionbin-dev
+```
+
+It runs with `--rm`, so the database and any pastes left behind by a failed run go with it. Leave a container that was already running alone.
 
 ## Results
 
