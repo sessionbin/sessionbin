@@ -37,6 +37,18 @@ class TestUploadEndpoint:
         assert data["error"] == "file too large"
         assert data["max_bytes"] == 10
 
+    def test_unknown_harness(self, client, fixture_bytes):
+        resp = client.post("/api/upload?harness=bogus", {"file": _as_upload(fixture_bytes)})
+        assert resp.status_code == 400
+        data = resp.json()
+        assert data["error"] == "unknown harness: bogus"
+        assert data["valid"] == ["claude-code", "opencode"]
+
+    def test_explicit_harness_accepted(self, client, fixture_bytes):
+        resp = client.post("/api/upload?harness=claude-code", {"file": _as_upload(fixture_bytes)})
+        assert resp.status_code == 200
+        assert Paste.objects.get(slug=resp.json()["slug"]).harness == "claude-code"
+
 
 @pytest.mark.django_db
 class TestViewPaste:

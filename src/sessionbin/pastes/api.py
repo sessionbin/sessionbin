@@ -7,7 +7,7 @@ from django.utils.crypto import constant_time_compare
 from ninja import File, Header, Router, Status
 from ninja.files import UploadedFile
 
-from sessionbin.adapters import ADAPTERS, Harness
+from sessionbin.adapters import ADAPTERS
 from sessionbin.pastes.models import Paste, hash_token
 from sessionbin.pastes.services import create_paste_from_upload, delete_paste
 
@@ -18,8 +18,11 @@ router = Router()
 def upload(
     request: HttpRequest,
     file: UploadedFile = File(...),
-    harness: Harness | None = None,
+    harness: str | None = None,
 ):
+    # Validated here rather than with a Literal annotation so the caller gets the same
+    # `{"error": ...}` shape as the other upload failures; ninja would reject an unknown
+    # value with a 422 schema error before this ran.
     if harness is not None and harness not in ADAPTERS:
         return JsonResponse(
             {"error": f"unknown harness: {harness}", "valid": list(ADAPTERS)},

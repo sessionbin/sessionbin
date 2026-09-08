@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 def parse(raw: bytes) -> Session:
-    return _parse_doc(json.loads(raw))
+    return parse_doc(json.loads(raw))
 
 
-def _parse_doc(doc: dict) -> Session:
+def parse_doc(doc: dict) -> Session:
     info = doc["info"]
 
     model = None
@@ -46,11 +46,11 @@ def _parse_doc(doc: dict) -> Session:
 
         parent_id = msg_info.get("parentID")
         time_info = msg_info.get("time", {})
-        timestamp = _parse_millis(time_info.get("created"))
-        completed = _parse_millis(time_info.get("completed"))
+        timestamp = parse_millis(time_info.get("created"))
+        completed = parse_millis(time_info.get("completed"))
 
         if role == "user":
-            blocks = _parse_parts(parts)
+            blocks = parse_parts(parts)
             turn = Turn(
                 index=len(turns),
                 role="user",
@@ -63,7 +63,7 @@ def _parse_doc(doc: dict) -> Session:
                 user_msg_ids[msg_id] = len(turns) - 1
 
         elif role == "assistant":
-            blocks = _parse_parts(parts)
+            blocks = parse_parts(parts)
             if not blocks:
                 continue
 
@@ -96,7 +96,7 @@ def _parse_doc(doc: dict) -> Session:
     return session
 
 
-def _parse_millis(ms: int | float | None) -> datetime | None:
+def parse_millis(ms: int | float | None) -> datetime | None:
     if not isinstance(ms, int | float):
         return None
     try:
@@ -105,7 +105,7 @@ def _parse_millis(ms: int | float | None) -> datetime | None:
         return None
 
 
-def _parse_parts(parts: list[dict]) -> list[Block]:
+def parse_parts(parts: list[dict]) -> list[Block]:
     blocks: list[Block] = []
     for part in parts:
         part_type = part.get("type")

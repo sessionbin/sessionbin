@@ -3,7 +3,6 @@ import hashlib
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
-from sessionbin.adapters import Harness
 from sessionbin.adapters import parse as adapter_parse
 from sessionbin.pastes.models import DELETE_TOKEN_LENGTH, Paste, hash_token
 from sessionbin.pastes.render import RENDERER_VERSION, render
@@ -15,7 +14,7 @@ def create_paste_from_upload(
     *,
     raw: bytes,
     uploader_ip: str | None,
-    harness: Harness | None = None,
+    harness: str | None = None,
 ) -> tuple[Paste, str]:
     redacted = redact_secrets(raw)
     session, adapter_version = adapter_parse(redacted, harness=harness)

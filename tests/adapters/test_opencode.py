@@ -1,9 +1,10 @@
 import json
 from collections import Counter
+from datetime import datetime, timezone
 
 import pytest
 
-from sessionbin.adapters.opencode import _parse_millis, _parse_parts, parse
+from sessionbin.adapters.opencode import parse, parse_millis, parse_parts
 
 
 def _export(*, info_overrides=None, messages=None):
@@ -124,19 +125,17 @@ class TestTurnGrouping:
 
 class TestPartMapping:
     def test_text(self):
-        blocks = _parse_parts([{"type": "text", "text": "hello"}])
+        blocks = parse_parts([{"type": "text", "text": "hello"}])
         assert len(blocks) == 1
         assert blocks[0].kind == "text"
         assert blocks[0].text == "hello"
 
     def test_empty_text_skipped(self):
-        blocks = _parse_parts([{"type": "text", "text": ""}])
+        blocks = parse_parts([{"type": "text", "text": ""}])
         assert blocks == []
 
     def test_reasoning_to_thinking(self):
-        blocks = _parse_parts(
-            [{"type": "reasoning", "text": "hmm", "time": {"start": 1, "end": 2}}]
-        )
+        blocks = parse_parts([{"type": "reasoning", "text": "hmm", "time": {"start": 1, "end": 2}}])
         assert blocks[0].kind == "thinking"
         assert blocks[0].text == "hmm"
 
@@ -147,11 +146,11 @@ class TestPartMapping:
             {"type": "patch", "hash": "abc", "files": []},
             {"type": "snapshot", "snapshot": "abc"},
         ]
-        blocks = _parse_parts(parts)
+        blocks = parse_parts(parts)
         assert blocks == []
 
     def test_unknown_part_warns(self, caplog):
-        blocks = _parse_parts([{"type": "mystery"}])
+        blocks = parse_parts([{"type": "mystery"}])
         assert blocks == []
         assert "unknown part type" in caplog.text
 
@@ -172,7 +171,7 @@ class TestToolParts:
                 },
             }
         ]
-        blocks = _parse_parts(parts)
+        blocks = parse_parts(parts)
         assert len(blocks) == 2
         assert blocks[0].kind == "tool_use"
         assert blocks[0].tool_name == "bash"
@@ -197,7 +196,7 @@ class TestToolParts:
                 },
             }
         ]
-        blocks = _parse_parts(parts)
+        blocks = parse_parts(parts)
         assert len(blocks) == 2
         assert blocks[1].kind == "tool_result"
         assert blocks[1].is_error is True
@@ -212,7 +211,7 @@ class TestToolParts:
                 "state": {"status": "pending", "input": {"command": "ls"}, "raw": ""},
             }
         ]
-        blocks = _parse_parts(parts)
+        blocks = parse_parts(parts)
         assert len(blocks) == 1
         assert blocks[0].kind == "tool_use"
 
@@ -238,13 +237,13 @@ class TestErrorMessages:
 
 class TestParseMillis:
     def test_valid(self):
-        dt = _parse_millis(1700000000000)
+        dt = parse_millis(1700000000000)
         assert dt is not None
         assert dt.year == 2023
         assert dt.tzinfo is not None
 
     def test_none(self):
-        assert _parse_millis(None) is None
+        assert parse_millis(None) is None
 
 
 class TestSessionEnd:
@@ -252,8 +251,8 @@ class TestSessionEnd:
         fixture = opencode_fixtures_dir / "basic_addition.json"
         session = parse(fixture.read_bytes())
         # First message created 1778871414360, last completed 1778871597905.
-        assert session.started_at == _parse_millis(1778871414360)
-        assert session.ended_at == _parse_millis(1778871597905)
+        assert session.started_at == datetime(2026, 5, 15, 18, 56, 54, 360000, tzinfo=timezone.utc)
+        assert session.ended_at == datetime(2026, 5, 15, 18, 59, 57, 905000, tzinfo=timezone.utc)
         assert (session.ended_at - session.started_at).total_seconds() == pytest.approx(183.545)
 
     def test_turn_end_set_on_assistant_turns(self, opencode_fixtures_dir):
