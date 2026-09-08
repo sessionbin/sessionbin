@@ -250,3 +250,52 @@ class TestRender:
         html = render(session)
         assert '<div class="transcript">' in html
         assert "claude-code" in html
+
+    def _render_turn(self, *blocks):
+        session = Session(
+            harness="claude-code",
+            turns=[Turn(index=0, role="assistant", timestamp=None, blocks=list(blocks))],
+        )
+        return render(session)
+
+    def test_thinking_with_text_is_collapsible(self):
+        html = self._render_turn(Block(kind="thinking", text="weighing the options"))
+        assert 'class="thinking-details"' in html
+        assert "<summary>thinking — weighing the options</summary>" in html
+        assert "weighing the options" in html
+        assert "turn-omitted" not in html
+
+    def test_thinking_summary_previews_first_line_only(self):
+        html = self._render_turn(
+            Block(kind="thinking", text="first line\n\nsecond line with more detail")
+        )
+        assert "<summary>thinking — first line</summary>" in html
+        # The body still carries the whole thing.
+        assert "second line with more detail" in html
+
+    def test_turn_of_only_empty_thinking_collapses_to_one_line(self):
+        # Opus 4.7+ and Sonnet 5 default to thinking display "omitted", so the block
+        # arrives with a signature but no text. Claude Code streams one block per line,
+        # so it would otherwise be a whole turn card wrapped around nothing.
+        for empty in ("", "   \n  "):
+            html = self._render_turn(Block(kind="thinking", text=empty))
+            assert 'class="turn-omitted"' in html
+            assert ">thinking<" in html
+            assert 'class="turn role-assistant"' not in html
+            assert 'class="turn-body"' not in html
+            assert 'class="thinking-details"' not in html
+
+    def test_empty_thinking_dropped_from_a_turn_that_has_other_content(self):
+        html = self._render_turn(
+            Block(kind="thinking", text=""),
+            Block(kind="text", text="the answer"),
+        )
+        assert "the answer" in html
+        assert 'class="turn role-assistant"' in html
+        assert "turn-omitted" not in html
+        assert 'class="thinking-details"' not in html
+
+    def test_turn_with_no_blocks_still_renders_its_header(self):
+        html = self._render_turn()
+        assert 'class="turn role-assistant"' in html
+        assert "turn-omitted" not in html

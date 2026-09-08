@@ -44,6 +44,20 @@ def tool_summary(value: dict | None) -> str:
 
 
 @register.filter
+def thinking_summary(text: str | None) -> str:
+    """One-line preview for a collapsed thinking block.
+
+    Mirrors tool_summary: enough to scan without expanding.
+    """
+    if not text:
+        return ""
+    first = next((line.strip() for line in text.splitlines() if line.strip()), "")
+    if len(first) > 80:
+        return first[:77] + "..."
+    return first
+
+
+@register.filter
 def duration(seconds: float | None) -> str:
     if seconds is None:
         return "?"
@@ -68,3 +82,27 @@ def render_markdown(text: str | None) -> str:
     result = _markdown(text)
     assert isinstance(result, str)
     return mark_safe(result)
+
+
+def _is_blank_thinking(block) -> bool:
+    return block.kind == "thinking" and not (block.text or "").strip()
+
+
+@register.filter
+def visible_blocks(turn) -> list:
+    """Blocks that have something to show.
+
+    Models defaulting to omitted reasoning display still emit thinking blocks, but with
+    empty text. Rendering those produces blank boxes, so drop them here.
+    """
+    return [b for b in turn.blocks if not _is_blank_thinking(b)]
+
+
+@register.filter
+def is_omitted_thinking_turn(turn) -> bool:
+    """True when a turn's only content was thinking that the model did not record.
+
+    Claude Code streams one block per line, so each such block becomes an entire turn.
+    The template collapses these to a single line instead of a full turn card.
+    """
+    return bool(turn.blocks) and all(_is_blank_thinking(b) for b in turn.blocks)

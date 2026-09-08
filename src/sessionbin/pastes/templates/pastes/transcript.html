@@ -14,6 +14,13 @@
   </div>
 
   {% for turn in session.turns %}
+  {% with blocks=turn|visible_blocks %}
+  {% if not blocks and turn|is_omitted_thinking_turn %}
+  <div class="turn-omitted" title="The model did not record the text of its reasoning.">
+    {% if turn.timestamp %}<span class="turn-timestamp">{{ turn.timestamp|date:"H:i:s" }}</span>{% endif %}
+    <span>thinking</span>
+  </div>
+  {% else %}
   <div class="turn role-{{ turn.role }}">
     <div class="turn-header">
       <span class="role-badge">{{ turn.role }}</span>
@@ -21,16 +28,18 @@
       <span class="turn-timestamp">{{ turn.timestamp|date:"H:i:s" }}</span>
       {% endif %}
     </div>
-    {% if turn.blocks %}
+    {% if blocks %}
     <div class="turn-body">
-      {% for block in turn.blocks %}
+      {% for block in blocks %}
       <div class="block">
         {% if block.kind == "text" %}
           <div class="block-text">{{ block.text|render_markdown }}</div>
 
         {% elif block.kind == "thinking" %}
-          <div class="thinking-label">thinking</div>
-          <div class="thinking block-text">{{ block.text|render_markdown }}</div>
+          <details class="thinking-details">
+            <summary>thinking — {{ block.text|thinking_summary }}</summary>
+            <div class="detail-body thinking block-text">{{ block.text|render_markdown }}</div>
+          </details>
 
         {% elif block.kind == "tool_use" %}
           <details>
@@ -56,5 +65,7 @@
     </div>
     {% endif %}
   </div>
+  {% endif %}
+  {% endwith %}
   {% endfor %}
 </div>

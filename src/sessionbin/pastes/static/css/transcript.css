@@ -134,21 +134,34 @@
   margin: 0;
 }
 
-.transcript .thinking-label {
-  font-size: 0.6875rem;
-  color: var(--t-muted);
-  font-style: italic;
-  margin-bottom: 0.2rem;
-}
-
 .transcript .thinking {
   color: var(--t-muted);
-  border: 1px solid var(--t-border);
-  border-radius: 4px;
-  padding: 0.5rem 0.75rem;
+}
+
+/* Reasoning is supporting detail, so it collapses like a tool call, but stays visually
+   quieter than one: italic summary in the muted colour rather than the primary. */
+.transcript .thinking-details summary {
+  font-family: inherit;
+  font-style: italic;
+  color: var(--t-muted);
 }
 
 .transcript .thinking a { color: var(--t-muted); }
+
+/* A turn whose only content was reasoning the model did not record. Claude Code streams
+   one block per line, so these would otherwise be a full turn card wrapped around
+   nothing. Keep it to a single unobtrusive line. */
+.transcript .turn-omitted {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-style: italic;
+  color: var(--t-muted);
+  opacity: 0.6;
+}
 
 .transcript details {
   border: 1px solid var(--t-border);
