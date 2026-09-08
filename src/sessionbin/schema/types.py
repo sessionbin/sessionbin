@@ -23,6 +23,9 @@ class Turn:
     role: Role
     timestamp: datetime | None
     blocks: list[Block] = field(default_factory=list)
+    # When a harness reports a turn's completion time separately from its start.
+    # Harnesses that stream one turn per message leave this unset.
+    ended_at: datetime | None = None
 
 
 @dataclass
@@ -39,7 +42,10 @@ class Session:
 
     @property
     def ended_at(self) -> datetime | None:
-        return self.turns[-1].timestamp if self.turns else None
+        if not self.turns:
+            return None
+        last = self.turns[-1]
+        return last.ended_at or last.timestamp
 
     @property
     def turn_count(self) -> int:

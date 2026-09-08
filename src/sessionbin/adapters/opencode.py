@@ -45,7 +45,9 @@ def _parse_doc(doc: dict) -> Session:
             continue
 
         parent_id = msg_info.get("parentID")
-        timestamp = _parse_millis(msg_info.get("time", {}).get("created"))
+        time_info = msg_info.get("time", {})
+        timestamp = _parse_millis(time_info.get("created"))
+        completed = _parse_millis(time_info.get("completed"))
 
         if role == "user":
             blocks = _parse_parts(parts)
@@ -77,6 +79,8 @@ def _parse_doc(doc: dict) -> Session:
 
                 if existing_idx is not None:
                     turns[existing_idx].blocks.extend(blocks)
+                    if completed:
+                        turns[existing_idx].ended_at = completed
                     continue
 
             turn = Turn(
@@ -84,6 +88,7 @@ def _parse_doc(doc: dict) -> Session:
                 role="assistant",
                 timestamp=timestamp,
                 blocks=blocks,
+                ended_at=completed,
             )
             turns.append(turn)
 

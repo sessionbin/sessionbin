@@ -94,6 +94,18 @@ class TestComputeStats:
         assert stats["tool_call_count"] == 0
         assert stats["duration"] is None
 
+    def test_duration_uses_last_turn_end(self):
+        t0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        t1 = datetime(2026, 1, 1, 0, 1, tzinfo=timezone.utc)
+        end = datetime(2026, 1, 1, 0, 5, tzinfo=timezone.utc)
+        turns = [
+            Turn(index=0, role="user", timestamp=t0),
+            Turn(index=1, role="assistant", timestamp=t1, ended_at=end),
+        ]
+        session = Session(harness="opencode", turns=turns)
+        stats = _compute_stats(session)
+        assert stats["duration"] == 300.0
+
 
 class TestRenderMarkdown:
     def test_plain_text(self):

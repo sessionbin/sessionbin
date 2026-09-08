@@ -247,6 +247,26 @@ class TestParseMillis:
         assert _parse_millis(None) is None
 
 
+class TestSessionEnd:
+    def test_end_comes_from_last_completed(self, opencode_fixtures_dir):
+        fixture = opencode_fixtures_dir / "basic_addition.json"
+        session = parse(fixture.read_bytes())
+        # First message created 1778871414360, last completed 1778871597905.
+        assert session.started_at == _parse_millis(1778871414360)
+        assert session.ended_at == _parse_millis(1778871597905)
+        assert (session.ended_at - session.started_at).total_seconds() == pytest.approx(183.545)
+
+    def test_turn_end_set_on_assistant_turns(self, opencode_fixtures_dir):
+        fixture = opencode_fixtures_dir / "basic_addition.json"
+        session = parse(fixture.read_bytes())
+        assistant_turns = [t for t in session.turns if t.role == "assistant"]
+        assert assistant_turns
+        for turn in assistant_turns:
+            assert turn.ended_at is not None
+            assert turn.timestamp is not None
+            assert turn.ended_at >= turn.timestamp
+
+
 class TestFixtureSmoke:
     @pytest.fixture(
         params=[
@@ -271,6 +291,11 @@ class TestFixtureSmoke:
         assert session.model is not None
         assert session.started_at is not None
         assert session.ended_at is not None
+
+    def test_session_never_ends_before_its_last_turn_starts(self, session):
+        assert session.ended_at is not None
+        assert session.started_at is not None
+        assert session.ended_at >= max(t.timestamp for t in session.turns if t.timestamp)
 
     def test_user_and_assistant_turns(self, session):
         roles = {t.role for t in session.turns}
