@@ -71,6 +71,8 @@ For larger changes — anything touching templates, CSS, upload/delete flows, or
 - Python 3.14+, uv for everything. No `requirements.txt`.
 - `ruff` for lint and format. Config in `pyproject.toml`. `mypy` with `django-stubs` for type checking. `tox` orchestrates all checks.
 - Fix lint errors at the source. Don't suppress with `# noqa` or exclude files/directories from linting — auto-generated code (migrations, etc.) gets linted and formatted like everything else.
+- **No underscore-prefixed "private" function names.** This is an application, not a published library, so there is no external API surface for the convention to protect. Use plain names.
+- **Type annotations should describe what the code actually accepts.** If you reach for `typing.cast()` to bridge two things you control, the annotation is wrong — widen or correct it instead. A `cast` on genuinely untyped external data (a Django settings dict, parsed JSON) is fine.
 - All tests live under `tests/`. No `tests.py` in Django app directories.
 - `pytest` for tests, `pytest-django` for Django-dependent tests. Schema and adapter tests are pure Python and run without a database.
 - Fixtures are real session files (redacted as needed) stored under `tests/fixtures/<harness>/`. Adapter bugs are reproduced by adding a fixture and writing a test before fixing the code.
