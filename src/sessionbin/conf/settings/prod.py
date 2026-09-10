@@ -19,6 +19,16 @@ CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h != "*"]
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Both are production-only: WhiteNoise because DEBUG serves static itself, ClientIPMiddleware
+# because the header is only trustworthy with a proxy in front. Positions are load-bearing:
+# WhiteNoise directly after SecurityMiddleware, ClientIP ahead of anything reading the address.
+MIDDLEWARE = list(MIDDLEWARE)  # noqa: F405
+MIDDLEWARE.insert(
+    MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+)
+MIDDLEWARE.insert(0, "sessionbin.conf.middleware.ClientIPMiddleware")
+
 # Security headers
 SECURE_SSL_REDIRECT = True
 # 5 minutes for launch. A wrong cert under the target 15768000 would pin every visitor to a
