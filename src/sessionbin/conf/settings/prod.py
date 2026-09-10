@@ -12,12 +12,18 @@ DEBUG = False
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h.strip()]
 
+# Derived so one env var drives both and the two cannot drift apart.
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h != "*"]
+
 # Proxy headers
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Security headers
-SECURE_HSTS_SECONDS = 15768000
+SECURE_SSL_REDIRECT = True
+# 5 minutes for launch. A wrong cert under the target 15768000 would pin every visitor to a
+# broken site for six months. Raise it once TLS has been stable for a week.
+SECURE_HSTS_SECONDS = 300
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True

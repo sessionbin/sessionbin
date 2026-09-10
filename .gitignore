@@ -139,6 +139,8 @@ tempCodeRunnerFile.py
 
 # App-specific
 data/
+# STATIC_ROOT. Only written by collectstatic, which runs at image build time.
+src/sessionbin/staticfiles/
 
 # Ruff stuff:
 .ruff_cache/
