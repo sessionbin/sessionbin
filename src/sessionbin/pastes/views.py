@@ -1,3 +1,5 @@
+import logging
+
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.crypto import constant_time_compare
@@ -7,8 +9,13 @@ from django.views.decorators.http import require_GET, require_http_methods
 from sessionbin.pastes.forms import UploadForm
 from sessionbin.pastes.models import Paste, hash_token
 from sessionbin.pastes.services import create_paste_from_upload, delete_paste
+from sessionbin.security.redact import RedactionError
 from sessionbin.storage.exceptions import NotFoundError
 from sessionbin.storage.factory import get_storage
+
+logger = logging.getLogger(__name__)
+
+SCAN_FAILED_MESSAGE = "The secret scan could not finish, so nothing was stored. Please try again."
 
 
 def _build_og_description(paste: Paste) -> str:
@@ -75,11 +82,16 @@ def upload_view(request):
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         raw = form.cleaned_data["file"].read()
-        paste, delete_token = create_paste_from_upload(
-            raw=raw,
-            uploader_ip=request.META.get("REMOTE_ADDR"),
-        )
-        return redirect(f"{paste.url}manage/?token={delete_token}")
+        try:
+            paste, delete_token = create_paste_from_upload(
+                raw=raw,
+                uploader_ip=request.META.get("REMOTE_ADDR"),
+            )
+        except RedactionError:
+            logger.exception("secret scan failed")
+            form.add_error(None, SCAN_FAILED_MESSAGE)
+        else:
+            return redirect(f"{paste.url}manage/?token={delete_token}")
     return render(request, "pastes/landing.html", {"form": form})
 
 

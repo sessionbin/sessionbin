@@ -1,3 +1,4 @@
+import logging
 from typing import cast
 
 from django.conf import settings
@@ -10,6 +11,9 @@ from ninja.files import UploadedFile
 from sessionbin.adapters import ADAPTERS
 from sessionbin.pastes.models import Paste, hash_token
 from sessionbin.pastes.services import create_paste_from_upload, delete_paste
+from sessionbin.security.redact import RedactionError
+
+logger = logging.getLogger(__name__)
 
 router = Router()
 
@@ -32,11 +36,15 @@ def upload(
     if file.size and file.size > max_bytes:
         return JsonResponse({"error": "file too large", "max_bytes": max_bytes}, status=413)
     raw = file.read()
-    paste, delete_token = create_paste_from_upload(
-        raw=raw,
-        uploader_ip=request.META.get("REMOTE_ADDR"),
-        harness=harness,
-    )
+    try:
+        paste, delete_token = create_paste_from_upload(
+            raw=raw,
+            uploader_ip=request.META.get("REMOTE_ADDR"),
+            harness=harness,
+        )
+    except RedactionError:
+        logger.exception("secret scan failed")
+        return JsonResponse({"error": "secret scan failed, nothing was stored"}, status=503)
     return {
         "slug": paste.slug,
         "url": request.build_absolute_uri(paste.url),
