@@ -44,6 +44,10 @@ fragment is embedded in the page shell at serve time.
   stored HTML keeps pointing at the old asset.
 - **Rendered fragments are stored, so template changes do not reach existing pastes.**
   After editing `transcript.html`, run `manage.py render` to re-render every stored paste.
+- **The deployed image carries no domain.** `deploy/Containerfile` and `settings/prod.py` take
+  the hostname from `DJANGO_ALLOWED_HOSTS` at runtime, and `CSRF_TRUSTED_ORIGINS` derives from
+  it. Anyone can run their own instance, so never hardcode `sessionbin.dev` outside the CLI's
+  overridable `DEFAULT_SERVER_URL`.
 
 ## Commands
 
