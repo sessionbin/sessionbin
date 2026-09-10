@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.urls import path
 from ninja import NinjaAPI
 
@@ -17,7 +16,6 @@ def health(request):
 api.add_router("/", pastes_router)
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("raw/<slug:slug>.jsonl", raw_paste, name="raw-paste"),
     path("p/<slug:slug>/", view_paste, name="view-paste"),
