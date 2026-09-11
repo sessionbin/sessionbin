@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tox:
+    runs-on: ubuntu-latest
+    # Fedora, not the bare runner: conf/settings/base.py raises at import without gitleaks,
+    # which takes down pytest and mypy alike. Keep the package list in step with
+    # dev/Containerfile.
+    container: quay.io/fedora/fedora:44
+    steps:
+      - name: Install toolchain
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            python3 python3.13 python-unversioned-command gitleaks tox git
+          dnf clean all
+          gitleaks version
+
+      - uses: actions/checkout@v5
+
+      - run: tox run

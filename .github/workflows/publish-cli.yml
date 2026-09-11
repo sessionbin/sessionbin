@@ -1,0 +1,35 @@
+name: Publish CLI to PyPI
+
+# Prefixed so backend image tags (v0.1.0) and CLI release tags stay unambiguous in one repo.
+on:
+  push:
+    tags:
+      - 'cli-v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    name: Build and publish to PyPI
+    if: ${{ github.repository_owner == 'sessionbin' }}
+
+    runs-on: ubuntu-latest
+    environment: release
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      # The CLI is its own uv project under cli/; the repo root is the backend.
+      - name: Build sdist and wheel
+        run: uv build --project cli --out-dir dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

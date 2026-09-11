@@ -1,0 +1,42 @@
+name: Publish container image
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    name: Build and push to GHCR
+    if: ${{ github.repository_owner == 'sessionbin' }}
+
+    runs-on: ubuntu-latest
+    container: quay.io/fedora/fedora:44
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Install toolchain
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            python3 python3.13 python-unversioned-command gitleaks tox git podman
+          dnf clean all
+
+      - uses: actions/checkout@v5
+
+      # The same gate as CI. A tag must not ship an image that main would have rejected.
+      - run: tox run
+
+      - name: Log in to GHCR
+        run: podman login ghcr.io -u '${{ github.actor }}' -p '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Build
+        run: podman build -t "ghcr.io/${{ github.repository }}:${{ github.ref_name }}" -f deploy/Containerfile .
+
+      - name: Push
+        run: podman push "ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
