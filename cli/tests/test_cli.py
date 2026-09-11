@@ -9,7 +9,7 @@ from unittest.mock import patch
 from click.testing import CliRunner
 
 from sessionbin_cli.api import APIError, SessionbinClient
-from sessionbin_cli.cli import _human_size, _time_ago, cli
+from sessionbin_cli.cli import MAX_UPLOAD_BYTES, _human_size, _time_ago, cli
 from sessionbin_cli.detect import SessionInfo
 
 
@@ -67,12 +67,12 @@ class TestUploadCommand:
 
     def test_upload_too_large(self, tmp_path):
         f = tmp_path / "big.jsonl"
-        f.write_bytes(b"x" * (10 * 1024 * 1024 + 1))
+        f.write_bytes(b"x" * (MAX_UPLOAD_BYTES + 1))
 
         result = CliRunner().invoke(cli, ["upload", str(f)])
 
         assert result.exit_code != 0
-        assert "10 MB" in result.output
+        assert "upload limit" in result.output
 
     def test_upload_api_error(self, tmp_path):
         f = tmp_path / "session.jsonl"
