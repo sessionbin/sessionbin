@@ -69,7 +69,6 @@ class TestParse:
         )
         session = parse(raw)
         assert session.model == "claude-opus-4"
-        assert session.cwd == "/work"
 
     def test_empty_messages(self):
         raw = _export(messages=[])
@@ -286,7 +285,6 @@ class TestFixtureSmoke:
         assert session.harness == "opencode"
 
     def test_metadata_populated(self, session):
-        assert session.cwd is not None
         assert session.model is not None
         assert session.started_at is not None
         assert session.ended_at is not None

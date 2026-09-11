@@ -45,11 +45,6 @@ def parse(raw: bytes) -> Session:
 
         timestamp = _parse_timestamp(obj.get("timestamp"))
 
-        if session.cwd is None and obj.get("cwd"):
-            session.cwd = obj["cwd"]
-        if session.git_branch is None and obj.get("gitBranch"):
-            session.git_branch = obj["gitBranch"]
-
         message = obj.get("message", {})
         role = message.get("role", msg_type)
 

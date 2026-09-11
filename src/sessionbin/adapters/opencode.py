@@ -24,7 +24,6 @@ def parse_doc(doc: dict) -> Session:
     session = Session(
         harness="opencode",
         model=model,
-        cwd=info.get("directory"),
     )
 
     turns: list[Turn] = []

@@ -83,7 +83,6 @@ On the manage page from step 3, take a snapshot and verify:
 2. Take a screenshot and verify:
    - [ ] Page title includes the slug
    - [ ] Session metadata header shows: harness name, model, start time, duration, turn count, tool call count
-         (`cwd` and `git_branch` are parsed into the schema but not rendered today)
    - [ ] User turns have "user" label with timestamp
    - [ ] Assistant turns have "assistant" label with timestamp
    - [ ] Text content blocks render inside the turns

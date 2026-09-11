@@ -66,13 +66,6 @@ class TestParse:
         assert len(session.turns) == 0
         assert "unknown type" in caplog.text
 
-    def test_metadata_first_occurrence(self):
-        line1 = _user_line(cwd="/first", gitBranch="main")
-        line2 = _assistant_line(cwd="/second", gitBranch="dev")
-        session = parse(_jsonl(line1, line2))
-        assert session.cwd == "/first"
-        assert session.git_branch == "main"
-
     def test_model_from_first_assistant(self):
         a1 = _assistant_line()
         a1["message"]["model"] = "claude-opus-4"
@@ -326,7 +319,6 @@ class TestFixtureSmokeSimple:
         assert session.harness == "claude-code"
 
     def test_metadata_populated(self, session):
-        assert session.cwd is not None
         assert session.model is not None
         assert session.started_at is not None
         assert session.ended_at is not None
@@ -351,7 +343,6 @@ class TestFixtureSmoke:
         assert session.harness == "claude-code"
 
     def test_metadata_populated(self, session):
-        assert session.cwd is not None
         assert session.model is not None
         assert session.started_at is not None
         assert session.ended_at is not None

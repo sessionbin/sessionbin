@@ -33,8 +33,6 @@ class Session:
     harness: str
     turns: list[Turn] = field(default_factory=list)
     model: str | None = None
-    cwd: str | None = None
-    git_branch: str | None = None
 
     @property
     def started_at(self) -> datetime | None:

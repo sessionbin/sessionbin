@@ -112,14 +112,16 @@ Reverse-engineered from real files; the fixtures are the ground truth.
 - `message.content` is either a plain string (user prompts) or a list of blocks.
 - Thinking blocks use the `thinking` key, not `text`.
 - Each assistant line carries exactly one content block, so one line is one turn.
-- `cwd`, `gitBranch`, and `model` come from the first line that has them. Timestamps are
+- `model` comes from the first line that has it. `cwd` and `gitBranch` are deliberately
+  **not** parsed: they identify the uploader's machine and nothing renders them. Timestamps are
   ISO 8601 with a `Z` suffix.
 
 ### OpenCode (single JSON doc, from `opencode export`)
 
 - Shape is `{"info": {...}, "messages": [...]}` — those two keys are what auto-detection
   keys off.
-- Model id is `info.model.id`; working directory is `info.directory` (not `cwd`).
+- Model id is `info.model.id`. `info.directory` is the working directory and is not parsed,
+  matching the Claude Code adapter.
 - **Several assistant messages share one `parentID` and are merged into a single turn**,
   unlike Claude Code. A turn's start is the first message's `time.created`; its end is
   the last merged message's `time.completed`, which is why `Turn.ended_at` exists.
