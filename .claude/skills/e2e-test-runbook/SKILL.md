@@ -72,17 +72,18 @@ Work through each section in order. Record pass/fail for every check. Stop and r
 On the manage page from step 3, take a snapshot and verify:
 - [ ] Page title includes "Manage" and the slug
 - [ ] Heading is "Manage paste"
-- [ ] Metadata shows: Slug, Uploaded timestamp, Size (in bytes), View URL
-- [ ] View URL is a link to `/p/<slug>/`
+- [ ] Metadata shows: Slug, Uploaded timestamp, Paste URL, Manage URL
+- [ ] Paste URL is a link to `/p/<slug>/`, with a Copy button beside it
 - [ ] "Delete this paste" button is present
 - [ ] Delete warning text is present
 
 ### 5. Paste View
 
-1. Click the View URL link on the manage page
+1. Click the Paste URL link on the manage page
 2. Take a screenshot and verify:
    - [ ] Page title includes the slug
-   - [ ] Session metadata header shows: harness name, model, CWD, branch, start time, duration, turn count, tool call count
+   - [ ] Session metadata header shows: harness name, model, start time, duration, turn count, tool call count
+         (`cwd` and `git_branch` are parsed into the schema but not rendered today)
    - [ ] User turns have "user" label with timestamp
    - [ ] Assistant turns have "assistant" label with timestamp
    - [ ] Text content blocks render inside the turns
@@ -118,7 +119,7 @@ On the manage page from step 3, take a snapshot and verify:
 1. Navigate to the manage page for the paste from step 3 (using the saved slug and token)
 2. Click "Delete this paste"
 3. Take a snapshot and verify:
-   - [ ] View URL is replaced with "(deleted)" in italics/emphasis
+   - [ ] Paste URL is replaced with "(deleted)" in italics/emphasis
    - [ ] A deletion timestamp message appears (e.g., "This paste was deleted on ...")
    - [ ] The delete button is gone
 4. Verify the paste view now returns **404**:
@@ -172,7 +173,7 @@ On the manage page from step 3, take a snapshot and verify:
 2. Upload an OpenCode fixture file (`.json` from `tests/fixtures/opencode/`) via the drop zone
 3. Click "Upload"
 4. Verify redirect to manage page
-5. Click the View URL and verify the paste renders with **"opencode"** harness
+5. Click the Paste URL and verify the paste renders with **"opencode"** harness
 6. Clean up by deleting the paste via the manage page
 
 ### 13. Error Handling (unchanged from Claude Code tests)
