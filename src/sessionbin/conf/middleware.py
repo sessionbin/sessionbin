@@ -28,16 +28,8 @@ class CSPMiddleware:
 
 
 class ClientIPMiddleware:
-    """Rewrite REMOTE_ADDR from the last X-Forwarded-For entry.
-
-    Behind a proxy REMOTE_ADDR is the proxy itself, so uploader_ip records nothing usable
-    for abuse triage. A proxy appends the peer it actually saw, so the last entry is the
-    only one a client cannot forge by sending its own header.
-
-    Enabled in prod settings alone, because that trust is only earned when a proxy is in
-    front. It also assumes exactly one: put a CDN ahead of Caddy and the last entry becomes
-    the CDN's edge, not the client.
-    """
+    """REMOTE_ADDR from the last X-Forwarded-For entry, the one the proxy appended and a
+    client cannot forge. Assumes exactly one proxy, and prod settings alone enable it."""
 
     def __init__(self, get_response):
         self.get_response = get_response

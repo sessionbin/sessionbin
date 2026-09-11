@@ -41,3 +41,11 @@ X_FRAME_OPTIONS = "DENY"
 CSRF_COOKIE_SECURE = True
 
 SESSIONBIN["CSP_ENABLED"] = True  # noqa: F405
+
+# Shared by both gunicorn workers; per-process LocMemCache would double every limit.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": os.getenv("SESSIONBIN_CACHE_DIR", str(BASE_DIR / "cache")),  # noqa: F405
+    }
+}

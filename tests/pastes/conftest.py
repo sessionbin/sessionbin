@@ -1,4 +1,5 @@
 import pytest
+from django.core.cache import cache
 
 from sessionbin.storage.factory import get_storage
 
@@ -13,3 +14,11 @@ def fixture_bytes(fixtures_dir):
 def _storage_dir(tmp_path, settings):
     get_storage.cache_clear()
     settings.SESSIONBIN = {**settings.SESSIONBIN, "DATA_DIR": tmp_path}
+
+
+# Every test shares one client address, so without this the first spends the budget.
+@pytest.fixture(autouse=True)
+def _clear_throttle_counters():
+    cache.clear()
+    yield
+    cache.clear()

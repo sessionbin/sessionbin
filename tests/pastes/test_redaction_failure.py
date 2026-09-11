@@ -1,8 +1,4 @@
-"""A gitleaks failure must not become an unhandled 500.
-
-RedactionError is raised for a timeout, a missing binary, or any unexpected exit code.
-None of those are the uploader's fault and none should leak a stack trace.
-"""
+"""A gitleaks failure must not become an unhandled 500."""
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile

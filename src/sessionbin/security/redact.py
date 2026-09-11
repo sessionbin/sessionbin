@@ -8,6 +8,11 @@ class RedactionError(Exception):
     pass
 
 
+# 0.88 s/MB on one core, so ~39s for a 20 MB upload on a shared vCPU. Raising the upload
+# cap means raising this, and gunicorn's --timeout above it.
+SCAN_TIMEOUT_SECONDS = 60
+
+
 def redact_secrets(raw: bytes) -> bytes:
     """Run gitleaks on raw bytes, return bytes with all secrets replaced
     by <REDACTED>. Raises RedactionError on subprocess failure or timeout."""
@@ -28,7 +33,7 @@ def redact_secrets(raw: bytes) -> bytes:
                     f"--source={tmpdir}",
                 ],
                 capture_output=True,
-                timeout=30,
+                timeout=SCAN_TIMEOUT_SECONDS,
             )
         except FileNotFoundError as exc:
             raise RedactionError("gitleaks is not installed") from exc

@@ -6,7 +6,6 @@ from sessionbin.pastes.models import Paste
 
 
 def remote_addr_after(meta):
-    """REMOTE_ADDR as the view would see it, for a request carrying this META."""
     seen = {}
 
     def view(request):
@@ -35,9 +34,6 @@ class TestClientIPMiddleware:
         assert remote_addr_after(meta) == "203.0.113.7"
 
     def test_last_entry_wins_over_a_spoofed_prefix(self):
-        # A client sending its own X-Forwarded-For gets its value kept as the prefix; the
-        # proxy appends the address it actually saw. Trusting the first entry would let the
-        # client pick any address it liked.
         meta = {
             "REMOTE_ADDR": "127.0.0.1",
             "HTTP_X_FORWARDED_FOR": "1.2.3.4, 5.6.7.8, 203.0.113.7",
@@ -55,8 +51,6 @@ class TestClientIPMiddleware:
 
 @pytest.mark.django_db
 class TestUploaderIPIsRecorded:
-    """The middleware exists so uploader_ip stops being the proxy's address."""
-
     def test_api_upload_records_the_forwarded_client(self, client, fixture_bytes, settings):
         settings.MIDDLEWARE = [
             "sessionbin.conf.middleware.ClientIPMiddleware",

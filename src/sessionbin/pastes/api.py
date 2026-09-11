@@ -1,5 +1,4 @@
 import logging
-from typing import cast
 
 from django.conf import settings
 from django.http import Http404, HttpRequest, JsonResponse
@@ -7,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
 from ninja import File, Header, Router, Status
 from ninja.files import UploadedFile
+from ninja.throttling import AnonRateThrottle
 
 from sessionbin.adapters import ADAPTERS
 from sessionbin.pastes.models import Paste, hash_token
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 
-@router.post("/upload")
+@router.post("/upload", throttle=[AnonRateThrottle(settings.SESSIONBIN["UPLOAD_RATE"])])
 def upload(
     request: HttpRequest,
     file: UploadedFile = File(...),
@@ -32,7 +32,7 @@ def upload(
             {"error": f"unknown harness: {harness}", "valid": list(ADAPTERS)},
             status=400,
         )
-    max_bytes = cast(int, settings.SESSIONBIN["MAX_UPLOAD_BYTES"])
+    max_bytes = settings.SESSIONBIN["MAX_UPLOAD_BYTES"]
     if file.size and file.size > max_bytes:
         return JsonResponse({"error": "file too large", "max_bytes": max_bytes}, status=413)
     raw = file.read()

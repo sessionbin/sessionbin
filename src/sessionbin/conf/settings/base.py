@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+from typing import TypedDict
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -59,20 +60,39 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Not None, which would key throttles on the whole X-Forwarded-For and let a spoofed
+# prefix win a fresh bucket. 0 means REMOTE_ADDR, as set by ClientIPMiddleware.
+NINJA_NUM_PROXIES = 0
+
 STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-_MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+_MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = _MAX_UPLOAD_BYTES
 FILE_UPLOAD_MAX_MEMORY_SIZE = _MAX_UPLOAD_BYTES
 
-SESSIONBIN = {
+
+class SessionbinSettings(TypedDict):
+    STORAGE_BACKEND: str
+    DATA_DIR: Path
+    MAX_UPLOAD_BYTES: int
+    MAX_UPLOAD_MB: int
+    UPLOAD_RATE: str
+    GITHUB_URL: str
+    CSP_ENABLED: bool
+    FOOTER_POSTAMBLE: str | None
+    FOOTER_FEEDBACK_URL: str | None
+    FOOTER_FEEDBACK_LABEL: str
+
+
+SESSIONBIN: SessionbinSettings = {
     "STORAGE_BACKEND": "filesystem",
     "DATA_DIR": Path(os.getenv("SESSIONBIN_DATA_DIR", BASE_DIR.parent.parent / "data")),
     "MAX_UPLOAD_BYTES": _MAX_UPLOAD_BYTES,
     "MAX_UPLOAD_MB": _MAX_UPLOAD_BYTES // (1024 * 1024),
+    "UPLOAD_RATE": os.getenv("SESSIONBIN_UPLOAD_RATE", "5/m"),
     "GITHUB_URL": os.environ.get(
         "SESSIONBIN_GITHUB_URL", "https://github.com/sessionbin/sessionbin"
     ),

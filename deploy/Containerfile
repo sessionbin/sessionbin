@@ -27,6 +27,6 @@ RUN DJANGO_SECRET_KEY=build-only python src/sessionbin/manage.py collectstatic -
 
 EXPOSE 8000
 
-# Allow higher timeout limit for larger uploads
+# Must stay above SCAN_TIMEOUT_SECONDS in security/redact.py.
 CMD ["gunicorn", "sessionbin.conf.wsgi:application", \
-     "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "60"]
+     "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]

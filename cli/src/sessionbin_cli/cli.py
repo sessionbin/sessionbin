@@ -19,7 +19,8 @@ from sessionbin_cli.sessions import get as session_get
 from sessionbin_cli.sessions import remove as session_remove
 from sessionbin_cli.sessions import save as session_save
 
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+# Mirrors the default server cap; another server answers 413 with its own.
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 
 CONTEXT_SETTINGS = {
     "help_option_names": ["-h", "--help"],
@@ -152,7 +153,8 @@ def upload(path: str | None, server: str | None, latest: bool, yes: bool, show_a
 
     if len(upload_data) > MAX_UPLOAD_BYTES:
         click.secho(
-            f"Upload is {_human_size(len(upload_data))}, which exceeds the 10 MB upload limit.",
+            f"Upload is {_human_size(len(upload_data))}, which exceeds the "
+            f"{_human_size(MAX_UPLOAD_BYTES)} upload limit.",
             fg="red",
             err=True,
         )
