@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "sessionbin"
-version = "0.1.0"
+version = "0.2.0"
 description = "CLI for uploading and managing sessionbin transcripts"
 readme = "README.md"
 license = "MIT"

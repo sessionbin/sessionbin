@@ -139,6 +139,7 @@ tempCodeRunnerFile.py
 
 # App-specific
 data/
+
 # STATIC_ROOT. Only written by collectstatic, which runs at image build time.
 src/sessionbin/staticfiles/
 
@@ -164,3 +165,4 @@ __marimo__/
 
 # Repo-specific
 notes/
+cli/uv.lock

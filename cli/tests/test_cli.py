@@ -6,8 +6,10 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
+import tomllib
 from click.testing import CliRunner
 
+from sessionbin_cli import __version__
 from sessionbin_cli.api import APIError, SessionbinClient
 from sessionbin_cli.cli import MAX_UPLOAD_BYTES, _human_size, _time_ago, cli
 from sessionbin_cli.detect import SessionInfo
@@ -415,3 +417,15 @@ class TestApiUploadHarnessParam:
 
         _, kwargs = mock_post.call_args
         assert kwargs["params"] == {}
+
+
+class TestVersion:
+    def test_version_flag_prints_the_package_version(self):
+        result = CliRunner().invoke(cli, ["--version"])
+        assert result.exit_code == 0
+        assert __version__ in result.output
+
+    def test_version_matches_pyproject(self):
+        pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+        with pyproject.open("rb") as fh:
+            assert __version__ == tomllib.load(fh)["project"]["version"]

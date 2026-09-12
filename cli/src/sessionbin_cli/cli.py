@@ -11,6 +11,7 @@ from pathlib import Path
 import click
 import questionary
 
+from sessionbin_cli import __version__
 from sessionbin_cli.api import APIError, SessionbinClient
 from sessionbin_cli.config import resolve_server_url
 from sessionbin_cli.detect import SessionInfo, find_all_sessions, most_recent
@@ -107,6 +108,7 @@ def _pick_session(show_all: bool = False) -> SessionInfo | None:
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(__version__, "-V", "--version")
 def cli():
     """CLI for uploading and managing sessionbin transcripts."""
 
