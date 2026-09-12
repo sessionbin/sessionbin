@@ -1,6 +1,6 @@
 [project]
 name = "sessionbin"
-version = "0.1.0"
+version = "0.2.0"
 description = "A transcript pastebin for agentic coding sessions"
 readme = "README.md"
 requires-python = ">=3.14"
