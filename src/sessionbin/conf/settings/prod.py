@@ -31,9 +31,7 @@ MIDDLEWARE.insert(0, "sessionbin.conf.middleware.ClientIPMiddleware")
 
 # Security headers
 SECURE_SSL_REDIRECT = True
-# 5 minutes for launch. A wrong cert under the target 15768000 would pin every visitor to a
-# broken site for six months. Raise it once TLS has been stable for a week.
-SECURE_HSTS_SECONDS = 300
+SECURE_HSTS_SECONDS = 15768000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
