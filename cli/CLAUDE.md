@@ -28,6 +28,9 @@ console script is what they actually invoke.
   though discovery succeeded.
 - **Codex sessions are plain files** under `~/.codex/sessions/`, uploaded as-is like Claude
   Code. The detector skips rollouts whose `thread_source` is not `user` (sub-agents).
+- **Pi sessions are plain files** under `~/.pi/agent/sessions/<encoded-cwd>/`, uploaded
+  as-is. The detector only lists files whose first line is a `type: session` header, and
+  shows the `session_info` display name as the title when one was set.
 - `detect.py`'s `DETECTORS` list is the extension point for new harnesses.
 
 ## Commands

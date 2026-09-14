@@ -103,59 +103,61 @@ and `prefers-color-scheme` selectors.
 
 ## Session format notes
 
-Reverse-engineered from real files; the fixtures are the ground truth.
+Reverse-engineered from real files; the fixtures are the ground truth, and the adapters
+are the reference for field names. What follows is the reasoning behind the choices that
+are not obvious from the code.
+
+Rules shared by every adapter:
+
+- Each adapter keeps a list of known bookkeeping line or entry types and warns on a new
+  one. Harnesses add types regularly, so when uploads start warning, extend the list
+  rather than the parser.
+- The working directory (`cwd`, `gitBranch`, `info.directory`) is never parsed: it
+  identifies the uploader's machine and nothing renders it.
+- A tool result is attached directly behind its call in the assistant turn that made it,
+  so a call and its output read together even when a harness batches parallel calls into
+  one message and streams every result afterwards.
 
 ### Claude Code (JSONL)
 
-- One JSON object per line, `type` selects the kind. Only `user` and `assistant` become
-  turns; everything else is bookkeeping. The adapter keeps a list of known bookkeeping
-  types so that a genuinely new type logs a warning. New Claude Code releases add types
-  regularly, so when uploads start warning, extend the list rather than the parser.
+- One file per session under `~/.claude/projects/<encoded-cwd>/`.
 - User lines with `isMeta: true` are harness-injected (the local-command caveat, skill
-  bodies, `[Image: source: ...]` records, context-usage output) and are skipped.
-- `message.content` is either a plain string (user prompts) or a list of blocks.
-- Thinking blocks use the `thinking` key, not `text`.
-- Each assistant line carries exactly one content block, so one line is one turn. The
-  exception is a user line holding only `tool_result` blocks for the preceding assistant
-  turn's calls: it is merged into that turn so a call and its result render together.
-- `model` comes from the first line that has it. `cwd` and `gitBranch` are deliberately
-  **not** parsed: they identify the uploader's machine and nothing renders them. Timestamps are
-  ISO 8601 with a `Z` suffix.
+  bodies, image records, context-usage output) and are skipped.
+- Each assistant line carries one content block, so one line is one turn.
 
 ### Codex (JSONL "rollout")
 
-- One file per session under `~/.codex/sessions/YYYY/MM/DD/rollout-<timestamp>-<id>.jsonl`.
-  Every line is `{"timestamp", "type", "payload"}`; the first line is `type: session_meta`,
-  which is what auto-detection keys off.
-- Only `response_item` lines become turns. `event_msg` lines duplicate the same content
-  in UI shape, and `compacted` replays history that already appeared earlier in the file;
-  the adapter keeps a list of these bookkeeping types so a new one logs a warning.
-- `payload.type` on a `response_item` is `message` (with `role`), `reasoning`,
-  `function_call`/`function_call_output` (JSON-string `arguments`), or
-  `custom_tool_call`/`custom_tool_call_output` (free-text `input`, used by the `exec`
-  tool). The free-text input goes into `Block.tool_input_text`, not `tool_input`, so the
-  script renders as plain text rather than an escaped JSON string. An output carries no
-  role; it is merged into the assistant turn holding the matching call, as in the other
-  adapters.
-- **Codex injects instructions under the user role.** Messages starting with
-  `# AGENTS.md instructions`, `<environment_context>`, `<turn_aborted>`, or `<skill>` are
-  dropped; `developer` messages are dropped entirely. `<user_shell_command>` (a `!cmd` in
-  the TUI) is kept as text.
-- Reasoning `summary` is empty on API-key auth, so thinking blocks are usually blank and
-  the renderer collapses them. Nothing marks a tool result as an error.
-- `model` comes from the first `turn_context` line. `cwd` is not parsed, matching the
-  other adapters.
-- Sub-agent rollouts (`thread_source` of `guardian_review` or `subagent`) live in the
-  same tree and parse fine, but the CLI does not list them.
+- One file per session under `~/.codex/sessions/YYYY/MM/DD/`. The `session_meta` first
+  line is what auto-detection keys off.
+- `event_msg` lines duplicate `response_item` content in UI shape and `compacted` replays
+  history already in the file, so only `response_item` lines become turns.
+- **Codex injects instructions under the user role** (`# AGENTS.md instructions`,
+  `<environment_context>`, and similar), which is why the adapter drops user messages by
+  prefix. `<user_shell_command>` (a `!cmd` in the TUI) is kept.
+- The `exec` tool's free-text script is why `Block.tool_input_text` exists: rendering it
+  as JSON would show an escaped string.
+- Reasoning summaries are empty on API-key auth, so thinking blocks are usually blank.
+  Nothing marks a tool result as an error.
+- Sub-agent rollouts (`thread_source` other than `user`) live in the same tree and parse
+  fine, but the CLI does not list them because they are pieces of another session.
+
+### Pi (JSONL, append-only tree)
+
+- One file per session under `~/.pi/agent/sessions/<encoded-cwd>/`. The `type: session`
+  first line is what auto-detection keys off.
+- Entries form a tree via `parentId` (`/tree`, `--fork`), but the adapter renders the
+  file in order rather than following the leaf path, so an abandoned branch still shows
+  up where it happened.
+- Extension-injected content (`custom_message` entries and `custom` messages) is kept
+  only when its `display` flag is set, matching what the user saw in the TUI.
+- A `bashExecution` message (a `!cmd` in the TUI) is rendered as user text the way Pi
+  presents it to the model. Compaction and branch summaries are dropped.
+- Local models through Pi can emit the same tool call id twice in one message; the
+  result attachment pairs the copies up in order.
 
 ### OpenCode (single JSON doc, from `opencode export`)
 
-- Shape is `{"info": {...}, "messages": [...]}` — those two keys are what auto-detection
-  keys off.
-- Model id is `info.model.id`. `info.directory` is the working directory and is not parsed,
-  matching the Claude Code adapter.
-- **Several assistant messages share one `parentID` and are merged into a single turn**,
-  unlike Claude Code. A turn's start is the first message's `time.created`; its end is
-  the last merged message's `time.completed`, which is why `Turn.ended_at` exists.
-- Assistant messages with an `error` key and no parts are skipped.
-- Tool parts carry `state.status`; only `completed` and `error` produce a result block.
+- Sessions live in a SQLite database, not as files; the CLI shells out to export one.
+- **Several assistant messages share one `parentID` and are merged into a single turn.**
+  The turn ends at the last merged message's completion time, which is why
+  `Turn.ended_at` exists.

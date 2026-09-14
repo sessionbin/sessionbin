@@ -1,7 +1,7 @@
 import json
 import logging
 
-from sessionbin.adapters.common import find_call_turn, parse_timestamp, strip_ansi
+from sessionbin.adapters.common import attach_results, find_call_turn, parse_timestamp, strip_ansi
 from sessionbin.schema.types import Block, Role, Session, Turn
 
 ADAPTER_VERSION = 1
@@ -61,7 +61,7 @@ def parse(raw: bytes) -> Session:
             continue
         role, blocks = parsed
         if call_turn := find_call_turn(turns, blocks):
-            call_turn.blocks.extend(blocks)
+            attach_results(call_turn, blocks)
             continue
         turns.append(
             Turn(

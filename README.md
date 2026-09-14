@@ -6,7 +6,7 @@ Upload a session file, get a shareable URL, and anyone with the link can view th
 Anonymous upload, delete-by-token.
 No accounts, no dashboards.
 
-Currently supported: Claude Code, Codex, and OpenCode. Future transcript support for: Pi, Gemini CLI.
+Currently supported: Claude Code, Codex, OpenCode, and Pi. Future transcript support for: Gemini CLI.
 
 ## How it works
 
@@ -39,11 +39,12 @@ To produce a real session and upload it, exec into the running container:
 podman exec -it sessionbin-dev bash
 cd /work && mkdir -p demo && cd demo          # any scratch directory
 export ANTHROPIC_API_KEY=...                  # or pass --env-file to podman run
-export OPENAI_API_KEY=...                     # for Codex
+export OPENAI_API_KEY=...                     # for Codex and Pi
 
 claude -p "..." --model claude-haiku-4-5      # Claude Code
 codex exec --skip-git-repo-check "..."        # Codex
 opencode run -m anthropic/claude-haiku-4-5 "..."   # OpenCode
+pi --provider openai --model gpt-5-mini -p "..."  # Pi
 
 sessionbin upload --latest -y --server http://127.0.0.1:8000
 ```

@@ -30,10 +30,11 @@ Run everything below from the repo root, on the host. The container mounts the c
 
 The database and stored pastes live in `/state` inside the container, so a fresh container starts empty and nothing lands in the checkout.
 
-**Fixture files:** This runbook uses checked-in fixtures only. Do not run `claude`, `codex`, or `opencode` inside the container to capture a fresh session — that needs credentials the runbook does not have and must not go looking for. curl runs on the host, so fixture paths are repo-relative. Use fixtures from every harness:
+**Fixture files:** This runbook uses checked-in fixtures only. Do not run `claude`, `codex`, `opencode`, or `pi` inside the container to capture a fresh session — that needs credentials the runbook does not have and must not go looking for. curl runs on the host, so fixture paths are repo-relative. Use fixtures from every harness:
 - `tests/fixtures/claude_code/*.jsonl` — Claude Code sessions (JSONL). Need at least two (one for web upload, one for API upload).
 - `tests/fixtures/opencode/*.json` — OpenCode sessions (JSON). Need at least one.
 - `tests/fixtures/codex/*.jsonl` — Codex sessions (JSONL rollouts). Need at least one.
+- `tests/fixtures/pi/*.jsonl` — Pi sessions (JSONL). Need at least one.
 
 ## Test Procedure
 
@@ -45,10 +46,10 @@ Work through each section in order. Record pass/fail for every check. Stop and r
 2. Take a snapshot and verify:
    - [ ] Page title is "sessionbin"
    - [ ] Heading "sessionbin" is visible
-   - [ ] Description text about sharing transcripts is present, mentioning **Claude Code**, **Codex**, and **OpenCode**
+   - [ ] Description text about sharing transcripts is present, mentioning **Claude Code**, **Codex**, **OpenCode**, and **Pi**
    - [ ] Drag-and-drop upload zone with "Drag a file here, or click to browse" text exists
    - [ ] "Upload" button exists
-   - [ ] "Upload from the command line" section with per-harness instructions (Claude Code, Codex, OpenCode) and curl examples exists
+   - [ ] "Upload from the command line" section with per-harness instructions (Claude Code, Codex, OpenCode, Pi) and curl examples exists
    - [ ] Navbar has "sessionbin" link, GitHub link, and theme toggle button
    - [ ] No console errors besides favicon 404
 
@@ -202,7 +203,34 @@ On the manage page from step 3, take a snapshot and verify:
 5. Click the Paste URL and verify the paste renders with **"codex"** harness
 6. Clean up by deleting the paste via the manage page
 
-### 15. Error Handling (unchanged from Claude Code tests)
+### 15. Pi Upload (API)
+
+1. Use curl to upload a Pi fixture without a harness parameter, so auto-detection is exercised:
+   ```
+   curl -s -F "file=@tests/fixtures/pi/2026-09-14T17-00-47-986Z_01a0a0dd-39f2-73ea-ab16-e09dcdd32d87.jsonl" http://127.0.0.1:8000/api/upload
+   ```
+2. Verify response is JSON with fields: `slug`, `url`, `delete_token`
+3. Navigate to the returned `url` in the browser
+4. Take a screenshot and verify:
+   - [ ] Session metadata header shows **"pi"** as the harness name
+   - [ ] Model name is displayed (e.g., "qwen38")
+   - [ ] One user prompt renders
+   - [ ] `read`, `write`, and `bash` tool-use blocks and their result blocks render collapsed
+   - [ ] The `read` result is marked as an error (ENOENT)
+   - [ ] Thinking blocks render collapsed with a one-line preview
+   - [ ] Final assistant text response is visible
+5. Clean up by deleting the paste via the API
+
+### 16. Pi Web Upload
+
+1. Navigate to `http://127.0.0.1:8000/`
+2. Upload a Pi fixture file (`.jsonl` from `tests/fixtures/pi/`) via the drop zone
+3. Click "Upload"
+4. Verify redirect to manage page
+5. Click the Paste URL and verify the paste renders with **"pi"** harness
+6. Clean up by deleting the paste via the manage page
+
+### 17. Error Handling (unchanged from Claude Code tests)
 
 Run these curl checks and verify the expected status codes:
 
@@ -258,4 +286,6 @@ After all sections pass, report a summary table:
 | OpenCode web upload | |
 | Codex upload (API) | |
 | Codex web upload | |
+| Pi upload (API) | |
+| Pi web upload | |
 | Error handling | |

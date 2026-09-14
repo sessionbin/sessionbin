@@ -140,6 +140,7 @@ def parse_parts(parts: list[dict]) -> list[Block]:
                 blocks.append(
                     Block(
                         kind="tool_result",
+                        tool_name=tool_name,
                         tool_use_id=call_id,
                         tool_output=output,
                         is_error=status == "error",

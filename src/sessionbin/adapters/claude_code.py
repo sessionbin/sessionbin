@@ -2,7 +2,7 @@ import json
 import logging
 import re
 
-from sessionbin.adapters.common import find_call_turn, parse_timestamp, strip_ansi
+from sessionbin.adapters.common import attach_results, find_call_turn, parse_timestamp, strip_ansi
 from sessionbin.schema.types import Block, Session, Turn
 
 ADAPTER_VERSION = 2
@@ -72,7 +72,7 @@ def parse(raw: bytes) -> Session:
         blocks = _parse_content(content, lineno)
 
         if call_turn := find_call_turn(turns, blocks):
-            call_turn.blocks.extend(blocks)
+            attach_results(call_turn, blocks)
             continue
 
         turn = Turn(

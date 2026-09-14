@@ -7,6 +7,7 @@ from sessionbin_cli.detect import (
     find_claude_sessions,
     find_codex_sessions,
     find_opencode_sessions,
+    find_pi_sessions,
     most_recent,
 )
 
@@ -68,6 +69,7 @@ def test_most_recent(tmp_path, monkeypatch):
     )
     monkeypatch.setattr("sessionbin_cli.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
     monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", tmp_path / "nonexistent")
+    monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", tmp_path / "nonexistent")
     paths = _make_project(tmp_path, "-home-user-repos-proj", ["old.jsonl", "new.jsonl"])
     os.utime(paths[0], (time.time() - 100, time.time() - 100))
     os.utime(paths[1], (time.time(), time.time()))
@@ -82,6 +84,7 @@ def test_most_recent_empty(tmp_path, monkeypatch):
     )
     monkeypatch.setattr("sessionbin_cli.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
     monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", tmp_path / "nonexistent")
+    monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", tmp_path / "nonexistent")
     (tmp_path / ".claude" / "projects").mkdir(parents=True)
     assert most_recent() is None
 
@@ -330,3 +333,86 @@ def test_codex_tolerates_malformed_file(tmp_path, monkeypatch):
 def test_codex_missing_dir(tmp_path, monkeypatch):
     monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", tmp_path / "nonexistent")
     assert find_codex_sessions() == []
+
+
+def _pi_session(
+    path, session_id="01a0", cwd="/home/user/repos/proj", name=None, prompt="Fix the bug"
+):
+    lines = [
+        {
+            "type": "session",
+            "version": 3,
+            "id": session_id,
+            "timestamp": "2026-09-14T17:00:47.986Z",
+            "cwd": cwd,
+        },
+        {
+            "type": "model_change",
+            "id": "e1",
+            "parentId": None,
+            "timestamp": "2026-09-14T17:00:48.023Z",
+            "provider": "mango",
+            "modelId": "qwen38",
+        },
+        {
+            "type": "message",
+            "id": "e2",
+            "parentId": "e1",
+            "timestamp": "2026-09-14T17:00:48.028Z",
+            "message": {"role": "user", "content": [{"type": "text", "text": prompt}]},
+        },
+    ]
+    if name is not None:
+        lines.insert(
+            1,
+            {
+                "type": "session_info",
+                "id": "e0",
+                "parentId": None,
+                "timestamp": "2026-09-14T17:00:47.986Z",
+                "name": name,
+            },
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(json.dumps(line) for line in lines) + "\n")
+    return path
+
+
+def test_pi_finds_sessions(tmp_path, monkeypatch):
+    sessions_dir = tmp_path / ".pi" / "agent" / "sessions"
+    monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", sessions_dir)
+    project_dir = sessions_dir / "--home-user-repos-proj--"
+    old = _pi_session(project_dir / "2026-09-13T10-00-00-000Z_old.jsonl", session_id="old")
+    new = _pi_session(
+        project_dir / "2026-09-14T10-00-00-000Z_new.jsonl", session_id="new", name="arithmetic"
+    )
+    os.utime(old, (time.time() - 100, time.time() - 100))
+    os.utime(new, (time.time(), time.time()))
+
+    results = find_pi_sessions()
+
+    assert [s.session_id for s in results] == ["new", "old"]
+    s = results[0]
+    assert s.harness == "pi"
+    assert s.path == new
+    assert s.project == "proj"
+    assert s.title == "arithmetic"
+    assert s.summary == "Fix the bug"
+    assert results[1].title is None
+
+
+def test_pi_skips_files_without_session_header(tmp_path, monkeypatch):
+    sessions_dir = tmp_path / ".pi" / "agent" / "sessions"
+    monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", sessions_dir)
+    project_dir = sessions_dir / "--home-user-repos-proj--"
+    _pi_session(project_dir / "real.jsonl", session_id="real")
+    project_dir.mkdir(parents=True, exist_ok=True)
+    (project_dir / "other.jsonl").write_text(json.dumps({"type": "user", "message": {}}) + "\n")
+    (project_dir / "broken.jsonl").write_text("not json\n")
+
+    assert [s.session_id for s in find_pi_sessions()] == ["real"]
+
+
+def test_pi_missing_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", tmp_path / "nonexistent")
+    assert find_pi_sessions() == []

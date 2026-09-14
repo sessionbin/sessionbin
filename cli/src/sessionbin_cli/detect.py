@@ -11,6 +11,7 @@ import platformdirs
 CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
 OPENCODE_DB_PATH = platformdirs.user_data_path("opencode") / "opencode.db"
 CODEX_SESSIONS_DIR = Path.home() / ".codex" / "sessions"
+PI_SESSIONS_DIR = Path.home() / ".pi" / "agent" / "sessions"
 
 
 @dataclass
@@ -20,7 +21,7 @@ class SessionInfo:
     project: str
     title: str | None
     summary: str | None
-    harness: Literal["claude-code", "codex", "opencode"]
+    harness: Literal["claude-code", "codex", "opencode", "pi"]
     session_id: str | None = None
     worktree: Path | None = None
 
@@ -195,8 +196,82 @@ def find_codex_sessions() -> list[SessionInfo]:
     return results
 
 
+def pi_read_metadata(path: Path) -> tuple[str | None, str | None, str | None, str | None] | None:
+    """Return (session id, cwd, name, first prompt), or None if the file is not a Pi session.
+
+    Pi validates a session by its first line, a `type: session` header, and so does this.
+    """
+    name = None
+    summary = None
+    try:
+        with open(path) as f:
+            try:
+                header = json.loads(f.readline())
+            except json.JSONDecodeError:
+                return None
+            if not isinstance(header, dict) or header.get("type") != "session":
+                return None
+            for line in f:
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    break
+                if obj.get("type") == "session_info":
+                    name = obj.get("name") or None
+                elif obj.get("type") == "message" and summary is None:
+                    summary = pi_user_text(obj.get("message"))
+    except (UnicodeDecodeError, OSError):
+        return None
+    return header.get("id"), header.get("cwd"), name, summary
+
+
+def pi_user_text(message) -> str | None:
+    if not isinstance(message, dict) or message.get("role") != "user":
+        return None
+    content = message.get("content")
+    if isinstance(content, str):
+        return content.strip() or None
+    if isinstance(content, list):
+        for part in content:
+            text = part.get("text") if isinstance(part, dict) else None
+            if isinstance(text, str) and text.strip():
+                return text.strip()
+    return None
+
+
+def find_pi_sessions() -> list[SessionInfo]:
+    if not PI_SESSIONS_DIR.is_dir():
+        return []
+    results: list[SessionInfo] = []
+    for f in PI_SESSIONS_DIR.glob("*/*.jsonl"):
+        if not f.is_file():
+            continue
+        metadata = pi_read_metadata(f)
+        if metadata is None:
+            continue
+        session_id, cwd, name, summary = metadata
+        results.append(
+            SessionInfo(
+                path=f,
+                mtime=f.stat().st_mtime,
+                project=Path(cwd).name if cwd else "-",
+                title=name,
+                summary=summary,
+                harness="pi",
+                session_id=session_id,
+            )
+        )
+    results.sort(key=lambda x: x.mtime, reverse=True)
+    return results
+
+
 Detector = Callable[[], list[SessionInfo]]
-DETECTORS: list[Detector] = [find_claude_sessions, find_opencode_sessions, find_codex_sessions]
+DETECTORS: list[Detector] = [
+    find_claude_sessions,
+    find_opencode_sessions,
+    find_codex_sessions,
+    find_pi_sessions,
+]
 
 
 def find_all_sessions() -> list[SessionInfo]:

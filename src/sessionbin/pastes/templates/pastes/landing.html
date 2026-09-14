@@ -4,7 +4,7 @@
 <h1>sessionbin</h1>
 <p class="text-muted">
     Share agentic coding session transcripts. Upload a session file, get a URL,
-    share it. Supports <strong>Claude Code</strong>, <strong>Codex</strong>, and <strong>OpenCode</strong>.
+    share it. Supports <strong>Claude Code</strong>, <strong>Codex</strong>, <strong>OpenCode</strong>, and <strong>Pi</strong>.
 </p>
 
 <form method="post" enctype="multipart/form-data" id="upload-form" data-max-size="{{ max_upload_bytes }}">
@@ -61,6 +61,13 @@
     </p>
     <pre class="shell"><code><span>opencode export &lt;sessionID&gt; &gt; session.json</span>
 <span>sessionbin upload session.json</span></code></pre>
+
+    <h3>Pi</h3>
+    <p class="text-muted">
+        Session files are stored as <code>.jsonl</code> under
+        <code>~/.pi/agent/sessions/</code>. Upload directly:
+    </p>
+    <pre class="shell"><code><span>sessionbin upload 2026-09-14T17-00-47-986Z_&lt;id&gt;.jsonl</span></code></pre>
 
     <h3>Install the CLI</h3>
     <pre class="shell"><code><span>uv tool install sessionbin</span></code></pre>

@@ -10,6 +10,8 @@ Role = Literal["user", "assistant", "system"]
 class Block:
     kind: BlockKind
     text: str | None = None
+    # Set on tool_use blocks by the adapter, and on tool_result blocks when they are
+    # attached to their call, so a result can be labelled without the call id.
     tool_name: str | None = None
     tool_input: dict | None = None
     # Free-text tool input (a script, a patch) that is not a JSON object.

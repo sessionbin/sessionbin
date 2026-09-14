@@ -61,7 +61,7 @@
 
         {% elif block.kind == "tool_result" %}
           <details class="{% if block.is_error %}tool-result-error{% endif %}">
-            <summary>{% if block.is_error %}Error: {% endif %}result{% if block.tool_use_id %} for {{ block.tool_use_id|slice:":20" }}...{% endif %}</summary>
+            <summary>{% if block.is_error %}Error: {% endif %}{% if block.tool_name %}{{ block.tool_name }} → result{% elif block.tool_use_id %}result for {{ block.tool_use_id|slice:":20" }}...{% else %}result{% endif %}</summary>
             <div class="detail-body">
               <pre>{{ block.tool_output }}</pre>
             </div>

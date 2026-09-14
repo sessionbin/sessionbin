@@ -209,6 +209,28 @@ class TestRender:
         assert "file.txt" in html
         assert "done" in html
 
+    def test_tool_result_summary_uses_tool_name(self):
+        html = self._render_turn(
+            Block(kind="tool_use", tool_name="bash", tool_input={}, tool_use_id="call_abc"),
+            Block(kind="tool_result", tool_name="bash", tool_use_id="call_abc", tool_output="ok"),
+        )
+        assert "<summary>bash → result</summary>" in html
+        assert "call_abc..." not in html
+
+    def test_tool_result_summary_falls_back_to_call_id(self):
+        html = self._render_turn(
+            Block(kind="tool_result", tool_use_id="call_abc", tool_output="ok")
+        )
+        assert "<summary>result for call_abc...</summary>" in html
+
+    def test_error_result_summary_is_prefixed(self):
+        html = self._render_turn(
+            Block(
+                kind="tool_result", tool_name="read", tool_use_id="c", tool_output="", is_error=True
+            )
+        )
+        assert "<summary>Error: read → result</summary>" in html
+
     def test_free_text_tool_input_renders_as_plain_pre(self):
         session = Session(
             harness="codex",
