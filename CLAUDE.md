@@ -93,8 +93,9 @@ For anything touching templates, CSS, upload/delete flows, or API endpoints, als
 ## Rendering notes
 
 Text and thinking blocks render markdown via `mistune` with `pygments` highlighting.
-Tool-use input is highlighted as JSON. **Tool results stay plain `<pre>`** — their output
-is arbitrary text, not always JSON.
+Tool-use input is highlighted as JSON, unless the adapter set `tool_input_text` (a script
+or patch), which renders as plain `<pre>`. **Tool results stay plain `<pre>`** — their
+output is arbitrary text, not always JSON.
 
 Pygments emits class-based output, so light (default) and dark (monokai) CSS are both
 embedded in the fragment's `<style>` block, keyed to the existing `[data-theme="dark"]`
@@ -115,6 +116,31 @@ Reverse-engineered from real files; the fixtures are the ground truth.
 - `model` comes from the first line that has it. `cwd` and `gitBranch` are deliberately
   **not** parsed: they identify the uploader's machine and nothing renders them. Timestamps are
   ISO 8601 with a `Z` suffix.
+
+### Codex (JSONL "rollout")
+
+- One file per session under `~/.codex/sessions/YYYY/MM/DD/rollout-<timestamp>-<id>.jsonl`.
+  Every line is `{"timestamp", "type", "payload"}`; the first line is `type: session_meta`,
+  which is what auto-detection keys off.
+- Only `response_item` lines become turns. `event_msg` lines duplicate the same content
+  in UI shape, and `compacted` replays history that already appeared earlier in the file;
+  the adapter keeps a list of these bookkeeping types so a new one logs a warning.
+- `payload.type` on a `response_item` is `message` (with `role`), `reasoning`,
+  `function_call`/`function_call_output` (JSON-string `arguments`), or
+  `custom_tool_call`/`custom_tool_call_output` (free-text `input`, used by the `exec`
+  tool). The free-text input goes into `Block.tool_input_text`, not `tool_input`, so the
+  script renders as plain text rather than an escaped JSON string. An output carries no
+  role; it is merged into the assistant turn holding the matching call, like OpenCode.
+- **Codex injects instructions under the user role.** Messages starting with
+  `# AGENTS.md instructions`, `<environment_context>`, `<turn_aborted>`, or `<skill>` are
+  dropped; `developer` messages are dropped entirely. `<user_shell_command>` (a `!cmd` in
+  the TUI) is kept as text.
+- Reasoning `summary` is empty on API-key auth, so thinking blocks are usually blank and
+  the renderer collapses them. Nothing marks a tool result as an error.
+- `model` comes from the first `turn_context` line. `cwd` is not parsed, matching the
+  other adapters.
+- Sub-agent rollouts (`thread_source` of `guardian_review` or `subagent`) live in the
+  same tree and parse fine, but the CLI does not list them.
 
 ### OpenCode (single JSON doc, from `opencode export`)
 

@@ -44,8 +44,8 @@ def tool_summary(value: dict | None) -> str:
 
 
 @register.filter
-def thinking_summary(text: str | None) -> str:
-    """One-line preview for a collapsed thinking block.
+def text_summary(text: str | None) -> str:
+    """One-line preview for a collapsed thinking block or free-text tool input.
 
     Mirrors tool_summary: enough to scan without expanding.
     """

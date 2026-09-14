@@ -13,6 +13,7 @@ RUN dnf install -y --setopt=install_weak_deps=False \
         python3 \
         python3.13 \
         python-unversioned-command \
+        nodejs-npm \
         gitleaks \
         tox \
         uv \
@@ -27,7 +28,7 @@ RUN dnf install -y --setopt=install_weak_deps=False \
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Agent harnesses, so a real session of every supported kind can be produced in here.
-# Neither is packaged by Fedora.
+# None of them is packaged by Fedora; Codex ships on npm, which is why nodejs is above.
 #
 # KEEP THIS IN SYNC: when the project gains support for a new harness, install that
 # harness here too, or the dev container can no longer produce a real session to test
@@ -37,6 +38,8 @@ ENV PATH="/root/.opencode/bin:${PATH}"
 
 RUN curl -fsSL https://claude.ai/install.sh | bash
 ENV PATH="/root/.local/bin:${PATH}"
+
+RUN npm install -g @openai/codex
 
 # Keep writable state out of the mounted repo so the container never leaves a database
 # or stored pastes in your checkout.

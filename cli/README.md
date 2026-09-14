@@ -6,6 +6,9 @@ CLI for uploading and managing [sessionbin](https://sessionbin.dev) transcripts.
 
 **Claude Code** sessions are read as files from `~/.claude/projects/`.
 
+**Codex** sessions are read as files from `~/.codex/sessions/`. Sub-agent rollouts (reviews,
+spawned agents) are skipped.
+
 **OpenCode** sessions live in a local SQLite database rather than as files, so uploading
 one shells out to `opencode export`. The `opencode` binary must be on your `PATH` (or at
 `~/.opencode/bin/opencode`).
@@ -28,7 +31,7 @@ Upload a specific file:
 sessionbin upload ~/.claude/projects/-home-user-repos-myproject/abc123.jsonl
 ```
 
-Or pick from recent sessions interactively (Claude Code and OpenCode):
+Or pick from recent sessions interactively (Claude Code, Codex, and OpenCode):
 
 ```bash
 sessionbin upload

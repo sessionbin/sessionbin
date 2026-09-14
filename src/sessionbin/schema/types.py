@@ -12,6 +12,8 @@ class Block:
     text: str | None = None
     tool_name: str | None = None
     tool_input: dict | None = None
+    # Free-text tool input (a script, a patch) that is not a JSON object.
+    tool_input_text: str | None = None
     tool_use_id: str | None = None
     tool_output: str | None = None
     is_error: bool = False

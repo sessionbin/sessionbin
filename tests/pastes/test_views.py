@@ -42,7 +42,7 @@ class TestUploadEndpoint:
         assert resp.status_code == 400
         data = resp.json()
         assert data["error"] == "unknown harness: bogus"
-        assert data["valid"] == ["claude-code", "opencode"]
+        assert data["valid"] == ["claude-code", "codex", "opencode"]
 
     def test_explicit_harness_accepted(self, client, fixture_bytes):
         resp = client.post("/api/upload?harness=claude-code", {"file": _as_upload(fixture_bytes)})

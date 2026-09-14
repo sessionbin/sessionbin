@@ -1,10 +1,11 @@
 import json
 
-from sessionbin.adapters import claude_code, opencode
+from sessionbin.adapters import claude_code, codex, opencode
 from sessionbin.schema.types import Session
 
 ADAPTERS: dict[str, tuple] = {
     "claude-code": (claude_code.parse, claude_code.ADAPTER_VERSION),
+    "codex": (codex.parse, codex.ADAPTER_VERSION),
     "opencode": (opencode.parse, opencode.ADAPTER_VERSION),
 }
 
@@ -19,6 +20,13 @@ def parse(raw: bytes, harness: str | None = None) -> tuple[Session, int]:
 def auto_detect(raw: bytes) -> tuple[Session, int]:
     stripped = raw.lstrip()
     if stripped.startswith(b"{"):
+        first_line = stripped.split(b"\n", 1)[0]
+        try:
+            head = json.loads(first_line)
+        except json.JSONDecodeError:
+            head = None
+        if isinstance(head, dict) and head.get("type") == "session_meta":
+            return codex.parse(raw), codex.ADAPTER_VERSION
         try:
             doc = json.loads(raw)
         except json.JSONDecodeError:

@@ -209,6 +209,31 @@ class TestRender:
         assert "file.txt" in html
         assert "done" in html
 
+    def test_free_text_tool_input_renders_as_plain_pre(self):
+        session = Session(
+            harness="codex",
+            turns=[
+                Turn(
+                    index=0,
+                    role="assistant",
+                    timestamp=None,
+                    blocks=[
+                        Block(
+                            kind="tool_use",
+                            tool_name="exec",
+                            tool_input_text="const r = 1;\ntext(r);",
+                            tool_use_id="c1",
+                        )
+                    ],
+                )
+            ],
+        )
+        html = render(session)
+        assert "<summary>exec(const r = 1;)</summary>" in html
+        assert "<pre>const r = 1;\ntext(r);</pre>" in html
+        body = html.split("</summary>", 1)[1].split("</details>", 1)[0]
+        assert "highlight" not in body
+
     def test_text_block_renders_markdown(self):
         session = Session(
             harness="claude-code",

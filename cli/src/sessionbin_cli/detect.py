@@ -10,6 +10,7 @@ import platformdirs
 
 CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
 OPENCODE_DB_PATH = platformdirs.user_data_path("opencode") / "opencode.db"
+CODEX_SESSIONS_DIR = Path.home() / ".codex" / "sessions"
 
 
 @dataclass
@@ -19,7 +20,7 @@ class SessionInfo:
     project: str
     title: str | None
     summary: str | None
-    harness: Literal["claude-code", "opencode"]
+    harness: Literal["claude-code", "codex", "opencode"]
     session_id: str | None = None
     worktree: Path | None = None
 
@@ -134,8 +135,68 @@ def find_opencode_sessions() -> list[SessionInfo]:
     return results
 
 
+def codex_read_metadata(path: Path) -> tuple[str | None, str | None, str | None] | None:
+    """Return (session id, cwd, first prompt) for a rollout, or None for a sub-agent rollout.
+
+    Sub-agent rollouts (guardian reviews, spawned agents) sit in the same tree with a
+    non-user thread_source; they are pieces of another session, so they are not listed.
+    """
+    session_id = None
+    cwd = None
+    summary = None
+    try:
+        with open(path) as f:
+            for line in f:
+                obj = json.loads(line)
+                payload = obj.get("payload")
+                if not isinstance(payload, dict):
+                    continue
+                if obj.get("type") == "session_meta":
+                    if payload.get("thread_source") not in (None, "user"):
+                        return None
+                    session_id = payload.get("id")
+                    cwd = payload.get("cwd")
+                elif obj.get("type") == "response_item" and payload.get("role") == "user":
+                    for part in payload.get("content", []):
+                        text = (part.get("text") or "").strip() if isinstance(part, dict) else ""
+                        if text and not text.startswith(("<", "# AGENTS.md")):
+                            summary = text
+                            break
+                if summary is not None:
+                    break
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+        pass
+    return session_id, cwd, summary
+
+
+def find_codex_sessions() -> list[SessionInfo]:
+    if not CODEX_SESSIONS_DIR.is_dir():
+        return []
+    results: list[SessionInfo] = []
+    for f in CODEX_SESSIONS_DIR.rglob("*.jsonl"):
+        if not f.is_file():
+            continue
+        metadata = codex_read_metadata(f)
+        if metadata is None:
+            continue
+        session_id, cwd, summary = metadata
+        results.append(
+            SessionInfo(
+                path=f,
+                mtime=f.stat().st_mtime,
+                project=Path(cwd).name if cwd else "-",
+                title=None,
+                summary=summary,
+                harness="codex",
+                session_id=session_id,
+            )
+        )
+    results.sort(key=lambda x: x.mtime, reverse=True)
+    return results
+
+
 Detector = Callable[[], list[SessionInfo]]
-DETECTORS: list[Detector] = [find_claude_sessions, find_opencode_sessions]
+DETECTORS: list[Detector] = [find_claude_sessions, find_opencode_sessions, find_codex_sessions]
 
 
 def find_all_sessions() -> list[SessionInfo]:

@@ -3,7 +3,12 @@ import os
 import sqlite3
 import time
 
-from sessionbin_cli.detect import find_claude_sessions, find_opencode_sessions, most_recent
+from sessionbin_cli.detect import (
+    find_claude_sessions,
+    find_codex_sessions,
+    find_opencode_sessions,
+    most_recent,
+)
 
 
 def _make_project(tmp_path, name, files):
@@ -62,6 +67,7 @@ def test_most_recent(tmp_path, monkeypatch):
         "sessionbin_cli.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects"
     )
     monkeypatch.setattr("sessionbin_cli.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
+    monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", tmp_path / "nonexistent")
     paths = _make_project(tmp_path, "-home-user-repos-proj", ["old.jsonl", "new.jsonl"])
     os.utime(paths[0], (time.time() - 100, time.time() - 100))
     os.utime(paths[1], (time.time(), time.time()))
@@ -75,6 +81,7 @@ def test_most_recent_empty(tmp_path, monkeypatch):
         "sessionbin_cli.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects"
     )
     monkeypatch.setattr("sessionbin_cli.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
+    monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", tmp_path / "nonexistent")
     (tmp_path / ".claude" / "projects").mkdir(parents=True)
     assert most_recent() is None
 
@@ -223,3 +230,103 @@ def test_opencode_empty_db(tmp_path, monkeypatch):
 def test_opencode_missing_db(tmp_path, monkeypatch):
     monkeypatch.setattr("sessionbin_cli.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
     assert find_opencode_sessions() == []
+
+
+def _codex_rollout(path, session_id="01a0", cwd="/home/user/repos/proj", thread_source="user"):
+    def user_message(text):
+        return {
+            "timestamp": "2026-09-14T14:20:38.644Z",
+            "type": "response_item",
+            "payload": {
+                "type": "message",
+                "role": "user",
+                "content": [{"type": "input_text", "text": text}],
+            },
+        }
+
+    lines = [
+        {
+            "timestamp": "2026-09-14T14:20:37.188Z",
+            "type": "session_meta",
+            "payload": {"id": session_id, "cwd": cwd, "thread_source": thread_source},
+        },
+        {
+            "timestamp": "2026-09-14T14:20:38.644Z",
+            "type": "response_item",
+            "payload": {
+                "type": "message",
+                "role": "developer",
+                "content": [{"type": "input_text", "text": "<skills_instructions>..."}],
+            },
+        },
+        user_message("# AGENTS.md instructions for /home/user/repos/proj"),
+        user_message("<environment_context>...</environment_context>"),
+        user_message("Fix the bug"),
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(json.dumps(line) for line in lines) + "\n")
+    return path
+
+
+def test_codex_finds_sessions(tmp_path, monkeypatch):
+    sessions_dir = tmp_path / ".codex" / "sessions"
+    monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", sessions_dir)
+    old = _codex_rollout(
+        sessions_dir / "2026" / "09" / "13" / "rollout-old.jsonl", session_id="old"
+    )
+    new = _codex_rollout(
+        sessions_dir / "2026" / "09" / "14" / "rollout-new.jsonl", session_id="new"
+    )
+    os.utime(old, (time.time() - 100, time.time() - 100))
+    os.utime(new, (time.time(), time.time()))
+
+    results = find_codex_sessions()
+
+    assert [s.session_id for s in results] == ["new", "old"]
+    s = results[0]
+    assert s.harness == "codex"
+    assert s.path == new
+    assert s.project == "proj"
+    assert s.title is None
+    assert s.summary == "Fix the bug"
+
+
+def test_codex_skips_subagent_rollouts(tmp_path, monkeypatch):
+    sessions_dir = tmp_path / ".codex" / "sessions"
+    monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", sessions_dir)
+    _codex_rollout(sessions_dir / "2026" / "09" / "14" / "rollout-main.jsonl", session_id="main")
+    _codex_rollout(
+        sessions_dir / "2026" / "09" / "14" / "rollout-sub.jsonl",
+        session_id="sub",
+        thread_source="guardian_review",
+    )
+
+    results = find_codex_sessions()
+
+    assert [s.session_id for s in results] == ["main"]
+
+
+def test_codex_lists_rollout_without_thread_source(tmp_path, monkeypatch):
+    sessions_dir = tmp_path / ".codex" / "sessions"
+    monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", sessions_dir)
+    _codex_rollout(sessions_dir / "rollout-old-version.jsonl", session_id="v", thread_source=None)
+
+    assert [s.session_id for s in find_codex_sessions()] == ["v"]
+
+
+def test_codex_tolerates_malformed_file(tmp_path, monkeypatch):
+    sessions_dir = tmp_path / ".codex" / "sessions"
+    monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", sessions_dir)
+    sessions_dir.mkdir(parents=True)
+    (sessions_dir / "rollout-broken.jsonl").write_text("not json\n")
+
+    results = find_codex_sessions()
+
+    assert len(results) == 1
+    assert results[0].summary is None
+    assert results[0].project == "-"
+
+
+def test_codex_missing_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", tmp_path / "nonexistent")
+    assert find_codex_sessions() == []

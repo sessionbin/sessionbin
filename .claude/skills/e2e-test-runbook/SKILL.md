@@ -30,9 +30,10 @@ Run everything below from the repo root, on the host. The container mounts the c
 
 The database and stored pastes live in `/state` inside the container, so a fresh container starts empty and nothing lands in the checkout.
 
-**Fixture files:** This runbook uses checked-in fixtures only. Do not run `claude` or `opencode` inside the container to capture a fresh session — that needs credentials the runbook does not have and must not go looking for. curl runs on the host, so fixture paths are repo-relative. Use fixtures from both harnesses:
+**Fixture files:** This runbook uses checked-in fixtures only. Do not run `claude`, `codex`, or `opencode` inside the container to capture a fresh session — that needs credentials the runbook does not have and must not go looking for. curl runs on the host, so fixture paths are repo-relative. Use fixtures from every harness:
 - `tests/fixtures/claude_code/*.jsonl` — Claude Code sessions (JSONL). Need at least two (one for web upload, one for API upload).
 - `tests/fixtures/opencode/*.json` — OpenCode sessions (JSON). Need at least one.
+- `tests/fixtures/codex/*.jsonl` — Codex sessions (JSONL rollouts). Need at least one.
 
 ## Test Procedure
 
@@ -44,10 +45,10 @@ Work through each section in order. Record pass/fail for every check. Stop and r
 2. Take a snapshot and verify:
    - [ ] Page title is "sessionbin"
    - [ ] Heading "sessionbin" is visible
-   - [ ] Description text about sharing transcripts is present, mentioning **Claude Code** and **OpenCode**
+   - [ ] Description text about sharing transcripts is present, mentioning **Claude Code**, **Codex**, and **OpenCode**
    - [ ] Drag-and-drop upload zone with "Drag a file here, or click to browse" text exists
    - [ ] "Upload" button exists
-   - [ ] "Upload from the command line" section with per-harness instructions (Claude Code, OpenCode) and curl examples exists
+   - [ ] "Upload from the command line" section with per-harness instructions (Claude Code, Codex, OpenCode) and curl examples exists
    - [ ] Navbar has "sessionbin" link, GitHub link, and theme toggle button
    - [ ] No console errors besides favicon 404
 
@@ -175,7 +176,33 @@ On the manage page from step 3, take a snapshot and verify:
 5. Click the Paste URL and verify the paste renders with **"opencode"** harness
 6. Clean up by deleting the paste via the manage page
 
-### 13. Error Handling (unchanged from Claude Code tests)
+### 13. Codex Upload (API)
+
+1. Use curl to upload a Codex fixture without a harness parameter, so auto-detection is exercised:
+   ```
+   curl -s -F "file=@tests/fixtures/codex/rollout-2026-09-14T10-20-48-01a0a04a-bfb2-7e12-8e42-9bdd2783d9d2.jsonl" http://127.0.0.1:8000/api/upload
+   ```
+2. Verify response is JSON with fields: `slug`, `url`, `delete_token`
+3. Navigate to the returned `url` in the browser
+4. Take a screenshot and verify:
+   - [ ] Session metadata header shows **"codex"** as the harness name
+   - [ ] Model name is displayed (e.g., "gpt-5.6-luna")
+   - [ ] Two user prompts render (the second was a resumed turn)
+   - [ ] `exec` tool-use blocks and their result blocks render collapsed
+   - [ ] Blank reasoning collapses to a one-line "thinking" row, not an empty card
+   - [ ] Final assistant text response is visible
+5. Clean up by deleting the paste via the API
+
+### 14. Codex Web Upload
+
+1. Navigate to `http://127.0.0.1:8000/`
+2. Upload a Codex fixture file (`.jsonl` from `tests/fixtures/codex/`) via the drop zone
+3. Click "Upload"
+4. Verify redirect to manage page
+5. Click the Paste URL and verify the paste renders with **"codex"** harness
+6. Clean up by deleting the paste via the manage page
+
+### 15. Error Handling (unchanged from Claude Code tests)
 
 Run these curl checks and verify the expected status codes:
 
@@ -229,4 +256,6 @@ After all sections pass, report a summary table:
 | OpenCode upload with harness param | |
 | Invalid harness parameter | |
 | OpenCode web upload | |
+| Codex upload (API) | |
+| Codex web upload | |
 | Error handling | |

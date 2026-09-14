@@ -26,6 +26,8 @@ console script is what they actually invoke.
   not as files, so `upload` runs `opencode export <id>` to get JSON. The binary must be
   on `PATH` (or at `~/.opencode/bin/opencode`), otherwise OpenCode uploads fail even
   though discovery succeeded.
+- **Codex sessions are plain files** under `~/.codex/sessions/`, uploaded as-is like Claude
+  Code. The detector skips rollouts whose `thread_source` is not `user` (sub-agents).
 - `detect.py`'s `DETECTORS` list is the extension point for new harnesses.
 
 ## Commands
