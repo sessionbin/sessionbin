@@ -108,11 +108,16 @@ Reverse-engineered from real files; the fixtures are the ground truth.
 ### Claude Code (JSONL)
 
 - One JSON object per line, `type` selects the kind. Only `user` and `assistant` become
-  turns — `system`, `attachment`, `file-history-snapshot`, `last-prompt`, and
-  `permission-mode` are skipped.
+  turns; everything else is bookkeeping. The adapter keeps a list of known bookkeeping
+  types so that a genuinely new type logs a warning. New Claude Code releases add types
+  regularly, so when uploads start warning, extend the list rather than the parser.
+- User lines with `isMeta: true` are harness-injected (the local-command caveat, skill
+  bodies, `[Image: source: ...]` records, context-usage output) and are skipped.
 - `message.content` is either a plain string (user prompts) or a list of blocks.
 - Thinking blocks use the `thinking` key, not `text`.
-- Each assistant line carries exactly one content block, so one line is one turn.
+- Each assistant line carries exactly one content block, so one line is one turn. The
+  exception is a user line holding only `tool_result` blocks for the preceding assistant
+  turn's calls: it is merged into that turn so a call and its result render together.
 - `model` comes from the first line that has it. `cwd` and `gitBranch` are deliberately
   **not** parsed: they identify the uploader's machine and nothing renders them. Timestamps are
   ISO 8601 with a `Z` suffix.
@@ -130,7 +135,8 @@ Reverse-engineered from real files; the fixtures are the ground truth.
   `custom_tool_call`/`custom_tool_call_output` (free-text `input`, used by the `exec`
   tool). The free-text input goes into `Block.tool_input_text`, not `tool_input`, so the
   script renders as plain text rather than an escaped JSON string. An output carries no
-  role; it is merged into the assistant turn holding the matching call, like OpenCode.
+  role; it is merged into the assistant turn holding the matching call, as in the other
+  adapters.
 - **Codex injects instructions under the user role.** Messages starting with
   `# AGENTS.md instructions`, `<environment_context>`, `<turn_aborted>`, or `<skill>` are
   dropped; `developer` messages are dropped entirely. `<user_shell_command>` (a `!cmd` in

@@ -5,7 +5,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from sessionbin.adapters import parse as adapter_parse
-from sessionbin.pastes.render import render
+from sessionbin.pastes.models import Paste
+from sessionbin.pastes.render import RENDERER_VERSION, render
 
 
 class Command(BaseCommand):
@@ -41,6 +42,20 @@ class Command(BaseCommand):
 
     def _render_file(self, src: Path, dest: Path) -> None:
         raw = gzip.decompress(src.read_bytes())
-        session, _ = adapter_parse(raw)
+        paste = Paste.objects.filter(slug=dest.stem).first()
+        session, adapter_version = adapter_parse(raw, harness=paste.harness if paste else None)
         dest.write_text(render(session))
+        if paste:
+            paste.renderer_version = RENDERER_VERSION
+            paste.adapter_version = adapter_version
+            paste.turn_count = session.turn_count
+            paste.tool_call_count = session.tool_call_count
+            paste.save(
+                update_fields=[
+                    "renderer_version",
+                    "adapter_version",
+                    "turn_count",
+                    "tool_call_count",
+                ]
+            )
         self.stderr.write(f"  {dest.name}\n")

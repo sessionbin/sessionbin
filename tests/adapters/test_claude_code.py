@@ -3,13 +3,8 @@ from collections import Counter
 
 import pytest
 
-from sessionbin.adapters.claude_code import (
-    _parse_content,
-    _parse_timestamp,
-    _process_user_text,
-    _strip_ansi,
-    parse,
-)
+from sessionbin.adapters.claude_code import _parse_content, _process_user_text, parse
+from sessionbin.adapters.common import parse_timestamp, strip_ansi
 
 
 def _jsonl(*objs: dict) -> bytes:
@@ -47,18 +42,21 @@ class TestParse:
         assert session.turns[1].role == "assistant"
         assert session.turns[1].index == 1
 
-    def test_skipped_types_produce_no_turns(self):
+    def test_skipped_types_produce_no_turns(self, caplog):
         skipped = [
             "system",
             "attachment",
             "file-history-snapshot",
             "last-prompt",
             "permission-mode",
+            "atis-latch",
+            "cost-state",
         ]
         lines = [{"type": t} for t in skipped]
         raw = _jsonl(*lines)
         session = parse(raw)
         assert len(session.turns) == 0
+        assert "unknown type" not in caplog.text
 
     def test_unknown_type_warns(self, caplog):
         raw = _jsonl({"type": "bogus"})
@@ -97,18 +95,93 @@ class TestParse:
         assert "malformed JSON" in caplog.text
 
 
+class TestMetaMessages:
+    @pytest.mark.parametrize(
+        "content",
+        [
+            [{"type": "text", "text": "[Image: source: /home/alice/.claude/image-cache/x/1.png]"}],
+            "Base directory for this skill: /home/alice/.claude/skills/deploy",
+            "## Context Usage\n\n**Model:** claude-opus-5",
+        ],
+    )
+    def test_meta_user_lines_skipped(self, content):
+        session = parse(_jsonl(_user_line(content=content, isMeta=True, turnCompanion=True)))
+        assert session.turns == []
+
+    def test_non_meta_user_line_with_same_text_kept(self):
+        raw = _jsonl(_user_line(content="Base directory for this skill: /x"))
+        assert len(parse(raw).turns) == 1
+
+
+class TestToolResultMerging:
+    def test_result_joins_the_turn_that_made_the_call(self):
+        call = _assistant_line(
+            content=[{"type": "tool_use", "name": "Bash", "input": {"cmd": "ls"}, "id": "t1"}]
+        )
+        result = _user_line(content=[{"type": "tool_result", "content": "ok", "tool_use_id": "t1"}])
+        session = parse(_jsonl(_user_line(), call, result, _assistant_line()))
+        assert [t.role for t in session.turns] == ["user", "assistant", "assistant"]
+        assert [b.kind for b in session.turns[1].blocks] == ["tool_use", "tool_result"]
+        assert [t.index for t in session.turns] == [0, 1, 2]
+
+    def test_parallel_calls_each_get_their_result(self):
+        call_a = _assistant_line(
+            content=[{"type": "tool_use", "name": "Read", "input": {"f": "a"}, "id": "ta"}]
+        )
+        call_b = _assistant_line(
+            content=[{"type": "tool_use", "name": "Read", "input": {"f": "b"}, "id": "tb"}]
+        )
+        result_a = _user_line(
+            content=[{"type": "tool_result", "content": "A", "tool_use_id": "ta"}]
+        )
+        result_b = _user_line(
+            content=[{"type": "tool_result", "content": "B", "tool_use_id": "tb"}]
+        )
+        session = parse(_jsonl(_user_line(), call_a, call_b, result_a, result_b))
+        assert [t.role for t in session.turns] == ["user", "assistant", "assistant"]
+        assert [b.tool_output for b in session.turns[1].blocks if b.kind == "tool_result"] == ["A"]
+        assert [b.tool_output for b in session.turns[2].blocks if b.kind == "tool_result"] == ["B"]
+
+    def test_result_without_id_stays_a_user_turn(self):
+        call = _assistant_line(content=[{"type": "tool_use", "name": "Bash", "input": {}}])
+        result = _user_line(content=[{"type": "tool_result", "content": "ok"}])
+        session = parse(_jsonl(call, result))
+        assert [t.role for t in session.turns] == ["assistant", "user"]
+
+    def test_result_for_a_different_call_stays_a_user_turn(self):
+        call = _assistant_line(
+            content=[{"type": "tool_use", "name": "Bash", "input": {"cmd": "ls"}, "id": "t1"}]
+        )
+        result = _user_line(content=[{"type": "tool_result", "content": "ok", "tool_use_id": "t9"}])
+        session = parse(_jsonl(call, result))
+        assert [t.role for t in session.turns] == ["assistant", "user"]
+
+    def test_result_mixed_with_text_stays_a_user_turn(self):
+        call = _assistant_line(
+            content=[{"type": "tool_use", "name": "Bash", "input": {"cmd": "ls"}, "id": "t1"}]
+        )
+        result = _user_line(
+            content=[
+                {"type": "tool_result", "content": "ok", "tool_use_id": "t1"},
+                {"type": "text", "text": "and also do this"},
+            ]
+        )
+        session = parse(_jsonl(call, result))
+        assert [t.role for t in session.turns] == ["assistant", "user"]
+
+
 class TestParseTimestamp:
     def test_valid_iso_z(self):
-        ts = _parse_timestamp("2026-05-01T10:00:00.000Z")
+        ts = parse_timestamp("2026-05-01T10:00:00.000Z")
         assert ts is not None
         assert ts.year == 2026
         assert ts.tzinfo is not None
 
     def test_none(self):
-        assert _parse_timestamp(None) is None
+        assert parse_timestamp(None) is None
 
     def test_invalid(self):
-        assert _parse_timestamp("not-a-date") is None
+        assert parse_timestamp("not-a-date") is None
 
 
 class TestParseContent:
@@ -207,16 +280,19 @@ class TestProcessUserText:
 
 class TestStripAnsi:
     def test_strips_bold(self):
-        assert _strip_ansi("\x1b[1mOpus 4.6\x1b[22m") == "Opus 4.6"
+        assert strip_ansi("\x1b[1mOpus 4.6\x1b[22m") == "Opus 4.6"
 
     def test_strips_color(self):
-        assert _strip_ansi("\x1b[32mgreen\x1b[0m") == "green"
+        assert strip_ansi("\x1b[32mgreen\x1b[0m") == "green"
 
     def test_no_ansi_unchanged(self):
-        assert _strip_ansi("plain text") == "plain text"
+        assert strip_ansi("plain text") == "plain text"
 
     def test_multiple_sequences(self):
-        assert _strip_ansi("\x1b[1m\x1b[31mred bold\x1b[0m") == "red bold"
+        assert strip_ansi("\x1b[1m\x1b[31mred bold\x1b[0m") == "red bold"
+
+    def test_strips_terminal_title(self):
+        assert strip_ansi("\x1b]0;demo\x07output") == "output"
 
 
 class TestAnsiStrippingIntegration:
