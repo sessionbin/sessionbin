@@ -4,13 +4,14 @@ import logging
 from sessionbin.adapters.common import attach_results, find_call_turn, parse_timestamp, strip_ansi
 from sessionbin.schema.types import Block, Role, Session, Turn
 
-ADAPTER_VERSION = 1
+ADAPTER_VERSION = 2
 
 logger = logging.getLogger(__name__)
 
 SKIPPED_ENTRY_TYPES = frozenset(
     {
         "session",
+        "model_change",
         "thinking_level_change",
         "session_info",
         "label",
@@ -37,11 +38,7 @@ def parse(raw: bytes) -> Session:
 
         entry_type = obj.get("type")
 
-        if entry_type == "model_change":
-            if session.model is None and obj.get("modelId"):
-                session.model = obj["modelId"]
-            continue
-
+        model = None
         if entry_type == "custom_message":
             parsed = parse_custom(obj, lineno)
         elif entry_type == "message":
@@ -49,8 +46,7 @@ def parse(raw: bytes) -> Session:
             if not isinstance(message, dict):
                 logger.warning("skipping line %d without a message", lineno)
                 continue
-            if session.model is None and message.get("role") == "assistant":
-                session.model = message.get("model") or None
+            model = message.get("model")
             parsed = parse_message(message, lineno)
         else:
             if entry_type not in SKIPPED_ENTRY_TYPES:
@@ -68,6 +64,7 @@ def parse(raw: bytes) -> Session:
                 role=role,
                 timestamp=parse_timestamp(obj.get("timestamp")),
                 blocks=blocks,
+                model=model if role == "assistant" else None,
             )
         )
 

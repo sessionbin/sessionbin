@@ -35,7 +35,7 @@ def _user_msg(text="hello", msg_id="msg_u1"):
     }
 
 
-def _assistant_msg(parts, parent_id="msg_u1", msg_id="msg_a1"):
+def _assistant_msg(parts, parent_id="msg_u1", msg_id="msg_a1", model="claude-sonnet-4-6"):
     return {
         "info": {
             "id": msg_id,
@@ -43,7 +43,7 @@ def _assistant_msg(parts, parent_id="msg_u1", msg_id="msg_a1"):
             "role": "assistant",
             "parentID": parent_id,
             "time": {"created": 1700000001000, "completed": 1700000002000},
-            "modelID": "claude-sonnet-4-6",
+            "modelID": model,
             "providerID": "test",
             "finish": "stop",
         },
@@ -62,13 +62,33 @@ class TestParse:
         assert session.turns[1].role == "assistant"
         assert session.turns[1].index == 1
 
-    def test_metadata(self):
-        raw = _export(
-            info_overrides={"model": {"id": "claude-opus-4"}, "directory": "/work"},
-            messages=[_user_msg()],
-        )
+    def test_model_from_assistant_message(self):
+        raw = _export(messages=[_user_msg(), _assistant_msg([{"type": "text", "text": "hi"}])])
         session = parse(raw)
-        assert session.model == "claude-opus-4"
+        assert session.models == ["claude-sonnet-4-6"]
+        assert session.turns[1].model == "claude-sonnet-4-6"
+
+    def test_selected_model_that_produced_nothing_is_not_reported(self):
+        raw = _export(
+            info_overrides={"model": {"id": "claude-opus-4"}},
+            messages=[_user_msg(), _assistant_msg([{"type": "text", "text": "hi"}])],
+        )
+        assert parse(raw).models == ["claude-sonnet-4-6"]
+
+    def test_models_are_listed_in_order_of_first_use(self):
+        raw = _export(
+            messages=[
+                _user_msg(msg_id="msg_u1"),
+                _assistant_msg([{"type": "text", "text": "hi"}], model="big-pickle"),
+                _user_msg(text="again", msg_id="msg_u2"),
+                _assistant_msg(
+                    [{"type": "text", "text": "hi again"}],
+                    parent_id="msg_u2",
+                    msg_id="msg_a2",
+                ),
+            ],
+        )
+        assert parse(raw).models == ["big-pickle", "claude-sonnet-4-6"]
 
     def test_empty_messages(self):
         raw = _export(messages=[])

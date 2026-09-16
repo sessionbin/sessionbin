@@ -10,7 +10,11 @@ from sessionbin.pastes.services import create_paste_from_upload
 def test_render_refreshes_paste_stats(fixture_bytes):
     paste, _ = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
     Paste.objects.filter(slug=paste.slug).update(
-        turn_count=999, tool_call_count=999, renderer_version=1, adapter_version=1
+        turn_count=999,
+        tool_call_count=999,
+        renderer_version=1,
+        adapter_version=1,
+        session_model="stale-model",
     )
 
     call_command("render", paste.slug)
@@ -19,4 +23,5 @@ def test_render_refreshes_paste_stats(fixture_bytes):
     assert paste.turn_count != 999
     assert paste.tool_call_count != 999
     assert paste.renderer_version == RENDERER_VERSION
-    assert paste.adapter_version == 2
+    assert paste.adapter_version == 3
+    assert paste.session_model == "claude-sonnet-4-20250514"

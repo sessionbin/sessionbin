@@ -114,6 +114,13 @@
   font-family: var(--t-mono);
 }
 
+.transcript .turn-model {
+  color: var(--t-muted);
+  font-size: 0.6875rem;
+  font-family: var(--t-mono);
+  word-break: break-all;
+}
+
 .transcript .turn-body { padding: 0.5rem 0.75rem; }
 
 .transcript .block { margin-bottom: 0.5rem; }

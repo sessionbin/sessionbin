@@ -37,10 +37,12 @@ def _user_line(text="hello", timestamp="2026-05-01T10:00:00.000Z") -> dict:
     return _message({"role": "user", "content": [{"type": "text", "text": text}]}, timestamp)
 
 
-def _assistant_line(content: list | None = None, timestamp="2026-05-01T10:00:05.000Z") -> dict:
+def _assistant_line(
+    content: list | None = None, timestamp="2026-05-01T10:00:05.000Z", model="qwen38"
+) -> dict:
     if content is None:
         content = [{"type": "text", "text": "hi"}]
-    message = {"role": "assistant", "content": content, "model": "qwen38", "stopReason": "stop"}
+    message = {"role": "assistant", "content": content, "model": model, "stopReason": "stop"}
     return _message(message, timestamp)
 
 
@@ -75,16 +77,38 @@ class TestParse:
         assert session.turns[1].role == "assistant"
         assert session.turns[1].index == 1
 
-    def test_model_from_first_model_change(self):
-        raw = _jsonl(_header(), _model_change("qwen38"), _user_line(), _model_change("gpt-5.6"))
-        assert parse(raw).model == "qwen38"
+    def test_model_from_assistant_message(self):
+        raw = _jsonl(_header(), _model_change("qwen38"), _user_line(), _assistant_line())
+        session = parse(raw)
+        assert session.models == ["qwen38"]
+        assert session.turns[1].model == "qwen38"
 
-    def test_model_falls_back_to_assistant_message(self):
-        raw = _jsonl(_header(), _user_line(), _assistant_line())
-        assert parse(raw).model == "qwen38"
+    def test_model_selected_but_never_used_is_not_reported(self):
+        """Pi records the startup default before the user has had a chance to switch."""
+        raw = _jsonl(
+            _header(),
+            _model_change("gpt-5.6"),
+            _model_change("qwen38"),
+            _user_line(),
+            _assistant_line(),
+        )
+        assert parse(raw).models == ["qwen38"]
 
-    def test_no_model_anywhere_leaves_model_unset(self):
-        assert parse(_jsonl(_header(), _user_line())).model is None
+    def test_models_are_listed_in_order_of_first_use(self):
+        raw = _jsonl(
+            _header(),
+            _user_line(),
+            _assistant_line(model="qwen38"),
+            _user_line("again"),
+            _assistant_line(model="gpt-5.6"),
+            _user_line("third"),
+            _assistant_line(model="qwen38"),
+        )
+        assert parse(raw).models == ["qwen38", "gpt-5.6"]
+
+    def test_no_assistant_message_leaves_model_unset(self):
+        raw = _jsonl(_header(), _model_change("qwen38"), _user_line())
+        assert parse(raw).model is None
 
     def test_bookkeeping_entries_produce_no_turns(self):
         lines = [
@@ -388,6 +412,14 @@ class TestFixtureDetails:
         session = parse((pi_fixtures_dir / fixture).read_bytes())
         assert [t.role for t in session.turns] == ["user", "assistant"]
         assert [b.kind for b in session.turns[1].blocks] == ["thinking", "text"]
+
+    def test_startup_model_change_is_not_reported_when_the_user_switched_first(
+        self, pi_fixtures_dir
+    ):
+        """Pi logs the default model at startup, here switched away from before any prompt."""
+        fixture = "2026-09-16T15-55-54-213Z_01a0aaee-87e5-7a41-8f78-5d772f26fa83.jsonl"
+        session = parse((pi_fixtures_dir / fixture).read_bytes())
+        assert session.models == ["nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16"]
 
     def test_aborted_session_keeps_only_the_prompt(self, pi_fixtures_dir):
         fixture = "2026-09-01T19-27-01-466Z_01a05e70-6d5a-706e-b84c-94bd628d450d.jsonl"

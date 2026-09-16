@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from sessionbin.schema.types import Block, Session, Turn
 
-ADAPTER_VERSION = 1
+ADAPTER_VERSION = 2
 
 logger = logging.getLogger(__name__)
 
@@ -14,17 +14,7 @@ def parse(raw: bytes) -> Session:
 
 
 def parse_doc(doc: dict) -> Session:
-    info = doc["info"]
-
-    model = None
-    model_obj = info.get("model")
-    if isinstance(model_obj, dict):
-        model = model_obj.get("id")
-
-    session = Session(
-        harness="opencode",
-        model=model,
-    )
+    session = Session(harness="opencode")
 
     turns: list[Turn] = []
     messages = doc.get("messages", [])
@@ -88,6 +78,7 @@ def parse_doc(doc: dict) -> Session:
                 timestamp=timestamp,
                 blocks=blocks,
                 ended_at=completed,
+                model=msg_info.get("modelID"),
             )
             turns.append(turn)
 

@@ -4,7 +4,7 @@ import logging
 from sessionbin.adapters.common import attach_results, find_call_turn, parse_timestamp, strip_ansi
 from sessionbin.schema.types import Block, Role, Session, Turn
 
-ADAPTER_VERSION = 1
+ADAPTER_VERSION = 2
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,9 @@ SKIPPED_LINE_TYPES = frozenset(
 def parse(raw: bytes) -> Session:
     session = Session(harness="codex")
     turns: list[Turn] = []
+    # Codex records the model on its own line rather than on each response item, so the
+    # most recent turn_context is what generated the turns that follow it.
+    current_model: str | None = None
 
     for lineno, line in enumerate(raw.splitlines(), start=1):
         line = line.strip()
@@ -47,8 +50,8 @@ def parse(raw: bytes) -> Session:
             continue
 
         if line_type == "turn_context":
-            if session.model is None and payload.get("model"):
-                session.model = payload["model"]
+            if payload.get("model"):
+                current_model = payload["model"]
             continue
 
         if line_type != "response_item":
@@ -69,6 +72,7 @@ def parse(raw: bytes) -> Session:
                 role=role,
                 timestamp=parse_timestamp(obj.get("timestamp")),
                 blocks=blocks,
+                model=current_model if role == "assistant" else None,
             )
         )
 

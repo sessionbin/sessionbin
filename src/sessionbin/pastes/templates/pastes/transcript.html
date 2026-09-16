@@ -3,7 +3,7 @@
   <div class="header">
     <div class="header-left">
       <h1>{{ session.harness }}</h1>
-      {% if session.model %}<span class="header-model">{{ session.model }}</span>{% endif %}
+      {% if session.models %}<span class="header-model">{{ session.models|join:" · " }}</span>{% endif %}
     </div>
     <div class="header-stats">
       {% if session.started_at %}<span>{{ session.started_at|date:"Y-m-d H:i:s" }} UTC</span>{% endif %}
@@ -26,6 +26,9 @@
       <span class="role-badge">{{ turn.role }}</span>
       {% if turn.timestamp %}
       <span class="turn-timestamp">{{ turn.timestamp|date:"H:i:s" }}</span>
+      {% endif %}
+      {% if turn.model and session.models|length > 1 %}
+      <span class="turn-model">{{ turn.model }}</span>
       {% endif %}
     </div>
     {% if blocks %}

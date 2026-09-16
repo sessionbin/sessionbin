@@ -5,7 +5,7 @@ import re
 from sessionbin.adapters.common import attach_results, find_call_turn, parse_timestamp, strip_ansi
 from sessionbin.schema.types import Block, Session, Turn
 
-ADAPTER_VERSION = 2
+ADAPTER_VERSION = 3
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +57,6 @@ def parse(raw: bytes) -> Session:
         message = obj.get("message", {})
         role = message.get("role", msg_type)
 
-        if msg_type == "assistant" and session.model is None:
-            model = message.get("model")
-            if model:
-                session.model = model
-
         content = message.get("content", "")
 
         if msg_type == "user" and isinstance(content, str):
@@ -80,6 +75,7 @@ def parse(raw: bytes) -> Session:
             role=role,
             timestamp=timestamp,
             blocks=blocks,
+            model=message.get("model") if msg_type == "assistant" else None,
         )
         turns.append(turn)
 

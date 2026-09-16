@@ -50,18 +50,32 @@ class TestParse:
         assert session.turns[1].role == "assistant"
         assert session.turns[1].index == 1
 
-    def test_model_from_first_turn_context(self):
+    def test_turns_carry_the_turn_context_in_force(self):
         raw = _jsonl(
             _session_meta(),
             _turn_context("gpt-5.6-luna"),
             _user_line(),
+            _assistant_line(),
             _turn_context("gpt-5.6-sol"),
             _user_line("again"),
+            _assistant_line("hi again"),
         )
-        assert parse(raw).model == "gpt-5.6-luna"
+        session = parse(raw)
+        assert session.models == ["gpt-5.6-luna", "gpt-5.6-sol"]
+        assert [t.model for t in session.turns] == [None, "gpt-5.6-luna", None, "gpt-5.6-sol"]
+
+    def test_turn_context_that_produced_no_turn_is_not_reported(self):
+        raw = _jsonl(
+            _session_meta(),
+            _turn_context("gpt-5.6-luna"),
+            _turn_context("gpt-5.6-sol"),
+            _user_line(),
+            _assistant_line(),
+        )
+        assert parse(raw).models == ["gpt-5.6-sol"]
 
     def test_no_turn_context_leaves_model_unset(self):
-        assert parse(_jsonl(_session_meta(), _user_line())).model is None
+        assert parse(_jsonl(_session_meta(), _user_line(), _assistant_line())).model is None
 
     def test_bookkeeping_lines_produce_no_turns(self):
         lines = [

@@ -305,6 +305,33 @@ class TestRender:
         )
         return render(session)
 
+    def _render_models(self, *models):
+        session = Session(
+            harness="claude-code",
+            turns=[
+                Turn(
+                    index=i,
+                    role="assistant",
+                    timestamp=None,
+                    blocks=[Block(kind="text", text="hi")],
+                    model=model,
+                )
+                for i, model in enumerate(models)
+            ],
+        )
+        return render(session)
+
+    def test_header_lists_every_model_used(self):
+        html = self._render_models("opus-4", "sonnet-4", "opus-4")
+        assert '<span class="header-model">opus-4 · sonnet-4</span>' in html
+
+    def test_turn_model_shown_only_when_the_session_used_more_than_one(self):
+        assert 'class="turn-model"' not in self._render_models("opus-4", "opus-4")
+
+        html = self._render_models("opus-4", "sonnet-4")
+        assert '<span class="turn-model">opus-4</span>' in html
+        assert '<span class="turn-model">sonnet-4</span>' in html
+
     def test_thinking_with_text_is_collapsible(self):
         html = self._render_turn(Block(kind="thinking", text="weighing the options"))
         assert 'class="thinking-details"' in html
