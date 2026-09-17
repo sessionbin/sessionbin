@@ -124,6 +124,25 @@ footer.container {
   margin-top: 2rem;
 }
 
+/* A drawn rule rather than a glyph: the postamble ends in a period, and a middot or
+   bullet sitting next to it reads as stray punctuation. */
+footer.container > *:not(:last-child)::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 0.8em;
+  background: currentColor;
+  opacity: 0.3;
+  margin: 0 0.7rem;
+  vertical-align: -0.08em;
+}
+
+/* Stack instead of wrapping, which would strand the rule at the end of a line. */
+@media (max-width: 30rem) {
+  footer.container > * { display: block; }
+  footer.container > *:not(:last-child)::after { display: none; }
+}
+
 /* Buttons */
 button, .btn {
   display: inline-block;

@@ -47,7 +47,7 @@
     </main>
 {% if footer_postamble or footer_feedback_url %}
     <footer class="container">
-        {% if footer_postamble %}{{ footer_postamble }}{% endif %}{% if footer_postamble and footer_feedback_url %} | {% endif %}{% if footer_feedback_url %}<a href="{{ footer_feedback_url }}">{{ footer_feedback_label }}</a>{% endif %}
+        {% if footer_postamble %}<span>{{ footer_postamble }}</span>{% endif %}{% if footer_feedback_url %}<a href="{{ footer_feedback_url }}">{{ footer_feedback_label }}</a>{% endif %}
     </footer>
 {% endif %}
 <script>
