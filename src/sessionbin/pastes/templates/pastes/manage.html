@@ -11,7 +11,7 @@
     <dd><code>{{ paste.slug }}</code></dd>
 
     <dt>Uploaded</dt>
-    <dd>{{ paste.created_at }}</dd>
+    <dd>{{ paste.created_at|date:"Y-m-d H:i:s T" }}</dd>
 
     <dt>Paste URL</dt>
     <dd>
@@ -31,7 +31,7 @@
 
 {% if paste.deleted_at %}
 <div class="notice notice--deleted">
-    This paste was deleted on {{ paste.deleted_at }}.
+    This paste was deleted on {{ paste.deleted_at|date:"Y-m-d H:i:s T" }}.
 </div>
 {% else %}
 <div class="notice notice--danger">

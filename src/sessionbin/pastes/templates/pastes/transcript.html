@@ -6,7 +6,7 @@
       {% if session.models %}<span class="header-model">{{ session.models|join:" · " }}</span>{% endif %}
     </div>
     <div class="header-stats">
-      {% if session.started_at %}<span>{{ session.started_at|date:"Y-m-d H:i:s" }} UTC</span>{% endif %}
+      {% if session.started_at %}<span>{{ session.started_at|date:"Y-m-d H:i:s T" }}</span>{% endif %}
       {% if stats.duration is not None %}<span>{{ stats.duration|duration }}</span>{% endif %}
       <span>{{ stats.turn_count }} turns</span>
       <span>{{ stats.tool_call_count }} tool calls</span>
@@ -17,7 +17,7 @@
   {% with blocks=turn|visible_blocks %}
   {% if not blocks and turn|is_omitted_thinking_turn %}
   <div class="turn-omitted" title="The model did not record the text of its reasoning.">
-    {% if turn.timestamp %}<span class="turn-timestamp">{{ turn.timestamp|date:"H:i:s" }}</span>{% endif %}
+    {% if turn.timestamp %}<span class="turn-timestamp" title="{{ turn.timestamp|date:'Y-m-d H:i:s T' }}">{{ turn.timestamp|date:"H:i:s" }}</span>{% endif %}
     <span>thinking</span>
   </div>
   {% else %}
@@ -25,7 +25,7 @@
     <div class="turn-header">
       <span class="role-badge">{{ turn.role }}</span>
       {% if turn.timestamp %}
-      <span class="turn-timestamp">{{ turn.timestamp|date:"H:i:s" }}</span>
+      <span class="turn-timestamp" title="{{ turn.timestamp|date:'Y-m-d H:i:s T' }}">{{ turn.timestamp|date:"H:i:s" }}</span>
       {% endif %}
       {% if turn.model and session.models|length > 1 %}
       <span class="turn-model">{{ turn.model }}</span>
