@@ -19,7 +19,9 @@ Run everything below from the repo root, on the host. The container mounts the c
 2. If it isn't, build and start it detached:
    ```bash
    podman build -t sessionbin-dev -f dev/Containerfile dev/
-   podman run -d --rm -p 8000:8000 -v "$PWD":/repo:Z --name sessionbin-dev sessionbin-dev
+   podman run -d --rm -p 8000:8000 -v "$PWD":/repo:Z \
+       -v sessionbin-uv-cache:/root/.cache/uv \
+       --name sessionbin-dev sessionbin-dev
    ```
 
 3. Wait for it to serve — the entrypoint syncs dependencies, installs the CLI, and migrates first:

@@ -25,13 +25,15 @@ CLI, `gitleaks`, and all supported agent harnesses so you can produce real sessi
 
 ```bash
 podman build -t sessionbin-dev -f dev/Containerfile dev/
-podman run --rm -it -p 8000:8000 -v "$PWD":/repo:Z --name sessionbin-dev sessionbin-dev
+podman run --rm -it -p 8000:8000 -v "$PWD":/repo:Z \
+    -v sessionbin-uv-cache:/root/.cache/uv \
+    --name sessionbin-dev sessionbin-dev
 ```
 
 The site is then at <http://127.0.0.1:8000>. The container syncs dependencies, installs
 the CLI from `cli/`, applies migrations, and runs the dev server against your mounted
-checkout, so edits reload live. The database and stored pastes go to `/state` inside the
-container, never into your checkout.
+checkout, so edits reload live. The database and stored pastes go to `/state` in the
+container.
 
 To produce a real session and upload it, exec into the running container:
 
