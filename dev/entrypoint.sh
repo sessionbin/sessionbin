@@ -7,8 +7,9 @@ set -e
 # command in cli/ re-sync the same directory and break the running server.
 export UV_PROJECT_ENVIRONMENT=/venv/backend
 
+# Do not update uv.lock file
 echo "==> syncing backend dependencies"
-uv sync --quiet
+uv sync --quiet --frozen
 
 # The backend and the CLI are both distributions named "sessionbin", so they cannot share
 # one environment. `uv tool install` gives the CLI its own, which is also how end users
@@ -17,7 +18,7 @@ echo "==> installing the CLI from ./cli"
 uv tool install --force --quiet ./cli
 
 echo "==> applying migrations"
-uv run --quiet python src/sessionbin/manage.py migrate --noinput
+uv run --quiet --frozen python src/sessionbin/manage.py migrate --noinput
 
 echo "==> serving on http://0.0.0.0:8000"
-exec uv run python src/sessionbin/manage.py runserver 0.0.0.0:8000
+exec uv run --frozen python src/sessionbin/manage.py runserver 0.0.0.0:8000

@@ -85,6 +85,7 @@ On the manage page from step 3, take a snapshot and verify:
 2. Take a screenshot and verify:
    - [ ] Page title includes the slug
    - [ ] Session metadata header shows: harness name, model, start time, duration, turn count, tool call count
+   - [ ] No per-turn model labels: this session used one model, so only the header names it
    - [ ] User turns have "user" label with timestamp
    - [ ] Assistant turns have "assistant" label with timestamp
    - [ ] Text content blocks render inside the turns
@@ -187,7 +188,9 @@ On the manage page from step 3, take a snapshot and verify:
 3. Navigate to the returned `url` in the browser
 4. Take a screenshot and verify:
    - [ ] Session metadata header shows **"codex"** as the harness name
-   - [ ] Model name is displayed (e.g., "gpt-5.6-luna")
+   - [ ] Header lists both models the session used, joined by `·`: **gpt-5.6-luna · gpt-5.6-sol**
+   - [ ] Every turn carries its own model label, which only appears when a session used more
+         than one model
    - [ ] Two user prompts render (the second was a resumed turn)
    - [ ] `exec` tool-use blocks and their result blocks render collapsed
    - [ ] Blank reasoning collapses to a one-line "thinking" row, not an empty card
