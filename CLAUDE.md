@@ -63,7 +63,7 @@ tox run -e lint            # ruff, both packages    tox run -e check-format   # 
 
 `lint-fix` and `format` are the autofixing variants.
 
-A dev container with the backend, the CLI, gitleaks, and both agent harnesses is in
+A dev container with the backend, the CLI, gitleaks, and every supported harness is in
 `dev/` — see the README. Use it when you need a real session file to test against.
 **If you add support for a new harness, install it in `dev/Containerfile` too.**
 
