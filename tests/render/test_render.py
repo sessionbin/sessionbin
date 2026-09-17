@@ -373,3 +373,10 @@ class TestRender:
         html = self._render_turn()
         assert 'class="turn role-assistant"' in html
         assert "turn-omitted" not in html
+
+    def test_each_turn_is_linkable_by_its_index(self):
+        html = self._render_models("opus-4", "sonnet-4")
+        assert 'id="turn-0"' in html
+        assert 'href="#turn-0"' in html
+        assert 'id="turn-1"' in html
+        assert 'href="#turn-1"' in html

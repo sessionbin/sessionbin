@@ -82,6 +82,29 @@
   border: 1px solid var(--t-border);
   border-radius: 4px;
   overflow: hidden;
+  scroll-margin-top: 1rem;
+}
+
+/* Linking to a turn should say so when you arrive: an aura around the card that blooms
+   outwards and fades. */
+.transcript .turn:target {
+  animation: turn-flash 1.8s ease-out;
+}
+
+@keyframes turn-flash {
+  0%, 25% {
+    box-shadow: 0 0 9px 1px color-mix(in srgb, var(--t-primary) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 18px 4px color-mix(in srgb, var(--t-primary) 0%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transcript .turn:target {
+    animation: none;
+    box-shadow: 0 0 9px 1px color-mix(in srgb, var(--t-primary) 45%, transparent);
+  }
 }
 
 .transcript .turn-header {
@@ -120,6 +143,24 @@
   font-family: var(--t-mono);
   word-break: break-all;
 }
+
+/* Kept invisible until the turn is hovered or the link is focused, but always present so
+   it can be right-clicked and copied. */
+.transcript .turn-anchor {
+  color: var(--t-muted);
+  font-family: var(--t-mono);
+  font-size: 0.75rem;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.1s ease-in;
+}
+
+.transcript .turn:hover .turn-anchor,
+.transcript .turn-anchor:focus-visible {
+  opacity: 1;
+}
+
+.transcript .turn-anchor:hover { color: var(--t-primary); }
 
 .transcript .turn-body { padding: 0.5rem 0.75rem; }
 

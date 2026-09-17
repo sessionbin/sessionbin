@@ -2,7 +2,7 @@ from django.template.loader import render_to_string
 
 from sessionbin.schema.types import Session
 
-RENDERER_VERSION = 4
+RENDERER_VERSION = 5
 
 
 def render(session: Session) -> str:

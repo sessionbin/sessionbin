@@ -21,7 +21,7 @@
     <span>thinking</span>
   </div>
   {% else %}
-  <div class="turn role-{{ turn.role }}">
+  <div class="turn role-{{ turn.role }}" id="turn-{{ turn.index }}">
     <div class="turn-header">
       <span class="role-badge">{{ turn.role }}</span>
       {% if turn.timestamp %}
@@ -30,6 +30,7 @@
       {% if turn.model and session.models|length > 1 %}
       <span class="turn-model">{{ turn.model }}</span>
       {% endif %}
+      <a class="turn-anchor" href="#turn-{{ turn.index }}" title="Link to this turn" aria-label="Link to this turn">#</a>
     </div>
     {% if blocks %}
     <div class="turn-body">
