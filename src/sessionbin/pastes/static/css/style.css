@@ -276,6 +276,42 @@ pre.shell span::before {
   font-size: 0.75rem;
 }
 
+/* Tooltips
+   Drawn rather than left to the browser's own title tooltip, which cannot be warmed:
+   it waits about a second every time, however recently you read the last one. */
+.tooltip {
+  position: fixed;
+  z-index: 60;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: var(--sb-text);
+  color: var(--sb-surface);
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  max-width: calc(100vw - 1rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  opacity: 0;
+  /* Leaving is immediate. A transition is read from the state being moved to, so this
+     governs the way out and the rule below governs the way in. */
+  transition: opacity 0ms;
+}
+
+.tooltip[data-show="true"] {
+  opacity: 1;
+  transition: opacity 120ms ease-out;
+}
+
+/* Warm: the reader is already reading tooltips, so fading in again only lags them. */
+.tooltip[data-show="true"][data-instant="true"] { transition-duration: 0ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip[data-show="true"] { transition-duration: 0ms; }
+}
+
 /* Utility */
 .text-muted { color: var(--sb-muted); }
 
