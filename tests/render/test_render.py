@@ -1,7 +1,10 @@
-from datetime import datetime, timezone
+import re
+from datetime import datetime, timedelta, timezone
 
 from sessionbin.pastes.render import (
     _compute_stats,
+    build_prompt_index,
+    first_text,
     render,
 )
 from sessionbin.pastes.templatetags.transcript import (
@@ -116,6 +119,117 @@ class TestComputeStats:
         assert stats["duration"] == 300.0
 
 
+class TestBuildPromptIndex:
+    def prompts(self, *texts, gap_minutes=0):
+        turns = []
+        moment = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i, text in enumerate(texts):
+            if i and gap_minutes:
+                moment += timedelta(minutes=gap_minutes)
+            else:
+                moment += timedelta(seconds=30)
+            turns.append(
+                Turn(index=i, role="user", timestamp=moment, blocks=[Block(kind="text", text=text)])
+            )
+        return build_prompt_index(Session(harness="claude-code", turns=turns))
+
+    def test_indexes_user_turns_only(self):
+        turns = [
+            Turn(index=0, role="user", timestamp=None, blocks=[Block(kind="text", text="do it")]),
+            Turn(
+                index=1,
+                role="assistant",
+                timestamp=None,
+                blocks=[Block(kind="text", text="done")],
+            ),
+        ]
+        prompts = build_prompt_index(Session(harness="claude-code", turns=turns))
+        assert [p.index for p in prompts] == [0]
+        assert prompts[0].text == "do it"
+
+    def test_keeps_slash_commands(self):
+        assert [p.text for p in self.prompts("`/clear`", "real prompt")] == [
+            "`/clear`",
+            "real prompt",
+        ]
+
+    def test_skips_turns_without_text(self):
+        turns = [Turn(index=0, role="user", timestamp=None, blocks=[Block(kind="image")])]
+        assert build_prompt_index(Session(harness="claude-code", turns=turns)) == []
+
+    def test_marks_a_long_idle_gap(self):
+        prompts = self.prompts("first", "second", gap_minutes=90)
+        assert prompts[0].gap is None
+        assert prompts[1].gap == 5400.0
+
+    def test_leaves_short_gaps_unmarked(self):
+        prompts = self.prompts("first", "second", gap_minutes=5)
+        assert [p.gap for p in prompts] == [None, None]
+
+    def test_gap_at_the_threshold_is_marked(self):
+        prompts = self.prompts("first", "second", gap_minutes=60)
+        assert prompts[1].gap == 3600.0
+
+    def test_assistant_only_session_has_no_prompts(self):
+        turns = [
+            Turn(index=0, role="assistant", timestamp=None, blocks=[Block(kind="text", text="hi")])
+        ]
+        assert build_prompt_index(Session(harness="codex", turns=turns)) == []
+
+    def test_gap_measures_from_a_merged_turn_end(self):
+        """OpenCode merges several messages into one turn, so idle time runs from its end."""
+        start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        turns = [
+            Turn(index=0, role="user", timestamp=start, blocks=[Block(kind="text", text="go")]),
+            Turn(
+                index=1,
+                role="assistant",
+                timestamp=start + timedelta(minutes=1),
+                ended_at=start + timedelta(minutes=50),
+                blocks=[Block(kind="text", text="done")],
+            ),
+            Turn(
+                index=2,
+                role="user",
+                timestamp=start + timedelta(minutes=100),
+                blocks=[Block(kind="text", text="again")],
+            ),
+        ]
+        prompts = build_prompt_index(Session(harness="opencode", turns=turns))
+        # 50 minutes idle from the turn's end, not 99 from its start.
+        assert prompts[1].gap is None
+
+    def test_undated_turn_does_not_reset_the_gap_clock(self):
+        start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        turns = [
+            Turn(index=0, role="user", timestamp=start, blocks=[Block(kind="text", text="go")]),
+            Turn(index=1, role="assistant", timestamp=None, blocks=[Block(kind="text", text="?")]),
+            Turn(
+                index=2,
+                role="user",
+                timestamp=start + timedelta(minutes=90),
+                blocks=[Block(kind="text", text="again")],
+            ),
+        ]
+        prompts = build_prompt_index(Session(harness="claude-code", turns=turns))
+        assert prompts[1].gap == 5400.0
+
+
+class TestFirstText:
+    def test_ignores_whitespace_only_blocks(self):
+        turn = Turn(index=0, role="user", timestamp=None, blocks=[Block(kind="text", text="   ")])
+        assert first_text(turn) == ""
+
+    def test_finds_text_after_another_block(self):
+        turn = Turn(
+            index=0,
+            role="user",
+            timestamp=None,
+            blocks=[Block(kind="image"), Block(kind="text", text="  hello  ")],
+        )
+        assert first_text(turn) == "hello"
+
+
 class TestRenderMarkdown:
     def test_plain_text(self):
         result = render_markdown("hello world")
@@ -166,6 +280,30 @@ class TestRenderMarkdown:
 
     def test_empty_returns_empty(self):
         assert render_markdown("") == ""
+
+
+class TestNavigatorLinks:
+    def test_every_navigator_link_has_a_turn_to_land_on(self):
+        """A turn whose only content was unrecorded reasoning renders without an id.
+
+        The navigator addresses turns by index, so anything that stops a turn emitting
+        its anchor would leave the panel pointing at nothing.
+        """
+        moment = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        session = Session(
+            harness="claude-code",
+            turns=[
+                Turn(index=0, role="user", timestamp=moment, blocks=[Block(kind="text", text="a")]),
+                # Renders as a bare line, not a turn card, and carries no id.
+                Turn(index=1, role="assistant", timestamp=moment, blocks=[Block(kind="thinking")]),
+                Turn(index=2, role="user", timestamp=moment, blocks=[Block(kind="text", text="b")]),
+            ],
+        )
+        html = render(session)
+        linked = set(re.findall(r'data-prompt-link="([^"]+)"', html))
+        anchors = set(re.findall(r'<div class="turn [^"]*" id="([^"]+)"', html))
+        assert linked == {"turn-0", "turn-2"}
+        assert linked <= anchors
 
 
 class TestRender:

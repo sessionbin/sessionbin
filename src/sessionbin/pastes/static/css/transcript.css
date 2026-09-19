@@ -25,7 +25,12 @@
   --t-text: var(--sb-text, #e0e0e4);
 }
 
+/* Sticky so the session's identity and its prompt navigator stay reachable: a long
+   transcript runs to tens of screens, and this is the only way back out of one. */
 .transcript .header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   background: var(--t-surface);
   border: 1px solid var(--t-border);
   border-radius: 6px;
@@ -36,6 +41,35 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.25rem 1.5rem;
+}
+
+/* Once stuck the header is chrome rather than a title card, so it gives up the padding
+   and the absolute date and keeps the stats a reader navigates by.
+   Turns pass underneath it, which is what sticky means. Squaring the corners and
+   casting a shadow gives them a hard edge to disappear behind, so the overlap reads as
+   one surface above another rather than as two things colliding. */
+.transcript .header.is-stuck {
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  box-shadow: 0 6px 12px -6px rgb(0 0 0 / 35%);
+}
+
+/* A turn cut through the middle of a line at the header's edge is what makes the
+   overlap look like a collision. This fades the last few pixels out into the page
+   colour so text thins away instead of being sliced. */
+.transcript .header.is-stuck::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 0.6rem;
+  background: linear-gradient(var(--sb-bg, #fafaf8), transparent);
+  pointer-events: none;
+}
+
+.transcript .header.is-stuck .header-date {
+  display: none;
 }
 
 .transcript .header-left {
@@ -59,10 +93,13 @@
   white-space: nowrap;
 }
 
+/* The auto margin sits here rather than on the navigator so the free space collects to
+   the stats' left, leaving them right-aligned with the navigator alongside them. */
 .transcript .header-stats {
   display: flex;
   flex-wrap: wrap;
   gap: 0.125rem 0;
+  margin-left: auto;
   font-size: 0.6875rem;
   color: var(--t-muted);
   font-family: var(--t-mono);
@@ -77,12 +114,161 @@
   margin: 0 0.4rem;
 }
 
+/* The navigator */
+
+.transcript .prompt-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.transcript .prompt-index summary,
+.transcript .prompt-step {
+  font-family: var(--t-mono);
+  font-size: 0.6875rem;
+  color: var(--t-muted);
+  background: var(--t-section-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.transcript .prompt-index summary {
+  list-style: none;
+  white-space: nowrap;
+}
+
+/* Width is reserved in script, from how many digits the count can reach. */
+.transcript .prompt-marker {
+  display: inline-block;
+  text-align: center;
+}
+
+.transcript .prompt-index summary::-webkit-details-marker {
+  display: none;
+}
+
+.transcript .prompt-index summary::after {
+  content: " \25be";
+}
+
+.transcript .prompt-index[open] summary,
+.transcript .prompt-index summary:hover,
+.transcript .prompt-step:hover {
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+}
+
+.transcript .prompt-step {
+  padding: 0.15rem 0.45rem;
+}
+
+/* Marked unavailable rather than disabled, because a disabled button is inert to the
+   pointer and would have no way to explain itself on hover. */
+.transcript .prompt-step[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.transcript .prompt-step[aria-disabled="true"]:hover {
+  color: var(--t-muted);
+  border-color: var(--t-border);
+}
+
+.transcript .prompt-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.3rem);
+  z-index: 30;
+  width: min(34rem, calc(100vw - 2.5rem));
+  max-height: 60vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: var(--t-surface);
+  border: 1px solid var(--t-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 25%);
+}
+
+.transcript .prompt-panel a {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--t-text);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.transcript .prompt-panel a:hover,
+.transcript .prompt-panel a:focus-visible {
+  background: var(--t-section-bg);
+}
+
+.transcript .prompt-panel .is-current a {
+  color: var(--t-primary);
+}
+
+.transcript .prompt-time {
+  flex: none;
+  font-family: var(--t-mono);
+  font-size: 0.6875rem;
+  color: var(--t-muted);
+}
+
+/* One line each: the panel is an outline to scan, not the prompts themselves. */
+.transcript .prompt-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Too narrow to hang the panel off the button without running past the left edge, so
+   it spans the header instead. The header is sticky, and therefore already the
+   containing block once the navigator stops being one. */
+@media (max-width: 30rem) {
+  .transcript .prompt-nav {
+    position: static;
+  }
+
+  .transcript .prompt-panel {
+    left: 0;
+    right: 0;
+    width: auto;
+  }
+
+  /* Three rows of chrome is too much to pin to a phone screen. The counts are still
+     on the header where it sits at the top of the page. */
+  .transcript .header.is-stuck .header-stats {
+    display: none;
+  }
+}
+
+/* Sessions get put down and picked up hours later, which nothing else on the page
+   shows. */
+.transcript .prompt-gap {
+  padding: 0.3rem 0.5rem 0.2rem;
+  font-size: 0.6875rem;
+  font-family: var(--t-mono);
+  color: var(--t-muted);
+  border-top: 1px solid var(--t-border);
+  margin-top: 0.25rem;
+}
+
 .transcript .turn {
   margin-bottom: 0.5rem;
   border: 1px solid var(--t-border);
   border-radius: 4px;
   overflow: hidden;
-  scroll-margin-top: 1rem;
+  /* Clears the stuck header, which would otherwise cover the turn just jumped to.
+     Sized for the tallest it gets, which is the wrapped phone layout. */
+  scroll-margin-top: 5rem;
 }
 
 /* Linking to a turn should say so when you arrive: an aura around the card that blooms

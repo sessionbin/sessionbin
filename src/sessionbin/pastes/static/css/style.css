@@ -278,3 +278,16 @@ pre.shell span::before {
 
 /* Utility */
 .text-muted { color: var(--sb-muted); }
+
+/* Read aloud, never shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
