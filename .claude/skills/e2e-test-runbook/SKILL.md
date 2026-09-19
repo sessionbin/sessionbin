@@ -93,6 +93,51 @@ On the manage page from step 3, take a snapshot and verify:
    - [ ] Text content blocks render inside the turns
    - [ ] Tool-use blocks render with collapsed/expandable summaries
    - [ ] Tool-result blocks render with collapsed/expandable summaries
+   - [ ] Duration reads in hours once past one, e.g. `10m 0s` here but `7h 3m` on a
+         long session, never `423m 38s`
+
+### 5a. Turn Navigator
+
+The header carries an index of the session's **user** turns: `« ‹ N / M ▾ › »`. Its
+position readout cannot always be derived from the scroll position, so check the
+behaviour, not just that the controls are on screen.
+
+On the paste from step 5, verify:
+- [ ] The navigator is present, and `M` equals the number of `user` turns in the
+      transcript (not the total turn count in the header)
+- [ ] Opening `▾` lists every user turn with its timestamp, each a link to `#turn-<n>`
+- [ ] Clicking an entry scrolls to that turn, flashes it, closes the panel, and moves
+      the readout to that entry
+- [ ] `›` and `‹` step one turn at a time; `»` and `«` jump to the ends
+- [ ] At the first turn `«` and `‹` are dimmed; at the last, `›` and `»` are. A dimmed
+      control still shows its tooltip on hover
+- [ ] Scrolling by hand from top to bottom moves the readout forwards only, reaching
+      `M / M` at the foot of the page
+- [ ] After jumping to a turn, scrolling away by **dragging the scrollbar** (no wheel,
+      no keys) releases the choice and the readout follows the page again
+- [ ] Loading `/p/<slug>/#turn-<n>` for an indexed turn selects that entry; going Back
+      to the bare URL returns the readout to `1 / M`
+- [ ] Once scrolled, the header sticks to the top, compacts, drops the absolute date
+      and casts a shadow; turns pass underneath it rather than colliding with it
+
+### 5b. Tooltips
+
+Tooltips are drawn by the page, not the browser, and are *warmed*: slow the first time,
+instant for a short window afterwards.
+
+- [ ] Hovering a navigator control shows a tooltip after a short pause, styled like the
+      page rather than an OS tooltip
+- [ ] Leaving and immediately hovering a neighbouring control shows its tooltip at once
+- [ ] Waiting a second or so and hovering again brings the pause back
+- [ ] Hovering a turn timestamp shows the full UTC timestamp; hovering the word
+      `thinking` on an omitted-reasoning row shows its explanation, positioned under the
+      word rather than the middle of the page
+- [ ] The GitHub link and theme toggle in the navbar both have tooltips
+- [ ] No element in the page still carries a `title` attribute, so the browser's own
+      tooltip never doubles up:
+      ```js
+      document.querySelectorAll('[title]').length   // expect 0
+      ```
 
 ### 6. API Upload
 
@@ -103,6 +148,11 @@ On the manage page from step 3, take a snapshot and verify:
 2. Verify response is JSON with fields: `slug`, `url`, `delete_token`
 3. **Save the slug and delete_token** for the API delete test
 4. Navigate to the returned `url` in the browser and verify the paste renders
+5. This fixture holds a single user turn, which is the degenerate case for the
+   navigator. Verify:
+   - [ ] The readout is `1 / 1`
+   - [ ] All four stepper arrows are hidden, not merely dimmed — with one turn there is
+         nothing to step between
 
 ### 7. API Delete
 
@@ -282,6 +332,8 @@ After all sections pass, report a summary table:
 | Web upload | |
 | Manage page | |
 | Paste view | |
+| Turn navigator | |
+| Tooltips | |
 | API upload | |
 | API delete | |
 | Web delete | |
