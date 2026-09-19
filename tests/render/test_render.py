@@ -54,6 +54,15 @@ class TestFormatDuration:
     def test_zero(self):
         assert duration(0) == "0s"
 
+    def test_hours_drop_seconds(self):
+        assert duration(25322) == "7h 2m"
+
+    def test_exact_hour(self):
+        assert duration(3600) == "1h 0m"
+
+    def test_just_under_an_hour_keeps_seconds(self):
+        assert duration(3599) == "59m 59s"
+
 
 class TestComputeStats:
     def test_with_turns_and_tool_calls(self):

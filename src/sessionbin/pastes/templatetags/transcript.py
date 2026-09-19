@@ -59,9 +59,17 @@ def text_summary(text: str | None) -> str:
 
 @register.filter
 def duration(seconds: float | None) -> str:
+    """A span of time, coarsening as it grows.
+
+    Sessions run for hours and are put down and picked up again, so past an hour the
+    seconds stop carrying information and only make the number harder to read.
+    """
     if seconds is None:
         return "?"
     m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    if h:
+        return f"{h}h {m}m"
     if m:
         return f"{m}m {s}s"
     return f"{s}s"
