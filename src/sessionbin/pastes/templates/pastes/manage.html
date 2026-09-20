@@ -8,43 +8,47 @@
 <h1>Paste deleted</h1>
 {% else %}
 <h1>Transcript uploaded</h1>
-{% endif %}
 
-{% if session_summary and not paste.deleted_at %}
+{% if session_summary %}
 <p class="session-summary mono">{{ session_summary }}</p>
 {% endif %}
 
+{# The one thing lifted out of the list below, because it is what the upload was for. #}
 <div class="share-block">
-    <span class="field-label">Share link</span>
-    {% if paste.deleted_at %}
-    <p><em>(deleted)</em></p>
-    {% else %}
     <div class="copyable-url share-url">
         <a href="{{ paste.url }}" class="mono">{{ paste_url }}</a>
         <button type="button" class="btn-copy" data-copy="{{ paste_url }}" aria-label="Copy share link">Copy</button>
         <span class="copy-status visually-hidden" role="status" aria-live="polite"></span>
     </div>
-    <p><a href="{{ paste.url }}" class="btn">View transcript</a></p>
-    {% endif %}
-</div>
-
-{% if not paste.deleted_at %}
-<div class="notice">
-    <p>
-        <strong>This page is the only way to delete the paste from the web.</strong>
-        Save its address now; nothing can recover it once the tab is gone.
-    </p>
-    <div class="copyable-url">
-        <a href="{{ manage_url }}" class="mono">{{ manage_url }}</a>
-        <button type="button" class="btn-copy" data-copy="{{ manage_url }}" aria-label="Copy manage link">Copy</button>
-        <span class="copy-status visually-hidden" role="status" aria-live="polite"></span>
-    </div>
+    <a href="{{ paste.url }}" class="btn">View transcript</a>
 </div>
 {% endif %}
 
-<p class="text-muted">
-    <code>{{ paste.slug }}</code> · uploaded {{ paste.created_at|date:"Y-m-d H:i:s T" }}
-</p>
+<dl>
+    <dt>Slug</dt>
+    <dd><code>{{ paste.slug }}</code></dd>
+
+    <dt>Uploaded</dt>
+    <dd>{{ paste.created_at|date:"Y-m-d H:i:s T" }}</dd>
+
+    {% if paste.deleted_at %}
+    <dt>Paste URL</dt>
+    <dd><em>(deleted)</em></dd>
+    {% else %}
+    <dt>Manage URL</dt>
+    <dd>
+        <div class="copyable-url">
+            <a href="{{ manage_url }}" class="mono">{{ manage_url }}</a>
+            <button type="button" class="btn-copy" data-copy="{{ manage_url }}" aria-label="Copy manage link">Copy</button>
+            <span class="copy-status visually-hidden" role="status" aria-live="polite"></span>
+        </div>
+        <p class="field-note">
+            The only way to delete this paste. Save it now; nothing can recover it once
+            the tab is gone.
+        </p>
+    </dd>
+    {% endif %}
+</dl>
 
 {% if paste.deleted_at %}
 <div class="notice notice--deleted">

@@ -211,14 +211,24 @@ code {
 /* Manage page */
 .session-summary { font-size: 0.8125rem; color: var(--sb-muted); margin-bottom: 1.25rem; }
 
-.share-block { margin-bottom: 1.5rem; }
-.field-label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--sb-muted);
-  margin-bottom: 0.25rem;
+.share-block { margin-bottom: 1.75rem; }
+.share-url { font-size: 0.9375rem; margin-bottom: 0.875rem; }
+
+/* Facts list. One label column and one value column, so everything below the share link
+   lines up on a single spine instead of each row inventing its own shape. */
+dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  margin-bottom: 1.5rem;
 }
-.share-url { font-size: 0.9375rem; margin-bottom: 0.75rem; }
+dt { color: var(--sb-muted); font-weight: 500; }
+/* anywhere, not break-word: only anywhere shrinks the min-content size, which is what
+   lets the 1fr track narrow enough for a long URL to stop overflowing the page. */
+dd { margin: 0; overflow-wrap: anywhere; }
+
+.field-note { margin: 0.25rem 0 0; font-size: 0.75rem; color: var(--sb-muted); }
 
 .delete-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.8125rem; }
 .btn-quiet {
@@ -259,8 +269,6 @@ code {
 }
 .notice--deleted { border-left-color: var(--sb-muted); color: var(--sb-muted); }
 
-.notice p { margin-bottom: 0.75rem; }
-.notice p:last-child { margin-bottom: 0; }
 
 /* Errors */
 .errors { color: var(--sb-danger); font-size: 0.8125rem; margin: 0.25rem 0; }

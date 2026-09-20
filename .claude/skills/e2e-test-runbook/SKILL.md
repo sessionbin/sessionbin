@@ -88,16 +88,19 @@ with deleting.
 - [ ] A summary line under it reports what was parsed, joined by `·`: harness, model,
       turn count, tool call count — for this fixture,
       `claude-code · claude-sonnet-4-20250514 · 22 turns · 8 tool calls`
-- [ ] Under "Share link", the **absolute** URL is shown as text, `http://127.0.0.1:8000/p/<slug>/`,
-      not the relative path — selecting it by hand yields something shareable
+- [ ] The share link sits directly under the summary, lifted out of the list below it:
+      the **absolute** URL as text, `http://127.0.0.1:8000/p/<slug>/`, not the relative
+      path, so selecting it by hand yields something shareable
 - [ ] A "View transcript" button follows it
-- [ ] A notice says this page is the only way to delete the paste and cannot be recovered,
-      and shows the manage URL with its own Copy button
-- [ ] The slug and upload timestamp appear in a muted line
+- [ ] Everything else is a two-column list: `Slug`, `Uploaded`, `Manage URL`. Every label
+      shares one left edge and every value shares another, so the rows line up on a
+      single spine rather than each inventing its own shape
+- [ ] The `Manage URL` row holds the full URL with its own Copy button, and a muted note
+      beneath saying it is the only way to delete the paste and cannot be recovered
 - [ ] "Delete this paste" is a quiet outlined button at the foot of the page, not a filled
       red one, with its warning text beside it
-2. Narrow the window to 390px and verify neither URL overflows the page and the delete
-   row wraps rather than scrolling sideways
+2. Narrow the window to 390px and verify neither URL overflows the page, the two columns
+   hold, and the delete row wraps rather than scrolling sideways
 3. Click the Copy button beside the share link. Verify it reads "Copied" for about a
    second, then returns to "Copy", and that the clipboard holds the absolute paste URL:
    ```js
@@ -209,9 +212,12 @@ instant for a short window afterwards.
 2. Click "Delete this paste"
 3. Take a snapshot and verify:
    - [ ] Heading now reads "Paste deleted"
-   - [ ] The share link is replaced with "(deleted)" in italics/emphasis, and the
-         "View transcript" button is gone
-   - [ ] The manage URL notice about losing delete rights is gone
+   - [ ] The promoted share link and its "View transcript" button are gone entirely.
+         With nothing left to share there is nothing to promote, so the page collapses
+         to the two-column list
+   - [ ] That list now reads `Slug`, `Uploaded`, `Paste URL`, with the last showing
+         "(deleted)" in italics/emphasis
+   - [ ] The `Manage URL` row and its note about losing delete rights are gone
    - [ ] The harness/model/turns summary line is gone: it described content that no
          longer exists
    - [ ] A deletion timestamp message appears (e.g., "This paste was deleted on ...")
