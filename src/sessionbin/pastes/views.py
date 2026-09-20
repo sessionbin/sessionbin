@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.defaultfilters import pluralize
 from django.utils.crypto import constant_time_compare
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET, require_http_methods
@@ -24,17 +25,22 @@ RATE_LIMITED_MESSAGE = "Too many uploads from your address. Please wait a minute
 upload_throttle = AnonRateThrottle(settings.SESSIONBIN["UPLOAD_RATE"])
 
 
-def _build_og_description(paste: Paste) -> str:
+def session_stats(paste: Paste) -> list[str]:
+    stats = []
+    if paste.turn_count is not None:
+        stats.append(f"{paste.turn_count} turn{pluralize(paste.turn_count)}")
+    if paste.tool_call_count is not None:
+        stats.append(f"{paste.tool_call_count} tool call{pluralize(paste.tool_call_count)}")
+    return stats
+
+
+def build_og_description(paste: Paste) -> str:
     if not paste.harness:
         return "Agentic coding session transcript on sessionbin."
     parts = [f"{paste.harness} session"]
     if paste.session_model:
         parts[0] += f" ({paste.session_model})"
-    stats = []
-    if paste.turn_count is not None:
-        stats.append(f"{paste.turn_count} turns")
-    if paste.tool_call_count is not None:
-        stats.append(f"{paste.tool_call_count} tool calls")
+    stats = session_stats(paste)
     if stats:
         parts.append(", ".join(stats))
     desc = " — ".join(parts)
@@ -54,7 +60,7 @@ def view_paste(request, slug: str):
         fragment = storage.read_fragment(slug)
     except NotFoundError:
         raise Http404
-    og_description = _build_og_description(paste)
+    og_description = build_og_description(paste)
     return render(
         request,
         "pastes/paste.html",
@@ -117,5 +123,14 @@ def manage_paste(request, slug: str):
         delete_paste(paste)
         return redirect(f"{request.path}?token={token}")
 
-    manage_url = f"{paste.url}manage/?token={token}"
-    return render(request, "pastes/manage.html", {"paste": paste, "manage_url": manage_url})
+    summary = [p for p in (paste.harness, paste.session_model) if p] + session_stats(paste)
+    return render(
+        request,
+        "pastes/manage.html",
+        {
+            "paste": paste,
+            "paste_url": request.build_absolute_uri(paste.url),
+            "manage_url": request.build_absolute_uri(f"{paste.url}manage/?token={token}"),
+            "session_summary": " · ".join(summary),
+        },
+    )

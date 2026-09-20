@@ -73,17 +73,45 @@ Work through each section in order. Record pass/fail for every check. Stop and r
 
 ### 4. Manage Page
 
-On the manage page from step 3, take a snapshot and verify:
+The page is the moment of success for a web upload, so it leads with the share link, not
+with deleting.
+
+1. On the manage page from step 3, take a snapshot and verify:
 - [ ] Page title includes "Manage" and the slug
-- [ ] Heading is "Manage paste"
-- [ ] Metadata shows: Slug, Uploaded timestamp, Paste URL, Manage URL
-- [ ] Paste URL is a link to `/p/<slug>/`, with a Copy button beside it
-- [ ] "Delete this paste" button is present
-- [ ] Delete warning text is present
+- [ ] Heading is "Transcript uploaded"
+- [ ] A summary line under it reports what was parsed, joined by `·`: harness, model,
+      turn count, tool call count (e.g. `claude-code · claude-sonnet-4-6 · 22 turns · 8 tool calls`)
+- [ ] Under "Share link", the **absolute** URL is shown as text, `http://127.0.0.1:8000/p/<slug>/`,
+      not the relative path — selecting it by hand yields something shareable
+- [ ] A "View transcript" button follows it
+- [ ] A notice says this page is the only way to delete the paste and cannot be recovered,
+      and shows the manage URL with its own Copy button
+- [ ] The slug and upload timestamp appear in a muted line
+- [ ] "Delete this paste" is a quiet outlined button at the foot of the page, not a filled
+      red one, with its warning text beside it
+2. Narrow the window to 390px and verify neither URL overflows the page and the delete
+   row wraps rather than scrolling sideways
+3. Click the Copy button beside the share link. Verify it reads "Copied" for about a
+   second, then returns to "Copy", and that the clipboard holds the absolute paste URL:
+   ```js
+   navigator.clipboard.readText()
+   ```
+4. Do the same for the Copy button on the manage URL, and verify the clipboard holds the
+   full manage URL including `?token=`
+5. Copy the share link and then the manage link a moment later. Verify each button keeps
+   its own "Copied" for its own second: the first timer must not wipe the second's
+   confirmation early
+6. A copy can fail, and this page must say so rather than doing nothing — it is the only
+   copy of the manage URL that will ever exist. Load the same manage page over the host's
+   LAN IP rather than `127.0.0.1`, which is an insecure context where
+   `navigator.clipboard` is undefined, and click a Copy button. Verify:
+   - [ ] A red "Copy failed — select the link and copy it yourself." appears under the URL
+   - [ ] It stays put rather than clearing after a second
+   - [ ] The button still reads "Copy", so nothing claims a copy that did not happen
 
 ### 5. Paste View
 
-1. Click the Paste URL link on the manage page
+1. Click the "View transcript" button on the manage page
 2. Take a screenshot and verify:
    - [ ] Page title includes the slug
    - [ ] Session metadata header shows: harness name, model, start time, duration, turn count, tool call count
@@ -173,7 +201,12 @@ instant for a short window afterwards.
 1. Navigate to the manage page for the paste from step 3 (using the saved slug and token)
 2. Click "Delete this paste"
 3. Take a snapshot and verify:
-   - [ ] Paste URL is replaced with "(deleted)" in italics/emphasis
+   - [ ] Heading now reads "Paste deleted"
+   - [ ] The share link is replaced with "(deleted)" in italics/emphasis, and the
+         "View transcript" button is gone
+   - [ ] The manage URL notice about losing delete rights is gone
+   - [ ] The harness/model/turns summary line is gone: it described content that no
+         longer exists
    - [ ] A deletion timestamp message appears (e.g., "This paste was deleted on ...")
    - [ ] The delete button is gone
 4. Verify the paste view now returns **404**:
@@ -227,7 +260,7 @@ instant for a short window afterwards.
 2. Upload an OpenCode fixture file (`.json` from `tests/fixtures/opencode/`) via the drop zone
 3. Click "Upload"
 4. Verify redirect to manage page
-5. Click the Paste URL and verify the paste renders with **"opencode"** harness
+5. Click "View transcript" and verify the paste renders with **"opencode"** harness
 6. Clean up by deleting the paste via the manage page
 
 ### 13. Codex Upload (API)
@@ -255,7 +288,7 @@ instant for a short window afterwards.
 2. Upload a Codex fixture file (`.jsonl` from `tests/fixtures/codex/`) via the drop zone
 3. Click "Upload"
 4. Verify redirect to manage page
-5. Click the Paste URL and verify the paste renders with **"codex"** harness
+5. Click "View transcript" and verify the paste renders with **"codex"** harness
 6. Clean up by deleting the paste via the manage page
 
 ### 15. Pi Upload (API)
@@ -282,7 +315,7 @@ instant for a short window afterwards.
 2. Upload a Pi fixture file (`.jsonl` from `tests/fixtures/pi/`) via the drop zone
 3. Click "Upload"
 4. Verify redirect to manage page
-5. Click the Paste URL and verify the paste renders with **"pi"** harness
+5. Click "View transcript" and verify the paste renders with **"pi"** harness
 6. Clean up by deleting the paste via the manage page
 
 ### 17. Error Handling (unchanged from Claude Code tests)

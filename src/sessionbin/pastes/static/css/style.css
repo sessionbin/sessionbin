@@ -161,15 +161,8 @@ button, .btn {
 button:hover, .btn:hover {
   background: var(--sb-accent-hover);
   border-color: var(--sb-accent-hover);
-}
-
-.btn-danger {
-  background: var(--sb-danger);
-  border-color: var(--sb-danger);
-}
-.btn-danger:hover {
-  background: var(--sb-danger-hover);
-  border-color: var(--sb-danger-hover);
+  /* An anchor styled as a button still matches a:hover, which would underline it. */
+  text-decoration: none;
 }
 
 /* Dropzone */
@@ -215,22 +208,33 @@ code {
   border-radius: 3px;
 }
 
-/* Definition lists (manage page) */
-dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.375rem 1rem;
-  font-size: 0.8125rem;
-  margin-bottom: 1.5rem;
+/* Manage page */
+.session-summary { font-size: 0.8125rem; color: var(--sb-muted); margin-bottom: 1.25rem; }
+
+.share-block { margin-bottom: 1.5rem; }
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--sb-muted);
+  margin-bottom: 0.25rem;
 }
-dt { color: var(--sb-muted); font-weight: 500; }
-/* anywhere, not break-word: only anywhere shrinks the min-content size, which is what
-   lets the 1fr track narrow enough for a long URL to stop overflowing the page. */
-dd { margin: 0; overflow-wrap: anywhere; }
+.share-url { font-size: 0.9375rem; margin-bottom: 0.75rem; }
+
+.delete-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.8125rem; }
+.btn-quiet {
+  padding: 0.3rem 0.65rem;
+  background: none;
+  color: var(--sb-danger);
+  border-color: var(--sb-border);
+}
+.btn-quiet:hover { background: var(--sb-danger); border-color: var(--sb-danger); color: #fff; }
 
 /* Copy button */
-.copyable-url { display: flex; align-items: center; gap: 0.5rem; }
+/* anywhere, not break-word: a long URL has no break opportunity of its own, so only
+   anywhere lets the flex item shrink below the URL's width on a narrow screen. */
+.copyable-url { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; overflow-wrap: anywhere; }
 .btn-copy {
+  flex: none;
   padding: 0 0.375rem;
   font-size: 0.6875rem;
   line-height: 1.6;
@@ -238,7 +242,13 @@ dd { margin: 0; overflow-wrap: anywhere; }
   color: var(--sb-muted);
   border: 1px solid var(--sb-border);
 }
-.btn-copy:hover { color: var(--sb-text); }
+/* background is restated because button:hover would otherwise win it back, being a
+   heavier selector than .btn-copy. */
+.btn-copy:hover { background: var(--sb-code-bg); color: var(--sb-text); }
+
+/* Its own line, rather than a third column squeezing the URL on a narrow screen. It only
+   takes one when a copy has failed: hidden, it is out of flow. */
+.copy-status { flex-basis: 100%; font-size: 0.75rem; color: var(--sb-danger); }
 
 /* Notices */
 .notice {
@@ -247,7 +257,6 @@ dd { margin: 0; overflow-wrap: anywhere; }
   font-size: 0.8125rem;
   margin: 1.5rem 0;
 }
-.notice--danger { border-left-color: var(--sb-danger); }
 .notice--deleted { border-left-color: var(--sb-muted); color: var(--sb-muted); }
 
 .notice p { margin-bottom: 0.75rem; }

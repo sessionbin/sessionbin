@@ -6,6 +6,46 @@ from django.utils import timezone
 
 from sessionbin.pastes.models import Paste
 from sessionbin.pastes.services import create_paste_from_upload, delete_paste
+from sessionbin.pastes.views import build_og_description, session_stats
+
+
+class TestSessionStats:
+    def test_counts_of_one_are_singular(self):
+        paste = Paste(turn_count=1, tool_call_count=1)
+        assert session_stats(paste) == ["1 turn", "1 tool call"]
+
+    def test_other_counts_are_plural(self):
+        assert session_stats(Paste(turn_count=22, tool_call_count=8)) == [
+            "22 turns",
+            "8 tool calls",
+        ]
+        assert session_stats(Paste(turn_count=0, tool_call_count=0)) == [
+            "0 turns",
+            "0 tool calls",
+        ]
+
+    def test_missing_counts_are_left_out(self):
+        assert session_stats(Paste()) == []
+        assert session_stats(Paste(turn_count=3)) == ["3 turns"]
+        assert session_stats(Paste(tool_call_count=3)) == ["3 tool calls"]
+
+
+class TestOgDescription:
+    def test_falls_back_without_a_harness(self):
+        assert build_og_description(Paste()) == "Agentic coding session transcript on sessionbin."
+
+    def test_pluralises_its_counts(self):
+        paste = Paste(
+            harness="claude-code",
+            session_model="claude-sonnet-4",
+            turn_count=1,
+            tool_call_count=1,
+        )
+        expected = "claude-code session (claude-sonnet-4) — 1 turn, 1 tool call"
+        assert build_og_description(paste) == expected
+
+    def test_omits_stats_it_does_not_have(self):
+        assert build_og_description(Paste(harness="codex")) == "codex session"
 
 
 @pytest.mark.django_db
@@ -189,6 +229,38 @@ class TestManagePaste:
         assert paste.slug in content
         assert f'href="{paste.url}"' in content
         assert "Delete this paste" in content
+
+    def test_shows_both_urls_in_full(self, client, fixture_bytes):
+        # Absolute, because the displayed text is what someone selects by hand.
+        paste, token = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
+        resp = client.get(f"/p/{paste.slug}/manage/?token={token}")
+        content = resp.content.decode()
+        assert f"http://testserver/p/{paste.slug}/" in content
+        assert f"http://testserver/p/{paste.slug}/manage/?token={token}" in content
+
+    def test_shows_session_summary(self, client, fixture_bytes):
+        paste, token = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
+        resp = client.get(f"/p/{paste.slug}/manage/?token={token}")
+        summary = (
+            f"{paste.harness} · {paste.session_model} · "
+            f"{paste.turn_count} turns · {paste.tool_call_count} tool call"
+        )
+        assert summary in resp.content.decode()
+
+    def test_no_summary_without_metadata(self, client, fixture_bytes):
+        paste, token = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
+        Paste.objects.filter(slug=paste.slug).update(
+            harness=None, session_model=None, turn_count=None, tool_call_count=None
+        )
+        resp = client.get(f"/p/{paste.slug}/manage/?token={token}")
+        assert "session-summary" not in resp.content.decode()
+
+    def test_no_summary_after_deletion(self, client, fixture_bytes):
+        # It describes a transcript nobody can read any more.
+        paste, token = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
+        delete_paste(paste)
+        resp = client.get(f"/p/{paste.slug}/manage/?token={token}")
+        assert "session-summary" not in resp.content.decode()
 
     def test_post_deletes_and_redirects(self, client, fixture_bytes):
         paste, token = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)

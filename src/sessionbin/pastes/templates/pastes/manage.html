@@ -4,45 +4,99 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 {% endblock %}
 {% block content %}
-<h1>Manage paste</h1>
+{% if paste.deleted_at %}
+<h1>Paste deleted</h1>
+{% else %}
+<h1>Transcript uploaded</h1>
+{% endif %}
 
-<dl>
-    <dt>Slug</dt>
-    <dd><code>{{ paste.slug }}</code></dd>
+{% if session_summary and not paste.deleted_at %}
+<p class="session-summary mono">{{ session_summary }}</p>
+{% endif %}
 
-    <dt>Uploaded</dt>
-    <dd>{{ paste.created_at|date:"Y-m-d H:i:s T" }}</dd>
+<div class="share-block">
+    <span class="field-label">Share link</span>
+    {% if paste.deleted_at %}
+    <p><em>(deleted)</em></p>
+    {% else %}
+    <div class="copyable-url share-url">
+        <a href="{{ paste.url }}" class="mono">{{ paste_url }}</a>
+        <button type="button" class="btn-copy" data-copy="{{ paste_url }}" aria-label="Copy share link">Copy</button>
+        <span class="copy-status visually-hidden" role="status" aria-live="polite"></span>
+    </div>
+    <p><a href="{{ paste.url }}" class="btn">View transcript</a></p>
+    {% endif %}
+</div>
 
-    <dt>Paste URL</dt>
-    <dd>
-        {% if paste.deleted_at %}
-        <em>(deleted)</em>
-        {% else %}
-        <span class="copyable-url">
-            <a href="{{ paste.url }}">{{ paste.url }}</a>
-            <button type="button" class="btn-copy" onclick="navigator.clipboard.writeText(location.origin + '{{ paste.url }}')">Copy</button>
-        </span>
-        {% endif %}
-    </dd>
+{% if not paste.deleted_at %}
+<div class="notice">
+    <p>
+        <strong>This page is the only way to delete the paste from the web.</strong>
+        Save its address now; nothing can recover it once the tab is gone.
+    </p>
+    <div class="copyable-url">
+        <a href="{{ manage_url }}" class="mono">{{ manage_url }}</a>
+        <button type="button" class="btn-copy" data-copy="{{ manage_url }}" aria-label="Copy manage link">Copy</button>
+        <span class="copy-status visually-hidden" role="status" aria-live="polite"></span>
+    </div>
+</div>
+{% endif %}
 
-    <dt>Manage URL</dt>
-    <dd><a href="{{ manage_url }}">{{ manage_url }}</a></dd>
-</dl>
+<p class="text-muted">
+    <code>{{ paste.slug }}</code> · uploaded {{ paste.created_at|date:"Y-m-d H:i:s T" }}
+</p>
 
 {% if paste.deleted_at %}
 <div class="notice notice--deleted">
     This paste was deleted on {{ paste.deleted_at|date:"Y-m-d H:i:s T" }}.
 </div>
 {% else %}
-<div class="notice notice--danger">
-    <form method="post">
-        {% csrf_token %}
-        <p>
-            Deleting this paste is permanent. The URL will return 404 and the
-            transcript will no longer be accessible.
-        </p>
-        <button type="submit" class="btn-danger">Delete this paste</button>
-    </form>
-</div>
+<form method="post" class="delete-row">
+    {% csrf_token %}
+    <button type="submit" class="btn-quiet">Delete this paste</button>
+    <span class="text-muted">
+        Permanent. The URL will return 404 and the transcript will no longer be accessible.
+    </span>
+</form>
 {% endif %}
+
+<script>
+    (function () {
+        document.querySelectorAll("button[data-copy]").forEach(function (btn) {
+            var status = btn.parentNode.querySelector(".copy-status");
+            var timer;
+
+            function reset() {
+                clearTimeout(timer);
+                btn.textContent = "Copy";
+                status.textContent = "";
+                status.classList.add("visually-hidden");
+            }
+
+            function succeeded() {
+                btn.textContent = "Copied";
+                status.textContent = "Copied to clipboard";
+                timer = setTimeout(reset, 1500);
+            }
+
+            /* Left standing rather than flashed for a second: someone who missed it would
+               go on believing they hold the only copy of a URL they never copied. */
+            function failed() {
+                status.textContent = "Copy failed — select the link and copy it yourself.";
+                status.classList.remove("visually-hidden");
+            }
+
+            btn.addEventListener("click", function () {
+                reset();
+                // Undefined outside a secure context, which a self-hosted instance over
+                // plain HTTP is.
+                if (!navigator.clipboard) {
+                    failed();
+                    return;
+                }
+                navigator.clipboard.writeText(btn.getAttribute("data-copy")).then(succeeded, failed);
+            });
+        });
+    })();
+</script>
 {% endblock %}
