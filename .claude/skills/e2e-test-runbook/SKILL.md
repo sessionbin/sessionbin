@@ -84,7 +84,7 @@ with deleting.
 
 1. On the manage page from step 3, take a snapshot and verify:
 - [ ] Page title includes "Manage" and the slug
-- [ ] Heading is "Transcript uploaded"
+- [ ] Heading is "Manage paste"
 - [ ] A summary line under it reports what was parsed, joined by `·`: harness, model,
       turn count, tool call count — for this fixture,
       `claude-code · claude-sonnet-4-20250514 · 22 turns · 8 tool calls`
