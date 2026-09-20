@@ -33,7 +33,12 @@ Run everything below from the repo root, on the host. The container mounts the c
 The database and stored pastes live in `/state` inside the container, so a fresh container starts empty and nothing lands in the checkout.
 
 **Fixture files:** This runbook uses checked-in fixtures only. Do not run `claude`, `codex`, `opencode`, or `pi` inside the container to capture a fresh session — that needs credentials the runbook does not have and must not go looking for. curl runs on the host, so fixture paths are repo-relative. Use fixtures from every harness:
-- `tests/fixtures/claude_code/*.jsonl` — Claude Code sessions (JSONL). Need at least two (one for web upload, one for API upload).
+- `tests/fixtures/claude_code/*.jsonl` — Claude Code sessions (JSONL). The two are not
+  interchangeable, so each section names the one it needs:
+  `f9e8d7c6-b5a4-3210-fedc-ba9876543210.jsonl` runs 22 turns, 4 of them user turns, over
+  10m 0s, and is the only one with a navigator worth stepping through;
+  `a1b2c3d4-e5f6-7890-abcd-ef1234567890.jsonl` is 4 turns with a single user turn, the
+  degenerate case for the navigator.
 - `tests/fixtures/opencode/*.json` — OpenCode sessions (JSON). Need at least one.
 - `tests/fixtures/codex/*.jsonl` — Codex sessions (JSONL rollouts). Need at least one.
 - `tests/fixtures/pi/*.jsonl` — Pi sessions (JSONL). Need at least one.
@@ -65,7 +70,8 @@ Work through each section in order. Record pass/fail for every check. Stop and r
 ### 3. Web Upload
 
 1. On the landing page, click the drop zone text to open the file picker
-2. Upload a fixture file (first `.jsonl` from `tests/fixtures/claude_code/`)
+2. Upload `tests/fixtures/claude_code/f9e8d7c6-b5a4-3210-fedc-ba9876543210.jsonl` — the
+   multi-turn one, which sections 5 and 5a need
 3. Verify the filename appears in the drop zone
 4. Click the "Upload" button
 5. Verify redirect to manage page (`/p/<slug>/manage/?token=<token>`)
@@ -80,7 +86,8 @@ with deleting.
 - [ ] Page title includes "Manage" and the slug
 - [ ] Heading is "Transcript uploaded"
 - [ ] A summary line under it reports what was parsed, joined by `·`: harness, model,
-      turn count, tool call count (e.g. `claude-code · claude-sonnet-4-6 · 22 turns · 8 tool calls`)
+      turn count, tool call count — for this fixture,
+      `claude-code · claude-sonnet-4-20250514 · 22 turns · 8 tool calls`
 - [ ] Under "Share link", the **absolute** URL is shown as text, `http://127.0.0.1:8000/p/<slug>/`,
       not the relative path — selecting it by hand yields something shareable
 - [ ] A "View transcript" button follows it
@@ -132,7 +139,7 @@ behaviour, not just that the controls are on screen.
 
 On the paste from step 5, verify:
 - [ ] The navigator is present, and `M` equals the number of `user` turns in the
-      transcript (not the total turn count in the header)
+      transcript, not the total turn count in the header: `4`, not `22`
 - [ ] Opening `▾` lists every user turn with its timestamp, each a link to `#turn-<n>`
 - [ ] Clicking an entry scrolls to that turn, flashes it, closes the panel, and moves
       the readout to that entry
@@ -169,9 +176,9 @@ instant for a short window afterwards.
 
 ### 6. API Upload
 
-1. Use curl to upload a second fixture file:
+1. Use curl to upload the other Claude Code fixture:
    ```
-   curl -s -F "file=@tests/fixtures/claude_code/<second-file>.jsonl" http://127.0.0.1:8000/api/upload
+   curl -s -F "file=@tests/fixtures/claude_code/a1b2c3d4-e5f6-7890-abcd-ef1234567890.jsonl" http://127.0.0.1:8000/api/upload
    ```
 2. Verify response is JSON with fields: `slug`, `url`, `delete_token`
 3. **Save the slug and delete_token** for the API delete test
