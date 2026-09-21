@@ -329,6 +329,20 @@ pre.shell span::before {
   .tooltip[data-show="true"] { transition-duration: 0ms; }
 }
 
+/* Not found */
+.notfound { text-align: center; padding: 4rem 0 3rem; }
+
+.notfound-code {
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 4rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--sb-border);
+}
+
+.notfound h1 { font-size: 1.5rem; margin-top: 0.75rem; }
+
 /* Utility */
 .text-muted { color: var(--sb-muted); }
 
