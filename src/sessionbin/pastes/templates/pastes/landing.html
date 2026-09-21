@@ -1,10 +1,14 @@
 {% extends "pastes/base.html" %}
+{% load static %}
 {% block title %}sessionbin{% endblock %}
+{% block extra_head %}
+<script src="{% static 'js/copy.js' %}" defer></script>
+{% endblock %}
 {% block content %}
-<h1>sessionbin</h1>
+<h1>Share agentic coding session transcripts</h1>
 <p class="text-muted">
-    Share agentic coding session transcripts. Upload a session file, get a URL,
-    share it. Supports <strong>Claude Code</strong>, <strong>Codex</strong>, <strong>OpenCode</strong>, and <strong>Pi</strong>.
+    Upload a session file, get a URL, share it.
+    Supports <strong>Claude Code</strong>, <strong>Codex</strong>, <strong>OpenCode</strong>, and <strong>Pi</strong>.
 </p>
 
 <form method="post" enctype="multipart/form-data" id="upload-form" data-max-size="{{ max_upload_bytes }}">
@@ -41,39 +45,73 @@
 <div class="cli-section">
     <h2>Upload from the command line</h2>
 
-    <h3>Claude Code</h3>
-    <p class="text-muted">
-        Session files are stored as <code>.jsonl</code> in
-        <code>~/.claude/projects/</code>. Upload directly:
-    </p>
-    <pre class="shell"><code><span>sessionbin upload session.jsonl</span></code></pre>
-
-    <h3>Codex</h3>
-    <p class="text-muted">
-        Session files are stored as <code>rollout-*.jsonl</code> under
-        <code>~/.codex/sessions/</code>. Upload directly:
-    </p>
-    <pre class="shell"><code><span>sessionbin upload rollout-2026-09-14T10-20-48-&lt;id&gt;.jsonl</span></code></pre>
-
-    <h3>OpenCode</h3>
-    <p class="text-muted">
-        Sessions are stored in a local database. Export first, then upload:
-    </p>
-    <pre class="shell"><code><span>opencode export &lt;sessionID&gt; &gt; session.json</span>
-<span>sessionbin upload session.json</span></code></pre>
-
-    <h3>Pi</h3>
-    <p class="text-muted">
-        Session files are stored as <code>.jsonl</code> under
-        <code>~/.pi/agent/sessions/</code>. Upload directly:
-    </p>
-    <pre class="shell"><code><span>sessionbin upload 2026-09-14T17-00-47-986Z_&lt;id&gt;.jsonl</span></code></pre>
-
     <h3>Install the CLI</h3>
     <pre class="shell"><code><span>uv tool install sessionbin</span></code></pre>
 
-    <h3>curl</h3>
-    <pre class="shell"><code><span>curl -F "file=@session.jsonl" {{ request.scheme }}://{{ request.get_host }}/api/upload</span></code></pre>
+    <h3 id="upload-a-session">Upload a session</h3>
+    {% with api=request.scheme|add:"://"|add:request.get_host|add:"/api/upload" %}
+    <div class="tabs" id="harness-tabs">
+        <div class="tab-list" role="tablist" aria-labelledby="upload-a-session">
+            <button type="button" class="tab" role="tab" id="tab-claude" aria-controls="panel-claude" aria-selected="true">Claude Code</button>
+            <button type="button" class="tab" role="tab" id="tab-codex" aria-controls="panel-codex" aria-selected="false" tabindex="-1">Codex</button>
+            <button type="button" class="tab" role="tab" id="tab-opencode" aria-controls="panel-opencode" aria-selected="false" tabindex="-1">OpenCode</button>
+            <button type="button" class="tab" role="tab" id="tab-pi" aria-controls="panel-pi" aria-selected="false" tabindex="-1">Pi</button>
+        </div>
+
+        <div class="tab-panel" id="panel-claude" role="tabpanel" aria-labelledby="tab-claude" tabindex="0">
+            <p class="text-muted">
+                Session files are stored as <code>.jsonl</code> in
+                <code>~/.claude/projects/</code>. Upload one directly:
+            </p>
+            <p class="snippet-label">sessionbin</p>
+            <pre class="shell"><code><span>sessionbin upload session.jsonl</span></code></pre>
+            <p class="snippet-label">curl</p>
+            <pre class="shell"><code><span>curl -F "file=@session.jsonl" {{ api }}</span></code></pre>
+            <p class="snippet-label">HTTPie</p>
+            <pre class="shell"><code><span>http -f POST {{ api }} file@session.jsonl</span></code></pre>
+        </div>
+
+        <div class="tab-panel" id="panel-codex" role="tabpanel" aria-labelledby="tab-codex" tabindex="0" hidden>
+            <p class="text-muted">
+                Session files are stored as <code>rollout-*.jsonl</code> under
+                <code>~/.codex/sessions/</code>. Upload one directly:
+            </p>
+            <p class="snippet-label">sessionbin</p>
+            <pre class="shell"><code><span>sessionbin upload rollout-2026-09-14T10-20-48-&lt;id&gt;.jsonl</span></code></pre>
+            <p class="snippet-label">curl</p>
+            <pre class="shell"><code><span>curl -F "file=@rollout-2026-09-14T10-20-48-&lt;id&gt;.jsonl" {{ api }}</span></code></pre>
+            <p class="snippet-label">HTTPie</p>
+            <pre class="shell"><code><span>http -f POST {{ api }} file@rollout-2026-09-14T10-20-48-&lt;id&gt;.jsonl</span></code></pre>
+        </div>
+
+        <div class="tab-panel" id="panel-opencode" role="tabpanel" aria-labelledby="tab-opencode" tabindex="0" hidden>
+            <p class="text-muted">
+                Sessions are stored in a local database, so export one first:
+            </p>
+            <pre class="shell"><code><span>opencode export &lt;sessionID&gt; &gt; session.json</span></code></pre>
+            <p class="text-muted">Then upload the export:</p>
+            <p class="snippet-label">sessionbin</p>
+            <pre class="shell"><code><span>sessionbin upload session.json</span></code></pre>
+            <p class="snippet-label">curl</p>
+            <pre class="shell"><code><span>curl -F "file=@session.json" {{ api }}</span></code></pre>
+            <p class="snippet-label">HTTPie</p>
+            <pre class="shell"><code><span>http -f POST {{ api }} file@session.json</span></code></pre>
+        </div>
+
+        <div class="tab-panel" id="panel-pi" role="tabpanel" aria-labelledby="tab-pi" tabindex="0" hidden>
+            <p class="text-muted">
+                Session files are stored as <code>.jsonl</code> under
+                <code>~/.pi/agent/sessions/</code>. Upload one directly:
+            </p>
+            <p class="snippet-label">sessionbin</p>
+            <pre class="shell"><code><span>sessionbin upload 2026-09-14T17-00-47-986Z_&lt;id&gt;.jsonl</span></code></pre>
+            <p class="snippet-label">curl</p>
+            <pre class="shell"><code><span>curl -F "file=@2026-09-14T17-00-47-986Z_&lt;id&gt;.jsonl" {{ api }}</span></code></pre>
+            <p class="snippet-label">HTTPie</p>
+            <pre class="shell"><code><span>http -f POST {{ api }} file@2026-09-14T17-00-47-986Z_&lt;id&gt;.jsonl</span></code></pre>
+        </div>
+    </div>
+    {% endwith %}
 </div>
 
 <script>
@@ -152,6 +190,40 @@
             }
         });
 
+    })();
+</script>
+
+<script>
+    (function () {
+        var tabs = Array.prototype.slice.call(
+            document.querySelectorAll("#harness-tabs .tab")
+        );
+
+        function select(tab) {
+            tabs.forEach(function (t) {
+                var on = t === tab;
+                t.setAttribute("aria-selected", on ? "true" : "false");
+                t.tabIndex = on ? 0 : -1;
+                document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+            });
+        }
+
+        tabs.forEach(function (tab, i) {
+            // Focusing a tab activates it. Click is handled separately because Safari
+            // does not focus a button when it is clicked.
+            tab.addEventListener("focus", function () { select(tab); });
+            tab.addEventListener("click", function () { select(tab); });
+            tab.addEventListener("keydown", function (e) {
+                var to =
+                    e.key === "ArrowRight" ? (i + 1) % tabs.length :
+                    e.key === "ArrowLeft" ? (i - 1 + tabs.length) % tabs.length :
+                    e.key === "Home" ? 0 :
+                    e.key === "End" ? tabs.length - 1 : -1;
+                if (to < 0) return;
+                e.preventDefault();
+                tabs[to].focus();
+            });
+        });
     })();
 </script>
 {% endblock %}

@@ -121,6 +121,13 @@ nav.container {
 
 #theme-toggle { background: none; border: none; cursor: pointer; }
 
+/* Which glyph shows is a fact about the theme, like any colour here, so it is settled in
+   the same style pass as the palette rather than by script afterwards. Set from JS it
+   would also mean both glyphs paint until the script at the foot of the page runs. */
+.icon-sun { display: none; }
+[data-theme="dark"] .icon-sun { display: block; }
+[data-theme="dark"] .icon-moon { display: none; }
+
 /* Footer */
 footer.container {
   padding: 1.5rem 1.25rem 1rem;
@@ -286,11 +293,73 @@ dd { margin: 0; overflow-wrap: anywhere; }
 /* CLI section */
 .cli-section { margin-top: 2rem; }
 
+/* Each subsection opens a new topic, so it gets air above it. The first one is the
+   exception: it belongs to the h2 directly above it and reads as part of it. */
+.cli-section h3 { margin-top: 1.75rem; }
+.cli-section h2 + h3 { margin-top: 1rem; }
+
 pre.shell span::before {
   content: "$ ";
   color: var(--sb-accent);
   user-select: none;
 }
+
+/* Copyable command block. The wrapper and the button are built by copy.js, so a block
+   without JS is simply a block. */
+.snippet { position: relative; }
+
+/* Room kept clear so a command that wraps never runs under the button. */
+.snippet pre.shell { padding-right: 2.25rem; }
+
+/* A bare glyph, drawn like the navbar's icons rather than as a filled button. A
+   background and a border would carry the 150ms transition every button here has for its
+   hover, and that transition runs on a theme switch too: the button would sit there lit
+   from the old palette for a moment after the page around it had turned over. Only
+   colour changes here, and colour is not transitioned, so it keeps step. */
+.btn-copy-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  padding: 0.25rem;
+  color: var(--sb-muted);
+  background: none;
+  border: none;
+  border-radius: 4px;
+}
+.btn-copy-icon:hover { color: var(--sb-text); background: none; }
+
+/* After :hover, which the cursor is still inside the moment a copy succeeds. */
+.btn-copy-icon.is-copied { color: var(--sb-accent); }
+
+.snippet-label {
+  font-size: 0.75rem;
+  color: var(--sb-muted);
+  margin: 0 0 0.25rem;
+}
+
+/* Harness tabs */
+/* Scrolls rather than wraps: four harness names fit on a phone, a fifth would otherwise
+   drop to a second row and split the underline the tabs sit on. */
+.tab-list {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--sb-border);
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 0.5rem 0.75rem;
+  color: var(--sb-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--sb-text); background: none; border-color: transparent; }
+.tab[aria-selected="true"] { color: var(--sb-text); border-bottom-color: var(--sb-accent); }
 
 /* Tooltips
    Drawn rather than left to the browser's own title tooltip, which cannot be warmed:

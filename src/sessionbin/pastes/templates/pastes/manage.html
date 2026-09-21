@@ -1,7 +1,9 @@
 {% extends "pastes/base.html" %}
+{% load static %}
 {% block title %}Manage {{ paste.slug }} — sessionbin{% endblock %}
 {% block extra_head %}
 <meta name="referrer" content="strict-origin-when-cross-origin">
+<script src="{% static 'js/copy.js' %}" defer></script>
 {% endblock %}
 {% block content %}
 {% if paste.deleted_at %}
@@ -63,44 +65,4 @@
     </span>
 </form>
 {% endif %}
-
-<script>
-    (function () {
-        document.querySelectorAll("button[data-copy]").forEach(function (btn) {
-            var status = btn.parentNode.querySelector(".copy-status");
-            var timer;
-
-            function reset() {
-                clearTimeout(timer);
-                btn.textContent = "Copy";
-                status.textContent = "";
-                status.classList.add("visually-hidden");
-            }
-
-            function succeeded() {
-                btn.textContent = "Copied";
-                status.textContent = "Copied to clipboard";
-                timer = setTimeout(reset, 1500);
-            }
-
-            /* Left standing rather than flashed for a second: someone who missed it would
-               go on believing they hold the only copy of a URL they never copied. */
-            function failed() {
-                status.textContent = "Copy failed — select the link and copy it yourself.";
-                status.classList.remove("visually-hidden");
-            }
-
-            btn.addEventListener("click", function () {
-                reset();
-                // Undefined outside a secure context, which a self-hosted instance over
-                // plain HTTP is.
-                if (!navigator.clipboard) {
-                    failed();
-                    return;
-                }
-                navigator.clipboard.writeText(btn.getAttribute("data-copy")).then(succeeded, failed);
-            });
-        });
-    })();
-</script>
 {% endblock %}

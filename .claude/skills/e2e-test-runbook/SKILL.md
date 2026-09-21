@@ -52,13 +52,41 @@ Work through each section in order. Record pass/fail for every check. Stop and r
 1. Navigate to `http://127.0.0.1:8000/`
 2. Take a snapshot and verify:
    - [ ] Page title is "sessionbin"
-   - [ ] Heading "sessionbin" is visible
-   - [ ] Description text about sharing transcripts is present, mentioning **Claude Code**, **Codex**, **OpenCode**, and **Pi**
+   - [ ] The `h1` reads "Share agentic coding session transcripts". The word sessionbin
+         appears once, in the navbar, rather than being said twice on one screen
+   - [ ] Description text below it mentions **Claude Code**, **Codex**, **OpenCode**, and **Pi**
    - [ ] Drag-and-drop upload zone with "Drag a file here, or click to browse" text exists
    - [ ] "Upload" button exists
-   - [ ] "Upload from the command line" section with per-harness instructions (Claude Code, Codex, OpenCode, Pi) and curl examples exists
+   - [ ] "Upload from the command line" section leads with "Install the CLI", since that
+         is what a first-time reader needs before anything else on the page is usable
+   - [ ] Under "Upload a session", the four harnesses are **tabs**, not stacked sections:
+         Claude Code selected by default, the other three panels hidden
+   - [ ] The selected panel names where that harness keeps its sessions and gives three
+         ways to upload the same file: `sessionbin`, `curl`, and `HTTPie`. OpenCode leads
+         with its `opencode export` step, shared by all three
    - [ ] Navbar has "sessionbin" link, GitHub link, and theme toggle button
    - [ ] No console errors besides favicon 404
+
+### 1a. Command Tabs and Copy Buttons
+
+The tablist follows the APG automatic-activation pattern, so focus alone selects a tab.
+
+- [ ] Clicking each tab shows that harness's panel and hides the rest
+- [ ] With a tab focused, `→` and `←` move along the tablist and select as they go,
+      wrapping at both ends; `Home` and `End` jump to the first and last
+- [ ] `Tab` from the selected tab moves to the panel, not to the next tab
+- [ ] Every command block carries a copy button in its top-right corner, drawn as an
+      icon rather than the word Copy, which would crowd the command. Clicking one puts
+      **the command without its `$ ` prompt** on the clipboard, and the glyph becomes a
+      green tick for about a second before returning:
+      ```js
+      navigator.clipboard.readText()   // e.g. "uv tool install sessionbin"
+      ```
+      The manage page's copy buttons stay lettered: they sit beside a URL, where a
+      second icon would read as part of the link rather than a control
+- [ ] Over the host's LAN IP rather than `127.0.0.1` — an insecure context, where
+      `navigator.clipboard` is undefined — a copy leaves
+      "Copy failed — select the command and copy it yourself." standing under the block
 
 ### 2. Theme Toggle
 
@@ -374,6 +402,7 @@ After all sections pass, report a summary table:
 | Test | Result |
 |------|--------|
 | Landing page | |
+| Command tabs and copy buttons | |
 | Theme toggle | |
 | Web upload | |
 | Manage page | |

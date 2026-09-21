@@ -55,25 +55,16 @@
 <script>
         (function() {
             var toggle = document.getElementById('theme-toggle');
-            var sun = toggle.querySelector('.icon-sun');
-            var moon = toggle.querySelector('.icon-moon');
             function current() {
                 return document.documentElement.getAttribute('data-theme')
                     || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            }
-            function update() {
-                var dark = current() === 'dark';
-                sun.style.display = dark ? 'block' : 'none';
-                moon.style.display = dark ? 'none' : 'block';
             }
             toggle.addEventListener('click', function(e) {
                 e.preventDefault();
                 var next = current() === 'dark' ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', next);
                 localStorage.setItem('theme', next);
-                update();
             });
-            update();
         })();
     </script>
 </body>
