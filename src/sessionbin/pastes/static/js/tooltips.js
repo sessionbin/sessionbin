@@ -7,21 +7,19 @@
  * at once and skips its fade. The warmth is shared across every trigger, which is the
  * point, since the ones worth reading in a row sit side by side.
  *
- * The text stays in the markup as a real title attribute and is only moved aside here,
- * so without this script the browser's own tooltips still work.
+ * The text stays in the markup as a real title attribute and is borrowed from there only
+ * while a hovering pointer is around, so on a touch screen, or with no script at all, the
+ * browser's own tooltips still work.
  */
 (function () {
-    // A pointer that cannot hover has no use for any of this, and holding a touch would
-    // only leave a tooltip stranded with no way to dismiss it.
-    if (!window.matchMedia('(hover: hover)').matches) return;
-
     var OPEN_DELAY = 200;
     var WARM_FOR = 300;
     var GAP = 6;
     var EDGE = 4;
 
-    var triggers = document.querySelectorAll('[title]');
-    if (!triggers.length) return;
+    // The markup is server-rendered and no title appears after it, so a page with none
+    // now will never have one.
+    if (!document.querySelectorAll('[title]').length) return;
 
     var tip = document.createElement('div');
     tip.className = 'tooltip';
@@ -31,11 +29,6 @@
     // accessibility tree and a stray description would be left sitting in the document.
     tip.setAttribute('role', 'tooltip');
     document.body.appendChild(tip);
-
-    triggers.forEach(function (el) {
-        el.setAttribute('data-tip', el.getAttribute('title'));
-        el.removeAttribute('title');
-    });
 
     var shownFor = null;
     var pendingFor = null;
@@ -48,10 +41,14 @@
         var width = tip.offsetWidth;
         var height = tip.offsetHeight;
         var left = at.left + at.width / 2 - width / 2;
+        // Both bounds come off documentElement, the box a client rect is measured
+        // against; innerWidth and innerHeight count in the scrollbars, and nothing can be
+        // read from under one.
         var limit = document.documentElement.clientWidth - width - EDGE;
+        var floor = document.documentElement.clientHeight - height - EDGE;
         var top = at.bottom + GAP;
         // Near the foot of the window there is no room underneath, so it goes above.
-        if (top + height + EDGE > window.innerHeight) top = at.top - height - GAP;
+        if (top > floor) top = at.top - height - GAP;
         tip.style.left = Math.round(Math.max(EDGE, Math.min(left, limit))) + 'px';
         tip.style.top = Math.round(Math.max(EDGE, top)) + 'px';
     }
@@ -134,7 +131,7 @@
     function reflow() {
         if (!shownFor) return;
         var at = shownFor.getBoundingClientRect();
-        if (at.bottom < 0 || at.top > window.innerHeight) hide();
+        if (at.bottom < 0 || at.top > document.documentElement.clientHeight) hide();
         else place(shownFor);
     }
 
@@ -154,4 +151,35 @@
     // Opening a tool call or the turn navigator moves the page out from under it too.
     // toggle does not bubble, hence the capture.
     document.addEventListener('toggle', hide, true);
+
+    /* Everything above hangs off data-tip, so holding the titles is what switches these
+       tooltips on. A pointer that cannot hover has no use for them, and holding a touch
+       would only leave one stranded with no way to dismiss it, so there the titles go
+       back and the browser takes over. Which pointer is primary can change under a live
+       page, as when a tablet gains a mouse, so it is not settled once at startup. The
+       listeners can stay attached through either state: with no data-tip anywhere, every
+       one of them falls straight through. */
+    function adopt() {
+        document.querySelectorAll('[title]').forEach(function (el) {
+            el.setAttribute('data-tip', el.getAttribute('title'));
+            el.removeAttribute('title');
+        });
+    }
+
+    function restore() {
+        hide();
+        document.querySelectorAll('[data-tip]').forEach(function (el) {
+            el.setAttribute('title', el.getAttribute('data-tip'));
+            el.removeAttribute('data-tip');
+        });
+    }
+
+    var hover = window.matchMedia('(hover: hover)');
+
+    hover.addEventListener('change', function () {
+        if (hover.matches) adopt();
+        else restore();
+    });
+
+    if (hover.matches) adopt();
 })();

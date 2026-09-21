@@ -26,15 +26,15 @@
     sync();
 })();
 
-/* Progressive enhancement for the user-turn navigator. The panel is a <details> and
+/* Progressive enhancement for the user-turn navigator. The index is a <details> and
    works without any of this; what needs script is knowing where the reader currently is.
    The steppers stay hidden until they work. */
 (function () {
     var nav = document.querySelector('.prompt-nav');
     if (!nav) return;
 
-    var panel = nav.querySelector('.prompt-index');
-    var summary = panel.querySelector('summary');
+    var index = nav.querySelector('.prompt-index');
+    var summary = index.querySelector('summary');
     var marker = nav.querySelector('.prompt-marker');
     var steppers = nav.querySelectorAll('.prompt-step');
     var items = [];
@@ -91,10 +91,10 @@
         chosenAt = null;
     }
 
-    function closePanel(restoreFocus) {
-        if (!panel.open) return;
-        var hadFocus = panel.contains(document.activeElement);
-        panel.open = false;
+    function closeIndex(restoreFocus) {
+        if (!index.open) return;
+        var hadFocus = index.contains(document.activeElement);
+        index.open = false;
         // Closing hides whatever was focused inside, which would otherwise drop the
         // reader at the top of the tab order.
         if (restoreFocus && hadFocus) summary.focus();
@@ -102,7 +102,7 @@
 
     function go(n) {
         if (n < 0 || n >= items.length) return;
-        closePanel(false);
+        closeIndex(false);
         choose(n);
         var target = items[n].target;
         if (window.location.hash === '#' + target.id) {
@@ -184,12 +184,12 @@
     var SCROLL_KEYS = /^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/;
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closePanel(true);
+        if (e.key === 'Escape') closeIndex(true);
         if (SCROLL_KEYS.test(e.key)) release();
     });
 
     document.addEventListener('click', function (e) {
-        if (!nav.contains(e.target)) closePanel(false);
+        if (!nav.contains(e.target)) closeIndex(false);
     });
 
     // Covers arriving on a shared turn link and the back button. A hash naming something
