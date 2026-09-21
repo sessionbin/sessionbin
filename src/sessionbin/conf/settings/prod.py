@@ -29,6 +29,13 @@ MIDDLEWARE.insert(
 )
 MIDDLEWARE.insert(0, "sessionbin.conf.middleware.ClientIPMiddleware")
 
+# Hashed names let WhiteNoise serve static immutable for a year rather than its 60-second
+# default, so a deploy cannot pair new HTML with the last release's cached CSS.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
 # Security headers
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 15768000

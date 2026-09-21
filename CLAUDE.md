@@ -40,13 +40,18 @@ fragment is embedded in the page shell at serve time.
   service layer.
 - **Slugs are the user-facing identity.** Two uploads of the same bytes produce two
   pastes with two slugs. The recorded sha256 is for analytics/dedup and is never exposed.
-- **Static assets are unversioned.** `{% static %}` emits a plain path with no hash, and
-  nothing configures `ManifestStaticFilesStorage`, so a CSS or JS change can be served
-  against a browser-cached copy. Stored fragments reference no assets at all; only the
-  page shell links them, so a template change never strands a fragment on an old file.
+- **Static assets are hashed in production, and only there.** `prod.py` sets WhiteNoise's
+  `CompressedManifestStaticFilesStorage`, and the `collectstatic` in `deploy/Containerfile`
+  writes the hashed names and the manifest at image build, so WhiteNoise serves them
+  immutable for a year instead of its 60-second default. Development stays unhashed: the
+  hashing mixin returns the plain path whenever `DEBUG` is on, so nothing needs collecting
+  to run the dev container. A `{% static %}` naming a file that was never collected is a
+  500 in production, not a 404.
 - **Rendered fragments are stored, so template changes do not reach existing pastes.**
   After editing `transcript.html`, run `manage.py render` to re-render every stored paste.
   Bumping `RENDERER_VERSION` makes that mandatory on deploy; nothing re-renders on its own.
+  Fragments reference no static assets at all — only the page shell links them — so asset
+  hashing never strands a stored fragment on a file that no longer exists.
 - **The deployed image carries no domain.** `deploy/Containerfile` and `settings/prod.py` take
   the hostname from `DJANGO_ALLOWED_HOSTS` at runtime, and `CSRF_TRUSTED_ORIGINS` derives from
   it. Anyone can run their own instance, so never hardcode `sessionbin.dev` outside the CLI's
