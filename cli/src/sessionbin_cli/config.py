@@ -17,7 +17,7 @@ def config_file() -> Path:
     return config_dir() / "config.toml"
 
 
-def _read_config_url() -> str | None:
+def read_config_url() -> str | None:
     path = config_file()
     if not path.exists():
         return None
@@ -31,7 +31,7 @@ def _read_config_url() -> str | None:
     return None
 
 
-def _prompt_and_save() -> str:
+def prompt_and_save() -> str:
     click.echo("No server configured. Enter your sessionbin instance URL.")
     url = click.prompt("Server URL", default=DEFAULT_SERVER_URL)
     url = url.rstrip("/")
@@ -50,8 +50,8 @@ def resolve_server_url(server_flag: str | None = None) -> str:
     if env:
         return env.rstrip("/")
 
-    from_config = _read_config_url()
+    from_config = read_config_url()
     if from_config:
         return from_config.rstrip("/")
 
-    return _prompt_and_save()
+    return prompt_and_save()

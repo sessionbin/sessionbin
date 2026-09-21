@@ -16,7 +16,7 @@ def render(session: Session) -> str:
         "pastes/transcript.html",
         {
             "session": session,
-            "stats": _compute_stats(session),
+            "stats": compute_stats(session),
             "prompts": build_prompt_index(session),
         },
     )
@@ -68,7 +68,7 @@ def first_text(turn: Turn) -> str:
     return ""
 
 
-def _compute_stats(session: Session) -> dict:
+def compute_stats(session: Session) -> dict:
     duration = None
     if session.started_at and session.ended_at:
         duration = (session.ended_at - session.started_at).total_seconds()

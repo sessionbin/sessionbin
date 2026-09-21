@@ -2,8 +2,8 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from sessionbin.pastes.render import (
-    _compute_stats,
     build_prompt_index,
+    compute_stats,
     first_text,
     render,
 )
@@ -94,14 +94,14 @@ class TestComputeStats:
             harness="claude-code",
             turns=turns,
         )
-        stats = _compute_stats(session)
+        stats = compute_stats(session)
         assert stats["turn_count"] == 2
         assert stats["tool_call_count"] == 2
         assert stats["duration"] == 60.0
 
     def test_empty_session(self):
         session = Session(harness="claude-code")
-        stats = _compute_stats(session)
+        stats = compute_stats(session)
         assert stats["turn_count"] == 0
         assert stats["tool_call_count"] == 0
         assert stats["duration"] is None
@@ -115,7 +115,7 @@ class TestComputeStats:
             Turn(index=1, role="assistant", timestamp=t1, ended_at=end),
         ]
         session = Session(harness="opencode", turns=turns)
-        stats = _compute_stats(session)
+        stats = compute_stats(session)
         assert stats["duration"] == 300.0
 
 

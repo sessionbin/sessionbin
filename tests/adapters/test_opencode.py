@@ -7,7 +7,7 @@ import pytest
 from sessionbin.adapters.opencode import parse, parse_millis, parse_parts
 
 
-def _export(*, info_overrides=None, messages=None):
+def export(*, info_overrides=None, messages=None):
     info = {
         "id": "ses_test",
         "title": "Test session",
@@ -23,7 +23,7 @@ def _export(*, info_overrides=None, messages=None):
     return json.dumps(doc).encode()
 
 
-def _user_msg(text="hello", msg_id="msg_u1"):
+def user_msg(text="hello", msg_id="msg_u1"):
     return {
         "info": {
             "id": msg_id,
@@ -35,7 +35,7 @@ def _user_msg(text="hello", msg_id="msg_u1"):
     }
 
 
-def _assistant_msg(parts, parent_id="msg_u1", msg_id="msg_a1", model="claude-sonnet-4-6"):
+def assistant_msg(parts, parent_id="msg_u1", msg_id="msg_a1", model="claude-sonnet-4-6"):
     return {
         "info": {
             "id": msg_id,
@@ -53,7 +53,7 @@ def _assistant_msg(parts, parent_id="msg_u1", msg_id="msg_a1", model="claude-son
 
 class TestParse:
     def test_minimal_session(self):
-        raw = _export(messages=[_user_msg(), _assistant_msg([{"type": "text", "text": "hi"}])])
+        raw = export(messages=[user_msg(), assistant_msg([{"type": "text", "text": "hi"}])])
         session = parse(raw)
         assert session.harness == "opencode"
         assert len(session.turns) == 2
@@ -63,25 +63,25 @@ class TestParse:
         assert session.turns[1].index == 1
 
     def test_model_from_assistant_message(self):
-        raw = _export(messages=[_user_msg(), _assistant_msg([{"type": "text", "text": "hi"}])])
+        raw = export(messages=[user_msg(), assistant_msg([{"type": "text", "text": "hi"}])])
         session = parse(raw)
         assert session.models == ["claude-sonnet-4-6"]
         assert session.turns[1].model == "claude-sonnet-4-6"
 
     def test_selected_model_that_produced_nothing_is_not_reported(self):
-        raw = _export(
+        raw = export(
             info_overrides={"model": {"id": "claude-opus-4"}},
-            messages=[_user_msg(), _assistant_msg([{"type": "text", "text": "hi"}])],
+            messages=[user_msg(), assistant_msg([{"type": "text", "text": "hi"}])],
         )
         assert parse(raw).models == ["claude-sonnet-4-6"]
 
     def test_models_are_listed_in_order_of_first_use(self):
-        raw = _export(
+        raw = export(
             messages=[
-                _user_msg(msg_id="msg_u1"),
-                _assistant_msg([{"type": "text", "text": "hi"}], model="big-pickle"),
-                _user_msg(text="again", msg_id="msg_u2"),
-                _assistant_msg(
+                user_msg(msg_id="msg_u1"),
+                assistant_msg([{"type": "text", "text": "hi"}], model="big-pickle"),
+                user_msg(text="again", msg_id="msg_u2"),
+                assistant_msg(
                     [{"type": "text", "text": "hi again"}],
                     parent_id="msg_u2",
                     msg_id="msg_a2",
@@ -91,13 +91,13 @@ class TestParse:
         assert parse(raw).models == ["big-pickle", "claude-sonnet-4-6"]
 
     def test_empty_messages(self):
-        raw = _export(messages=[])
+        raw = export(messages=[])
         session = parse(raw)
         assert len(session.turns) == 0
         assert session.started_at is None
 
     def test_timestamp_from_millis(self):
-        raw = _export(messages=[_user_msg()])
+        raw = export(messages=[user_msg()])
         session = parse(raw)
         ts = session.turns[0].timestamp
         assert ts is not None
@@ -108,19 +108,19 @@ class TestParse:
 class TestTurnGrouping:
     def test_assistant_messages_merged_by_parent(self):
         msgs = [
-            _user_msg(msg_id="msg_u1"),
-            _assistant_msg(
+            user_msg(msg_id="msg_u1"),
+            assistant_msg(
                 [{"type": "text", "text": "first"}],
                 parent_id="msg_u1",
                 msg_id="msg_a1",
             ),
-            _assistant_msg(
+            assistant_msg(
                 [{"type": "text", "text": "second"}],
                 parent_id="msg_u1",
                 msg_id="msg_a2",
             ),
         ]
-        session = parse(_export(messages=msgs))
+        session = parse(export(messages=msgs))
         assert len(session.turns) == 2
         assert session.turns[1].role == "assistant"
         texts = [b.text for b in session.turns[1].blocks if b.kind == "text"]
@@ -128,16 +128,16 @@ class TestTurnGrouping:
 
     def test_separate_user_turns(self):
         msgs = [
-            _user_msg("q1", msg_id="msg_u1"),
-            _assistant_msg([{"type": "text", "text": "a1"}], parent_id="msg_u1"),
-            _user_msg("q2", msg_id="msg_u2"),
-            _assistant_msg(
+            user_msg("q1", msg_id="msg_u1"),
+            assistant_msg([{"type": "text", "text": "a1"}], parent_id="msg_u1"),
+            user_msg("q2", msg_id="msg_u2"),
+            assistant_msg(
                 [{"type": "text", "text": "a2"}],
                 parent_id="msg_u2",
                 msg_id="msg_a2",
             ),
         ]
-        session = parse(_export(messages=msgs))
+        session = parse(export(messages=msgs))
         assert len(session.turns) == 4
         assert [t.role for t in session.turns] == ["user", "assistant", "user", "assistant"]
 
@@ -248,8 +248,8 @@ class TestErrorMessages:
             },
             "parts": [],
         }
-        msgs = [_user_msg(), error_msg]
-        session = parse(_export(messages=msgs))
+        msgs = [user_msg(), error_msg]
+        session = parse(export(messages=msgs))
         assert len(session.turns) == 1
         assert session.turns[0].role == "user"
 

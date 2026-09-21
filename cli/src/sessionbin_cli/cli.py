@@ -28,7 +28,7 @@ CONTEXT_SETTINGS = {
 }
 
 
-def _human_size(nbytes: int) -> str:
+def human_size(nbytes: int) -> str:
     for unit in ("B", "KB", "MB", "GB"):
         if nbytes < 1024:
             return f"{nbytes:.1f} {unit}" if unit != "B" else f"{nbytes} {unit}"
@@ -36,7 +36,7 @@ def _human_size(nbytes: int) -> str:
     return f"{nbytes:.1f} TB"
 
 
-def _time_ago(mtime: float) -> str:
+def time_ago(mtime: float) -> str:
     delta = time.time() - mtime
     if delta < 60:
         return "just now"
@@ -50,7 +50,7 @@ def _time_ago(mtime: float) -> str:
     return f"{days}d ago"
 
 
-def _short_summary(info: SessionInfo, max_len: int) -> str:
+def short_summary(info: SessionInfo, max_len: int) -> str:
     text = info.title or info.summary or info.path.name
     text = " ".join(text.splitlines())
     if len(text) > max_len:
@@ -58,11 +58,11 @@ def _short_summary(info: SessionInfo, max_len: int) -> str:
     return text
 
 
-def _session_size(s: SessionInfo) -> str:
+def session_size(s: SessionInfo) -> str:
     if s.harness == "opencode":
         return "-"
     try:
-        return _human_size(s.path.stat().st_size)
+        return human_size(s.path.stat().st_size)
     except OSError:
         return "-"
 
@@ -70,22 +70,22 @@ def _session_size(s: SessionInfo) -> str:
 DEFAULT_PICKER_LIMIT = 20
 
 
-def _pick_session(show_all: bool = False) -> SessionInfo | None:
+def pick_session(show_all: bool = False) -> SessionInfo | None:
     all_sessions = find_all_sessions()
     sessions = all_sessions if show_all else all_sessions[:DEFAULT_PICKER_LIMIT]
     if not sessions:
         return None
 
-    sizes = {id(s): _session_size(s) for s in sessions}
-    time_w = max(len(_time_ago(s.mtime)) for s in sessions)
+    sizes = {id(s): session_size(s) for s in sessions}
+    time_w = max(len(time_ago(s.mtime)) for s in sessions)
     size_w = max(len(v) for v in sizes.values())
     src_w = max(len(s.harness) for s in sessions)
     proj_w = max(len(s.project) for s in sessions)
     summary_max = 60
 
     def row(s: SessionInfo) -> str:
-        ago = _time_ago(s.mtime)
-        summary = _short_summary(s, summary_max)
+        ago = time_ago(s.mtime)
+        summary = short_summary(s, summary_max)
         return (
             f"{ago:<{time_w}}  {sizes[id(s)]:>{size_w}}  {s.harness:<{src_w}}  "
             f"{s.project:<{proj_w}}  {summary}"
@@ -133,30 +133,30 @@ def upload(path: str | None, server: str | None, latest: bool, yes: bool, show_a
         if session is None:
             click.secho("No sessions found.", fg="red", err=True)
             sys.exit(1)
-        size = _session_size(session)
-        ago = _time_ago(session.mtime)
+        size = session_size(session)
+        ago = time_ago(session.mtime)
         click.echo(f"Found: {session.path} ({size}, modified {ago})")
         if not yes:
             if not click.confirm("Upload?", default=False):
                 raise SystemExit(0)
         if session.harness == "opencode":
-            upload_data, upload_filename = _export_opencode_session(session)
+            upload_data, upload_filename = export_opencode_session(session)
         else:
             upload_data, upload_filename = session.path.read_bytes(), session.path.name
     else:
-        session = _pick_session(show_all=show_all)
+        session = pick_session(show_all=show_all)
         if session is None:
             click.secho("No sessions found.", fg="red", err=True)
             sys.exit(1)
         if session.harness == "opencode":
-            upload_data, upload_filename = _export_opencode_session(session)
+            upload_data, upload_filename = export_opencode_session(session)
         else:
             upload_data, upload_filename = session.path.read_bytes(), session.path.name
 
     if len(upload_data) > MAX_UPLOAD_BYTES:
         click.secho(
-            f"Upload is {_human_size(len(upload_data))}, which exceeds the "
-            f"{_human_size(MAX_UPLOAD_BYTES)} upload limit.",
+            f"Upload is {human_size(len(upload_data))}, which exceeds the "
+            f"{human_size(MAX_UPLOAD_BYTES)} upload limit.",
             fg="red",
             err=True,
         )
@@ -192,7 +192,7 @@ def upload(path: str | None, server: str | None, latest: bool, yes: bool, show_a
     click.secho(f"Manage: {manage_url}", fg="green")
 
 
-def _export_opencode_session(session: SessionInfo) -> tuple[bytes, str]:
+def export_opencode_session(session: SessionInfo) -> tuple[bytes, str]:
     binary = shutil.which("opencode")
     if binary is None:
         fallback = Path.home() / ".opencode" / "bin" / "opencode"

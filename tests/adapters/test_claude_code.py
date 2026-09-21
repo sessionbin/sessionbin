@@ -3,15 +3,15 @@ from collections import Counter
 
 import pytest
 
-from sessionbin.adapters.claude_code import _parse_content, _process_user_text, parse
+from sessionbin.adapters.claude_code import parse, parse_content, process_user_text
 from sessionbin.adapters.common import parse_timestamp, strip_ansi
 
 
-def _jsonl(*objs: dict) -> bytes:
+def jsonl(*objs: dict) -> bytes:
     return b"\n".join(json.dumps(o).encode() for o in objs)
 
 
-def _user_line(content="hello", **extra):
+def user_line(content="hello", **extra):
     obj = {
         "type": "user",
         "message": {"role": "user", "content": content},
@@ -21,7 +21,7 @@ def _user_line(content="hello", **extra):
     return obj
 
 
-def _assistant_line(content="hi", **extra):
+def assistant_line(content="hi", **extra):
     obj = {
         "type": "assistant",
         "message": {"role": "assistant", "content": content},
@@ -33,7 +33,7 @@ def _assistant_line(content="hi", **extra):
 
 class TestParse:
     def test_minimal_session(self):
-        raw = _jsonl(_user_line(), _assistant_line())
+        raw = jsonl(user_line(), assistant_line())
         session = parse(raw)
         assert session.harness == "claude-code"
         assert len(session.turns) == 2
@@ -53,31 +53,31 @@ class TestParse:
             "cost-state",
         ]
         lines = [{"type": t} for t in skipped]
-        raw = _jsonl(*lines)
+        raw = jsonl(*lines)
         session = parse(raw)
         assert len(session.turns) == 0
         assert "unknown type" not in caplog.text
 
     def test_unknown_type_warns(self, caplog):
-        raw = _jsonl({"type": "bogus"})
+        raw = jsonl({"type": "bogus"})
         session = parse(raw)
         assert len(session.turns) == 0
         assert "unknown type" in caplog.text
 
     def test_model_from_first_assistant(self):
-        a1 = _assistant_line()
+        a1 = assistant_line()
         a1["message"]["model"] = "claude-opus-4"
-        a2 = _assistant_line()
+        a2 = assistant_line()
         a2["message"]["model"] = "claude-sonnet-4"
-        session = parse(_jsonl(_user_line(), a1, a2))
+        session = parse(jsonl(user_line(), a1, a2))
         assert session.model == "claude-opus-4"
 
     def test_timestamps_from_first_and_last_turn(self):
-        u = _user_line()
+        u = user_line()
         u["timestamp"] = "2026-05-01T09:00:00.000Z"
-        a = _assistant_line()
+        a = assistant_line()
         a["timestamp"] = "2026-05-01T09:05:00.000Z"
-        session = parse(_jsonl(u, a))
+        session = parse(jsonl(u, a))
         assert session.started_at is not None
         assert session.ended_at is not None
         assert session.started_at < session.ended_at
@@ -89,7 +89,7 @@ class TestParse:
         assert session.ended_at is None
 
     def test_malformed_json_skipped(self, caplog):
-        raw = b"not json\n" + json.dumps(_user_line()).encode()
+        raw = b"not json\n" + json.dumps(user_line()).encode()
         session = parse(raw)
         assert len(session.turns) == 1
         assert "malformed JSON" in caplog.text
@@ -105,68 +105,64 @@ class TestMetaMessages:
         ],
     )
     def test_meta_user_lines_skipped(self, content):
-        session = parse(_jsonl(_user_line(content=content, isMeta=True, turnCompanion=True)))
+        session = parse(jsonl(user_line(content=content, isMeta=True, turnCompanion=True)))
         assert session.turns == []
 
     def test_non_meta_user_line_with_same_text_kept(self):
-        raw = _jsonl(_user_line(content="Base directory for this skill: /x"))
+        raw = jsonl(user_line(content="Base directory for this skill: /x"))
         assert len(parse(raw).turns) == 1
 
 
 class TestToolResultMerging:
     def test_result_joins_the_turn_that_made_the_call(self):
-        call = _assistant_line(
+        call = assistant_line(
             content=[{"type": "tool_use", "name": "Bash", "input": {"cmd": "ls"}, "id": "t1"}]
         )
-        result = _user_line(content=[{"type": "tool_result", "content": "ok", "tool_use_id": "t1"}])
-        session = parse(_jsonl(_user_line(), call, result, _assistant_line()))
+        result = user_line(content=[{"type": "tool_result", "content": "ok", "tool_use_id": "t1"}])
+        session = parse(jsonl(user_line(), call, result, assistant_line()))
         assert [t.role for t in session.turns] == ["user", "assistant", "assistant"]
         assert [b.kind for b in session.turns[1].blocks] == ["tool_use", "tool_result"]
         assert [t.index for t in session.turns] == [0, 1, 2]
 
     def test_parallel_calls_each_get_their_result(self):
-        call_a = _assistant_line(
+        call_a = assistant_line(
             content=[{"type": "tool_use", "name": "Read", "input": {"f": "a"}, "id": "ta"}]
         )
-        call_b = _assistant_line(
+        call_b = assistant_line(
             content=[{"type": "tool_use", "name": "Read", "input": {"f": "b"}, "id": "tb"}]
         )
-        result_a = _user_line(
-            content=[{"type": "tool_result", "content": "A", "tool_use_id": "ta"}]
-        )
-        result_b = _user_line(
-            content=[{"type": "tool_result", "content": "B", "tool_use_id": "tb"}]
-        )
-        session = parse(_jsonl(_user_line(), call_a, call_b, result_a, result_b))
+        result_a = user_line(content=[{"type": "tool_result", "content": "A", "tool_use_id": "ta"}])
+        result_b = user_line(content=[{"type": "tool_result", "content": "B", "tool_use_id": "tb"}])
+        session = parse(jsonl(user_line(), call_a, call_b, result_a, result_b))
         assert [t.role for t in session.turns] == ["user", "assistant", "assistant"]
         assert [b.tool_output for b in session.turns[1].blocks if b.kind == "tool_result"] == ["A"]
         assert [b.tool_output for b in session.turns[2].blocks if b.kind == "tool_result"] == ["B"]
 
     def test_result_without_id_stays_a_user_turn(self):
-        call = _assistant_line(content=[{"type": "tool_use", "name": "Bash", "input": {}}])
-        result = _user_line(content=[{"type": "tool_result", "content": "ok"}])
-        session = parse(_jsonl(call, result))
+        call = assistant_line(content=[{"type": "tool_use", "name": "Bash", "input": {}}])
+        result = user_line(content=[{"type": "tool_result", "content": "ok"}])
+        session = parse(jsonl(call, result))
         assert [t.role for t in session.turns] == ["assistant", "user"]
 
     def test_result_for_a_different_call_stays_a_user_turn(self):
-        call = _assistant_line(
+        call = assistant_line(
             content=[{"type": "tool_use", "name": "Bash", "input": {"cmd": "ls"}, "id": "t1"}]
         )
-        result = _user_line(content=[{"type": "tool_result", "content": "ok", "tool_use_id": "t9"}])
-        session = parse(_jsonl(call, result))
+        result = user_line(content=[{"type": "tool_result", "content": "ok", "tool_use_id": "t9"}])
+        session = parse(jsonl(call, result))
         assert [t.role for t in session.turns] == ["assistant", "user"]
 
     def test_result_mixed_with_text_stays_a_user_turn(self):
-        call = _assistant_line(
+        call = assistant_line(
             content=[{"type": "tool_use", "name": "Bash", "input": {"cmd": "ls"}, "id": "t1"}]
         )
-        result = _user_line(
+        result = user_line(
             content=[
                 {"type": "tool_result", "content": "ok", "tool_use_id": "t1"},
                 {"type": "text", "text": "and also do this"},
             ]
         )
-        session = parse(_jsonl(call, result))
+        session = parse(jsonl(call, result))
         assert [t.role for t in session.turns] == ["assistant", "user"]
 
 
@@ -186,29 +182,29 @@ class TestParseTimestamp:
 
 class TestParseContent:
     def test_string(self):
-        blocks = _parse_content("hello", 1)
+        blocks = parse_content("hello", 1)
         assert len(blocks) == 1
         assert blocks[0].kind == "text"
         assert blocks[0].text == "hello"
 
     def test_empty_string(self):
-        assert _parse_content("", 1) == []
+        assert parse_content("", 1) == []
 
     def test_non_string_non_list(self):
-        assert _parse_content(42, 1) == []
+        assert parse_content(42, 1) == []
 
     def test_text_block(self):
-        blocks = _parse_content([{"type": "text", "text": "hi"}], 1)
+        blocks = parse_content([{"type": "text", "text": "hi"}], 1)
         assert blocks[0].kind == "text"
         assert blocks[0].text == "hi"
 
     def test_thinking_block(self):
-        blocks = _parse_content([{"type": "thinking", "thinking": "hmm"}], 1)
+        blocks = parse_content([{"type": "thinking", "thinking": "hmm"}], 1)
         assert blocks[0].kind == "thinking"
         assert blocks[0].text == "hmm"
 
     def test_tool_use_block(self):
-        blocks = _parse_content(
+        blocks = parse_content(
             [{"type": "tool_use", "name": "Bash", "input": {"cmd": "ls"}, "id": "t1"}], 1
         )
         b = blocks[0]
@@ -218,7 +214,7 @@ class TestParseContent:
         assert b.tool_use_id == "t1"
 
     def test_tool_result_string(self):
-        blocks = _parse_content(
+        blocks = parse_content(
             [{"type": "tool_result", "content": "output", "tool_use_id": "t1"}], 1
         )
         b = blocks[0]
@@ -229,19 +225,19 @@ class TestParseContent:
 
     def test_tool_result_array_content(self):
         content = [{"type": "text", "text": "line1"}, {"type": "text", "text": "line2"}]
-        blocks = _parse_content(
+        blocks = parse_content(
             [{"type": "tool_result", "content": content, "tool_use_id": "t1"}], 1
         )
         assert blocks[0].tool_output == "line1\nline2"
 
     def test_tool_result_is_error(self):
-        blocks = _parse_content(
+        blocks = parse_content(
             [{"type": "tool_result", "content": "fail", "tool_use_id": "t1", "is_error": True}], 1
         )
         assert blocks[0].is_error is True
 
     def test_unknown_block_type_warns(self, caplog):
-        blocks = _parse_content([{"type": "magic"}], 1)
+        blocks = parse_content([{"type": "magic"}], 1)
         assert blocks == []
         assert "unknown block type" in caplog.text
 
@@ -252,7 +248,7 @@ class TestProcessUserText:
             "<local-command-caveat>Caveat: The messages below were generated"
             " by the user while running local commands.</local-command-caveat>"
         )
-        assert _process_user_text(text) is None
+        assert process_user_text(text) is None
 
     def test_command_name_extracted(self):
         text = (
@@ -260,7 +256,7 @@ class TestProcessUserText:
             " <command-message>model</command-message>"
             " <command-args></command-args>"
         )
-        assert _process_user_text(text) == "`/model`"
+        assert process_user_text(text) == "`/model`"
 
     def test_command_name_with_args(self):
         text = (
@@ -268,14 +264,14 @@ class TestProcessUserText:
             " <command-message>effort</command-message>"
             " <command-args>max</command-args>"
         )
-        assert _process_user_text(text) == "`/effort`"
+        assert process_user_text(text) == "`/effort`"
 
     def test_local_command_stdout_stripped(self):
         text = "<local-command-stdout>Set effort level to max</local-command-stdout>"
-        assert _process_user_text(text) == "Set effort level to max"
+        assert process_user_text(text) == "Set effort level to max"
 
     def test_plain_text_unchanged(self):
-        assert _process_user_text("hello world") == "hello world"
+        assert process_user_text("hello world") == "hello world"
 
 
 class TestStripAnsi:
@@ -297,13 +293,13 @@ class TestStripAnsi:
 
 class TestAnsiStrippingIntegration:
     def test_ansi_stripped_from_string_content(self):
-        raw = _jsonl(_user_line(content="\x1b[1mhello\x1b[0m"))
+        raw = jsonl(user_line(content="\x1b[1mhello\x1b[0m"))
         session = parse(raw)
         assert session.turns[0].blocks[0].text == "hello"
 
     def test_ansi_stripped_from_text_block(self):
         content = [{"type": "text", "text": "\x1b[32mgreen\x1b[0m"}]
-        raw = _jsonl(_assistant_line(content=content))
+        raw = jsonl(assistant_line(content=content))
         session = parse(raw)
         assert session.turns[0].blocks[0].text == "green"
 
@@ -311,7 +307,7 @@ class TestAnsiStrippingIntegration:
         content = [
             {"type": "tool_result", "content": "\x1b[1mbold output\x1b[22m", "tool_use_id": "t1"}
         ]
-        raw = _jsonl(_user_line(content=content))
+        raw = jsonl(user_line(content=content))
         session = parse(raw)
         assert session.turns[0].blocks[0].tool_output == "bold output"
 
@@ -321,57 +317,57 @@ class TestAnsiStrippingIntegration:
             "Set model to \x1b[1mOpus 4.6 (1M context)\x1b[22m"
             "</local-command-stdout>"
         )
-        raw = _jsonl(_user_line(content=text))
+        raw = jsonl(user_line(content=text))
         session = parse(raw)
         assert session.turns[0].blocks[0].text == "Set model to Opus 4.6 (1M context)"
 
 
 class TestLocalCommandIntegration:
     def test_caveat_turn_skipped(self):
-        caveat = _user_line(
+        caveat = user_line(
             content="<local-command-caveat>Caveat: DO NOT respond.</local-command-caveat>"
         )
-        raw = _jsonl(caveat, _assistant_line())
+        raw = jsonl(caveat, assistant_line())
         session = parse(raw)
         assert len(session.turns) == 1
         assert session.turns[0].role == "assistant"
 
     def test_command_name_turn_rendered(self):
-        cmd = _user_line(
+        cmd = user_line(
             content=(
                 "<command-name>/model</command-name>"
                 " <command-message>model</command-message>"
                 " <command-args></command-args>"
             ),
         )
-        raw = _jsonl(cmd)
+        raw = jsonl(cmd)
         session = parse(raw)
         assert len(session.turns) == 1
         assert session.turns[0].blocks[0].text == "`/model`"
 
     def test_stdout_turn_rendered(self):
-        stdout = _user_line(
+        stdout = user_line(
             content="<local-command-stdout>Set model to Opus 4.6</local-command-stdout>"
         )
-        raw = _jsonl(stdout)
+        raw = jsonl(stdout)
         session = parse(raw)
         assert len(session.turns) == 1
         assert session.turns[0].blocks[0].text == "Set model to Opus 4.6"
 
     def test_turn_indices_correct_after_skip(self):
-        caveat = _user_line(content="<local-command-caveat>Caveat: skip me.</local-command-caveat>")
-        cmd = _user_line(
+        caveat = user_line(content="<local-command-caveat>Caveat: skip me.</local-command-caveat>")
+        cmd = user_line(
             content=(
                 "<command-name>/effort</command-name>"
                 " <command-message>effort</command-message>"
                 " <command-args></command-args>"
             ),
         )
-        stdout = _user_line(
+        stdout = user_line(
             content="<local-command-stdout>Set effort level to max</local-command-stdout>"
         )
-        real = _user_line(content="Do something")
-        raw = _jsonl(caveat, cmd, stdout, real, _assistant_line())
+        real = user_line(content="Do something")
+        raw = jsonl(caveat, cmd, stdout, real, assistant_line())
         session = parse(raw)
         assert len(session.turns) == 4
         for i, turn in enumerate(session.turns):

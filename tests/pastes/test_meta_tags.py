@@ -5,7 +5,7 @@ import pytest
 from sessionbin.pastes.services import create_paste_from_upload, delete_paste
 
 
-def _get_meta_content(html: str, attr: str, value: str) -> str | None:
+def get_meta_content(html: str, attr: str, value: str) -> str | None:
     pattern = rf'<meta\s+{attr}="{re.escape(value)}"\s+content="([^"]*)"'
     m = re.search(pattern, html)
     if m:
@@ -30,14 +30,14 @@ class TestLandingPageMeta:
         resp = client.get("/")
         html = resp.content.decode()
         for attr, name in CORE_OG_TAGS:
-            content = _get_meta_content(html, attr, name)
+            content = get_meta_content(html, attr, name)
             assert content is not None and content != "", f"Missing or empty: {name}"
 
     def test_twitter_tags_present(self, client):
         resp = client.get("/")
         html = resp.content.decode()
         for name in ("twitter:title", "twitter:description"):
-            content = _get_meta_content(html, "name", name)
+            content = get_meta_content(html, "name", name)
             assert content is not None and content != "", f"Missing or empty: {name}"
 
 
@@ -48,14 +48,14 @@ class TestPastePageMeta:
         resp = client.get(f"/p/{paste.slug}/")
         html = resp.content.decode()
         for attr, name in CORE_OG_TAGS:
-            content = _get_meta_content(html, attr, name)
+            content = get_meta_content(html, attr, name)
             assert content is not None and content != "", f"Missing or empty: {name}"
 
     def test_og_url_matches_request(self, client, fixture_bytes):
         paste, _ = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
         resp = client.get(f"/p/{paste.slug}/")
         html = resp.content.decode()
-        og_url = _get_meta_content(html, "property", "og:url")
+        og_url = get_meta_content(html, "property", "og:url")
         assert og_url is not None
         assert f"/p/{paste.slug}/" in og_url
 
@@ -63,7 +63,7 @@ class TestPastePageMeta:
         paste, _ = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
         resp = client.get(f"/p/{paste.slug}/")
         html = resp.content.decode()
-        desc = _get_meta_content(html, "property", "og:description")
+        desc = get_meta_content(html, "property", "og:description")
         assert desc is not None
         assert "session" in desc.lower()
 
@@ -71,7 +71,7 @@ class TestPastePageMeta:
         paste, _ = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
         resp = client.get(f"/p/{paste.slug}/")
         html = resp.content.decode()
-        title = _get_meta_content(html, "property", "og:title")
+        title = get_meta_content(html, "property", "og:title")
         assert title is not None
         assert paste.slug in title
 
@@ -87,7 +87,7 @@ class TestMetaEscaping:
 
         resp = client.get(f"/p/{paste.slug}/")
         html = resp.content.decode()
-        desc = _get_meta_content(html, "property", "og:description")
+        desc = get_meta_content(html, "property", "og:description")
         assert desc is not None
         assert "<script>" not in desc
         assert "&lt;" in desc
@@ -99,7 +99,7 @@ class TestMetaTruncation:
         paste, _ = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
         resp = client.get(f"/p/{paste.slug}/")
         html = resp.content.decode()
-        desc = _get_meta_content(html, "property", "og:description")
+        desc = get_meta_content(html, "property", "og:description")
         assert desc is not None
         assert len(desc) <= 250
 
@@ -112,4 +112,4 @@ class TestDeletedPasteMeta:
         resp = client.get(f"/p/{paste.slug}/")
         assert resp.status_code == 404
         html = resp.content.decode()
-        assert _get_meta_content(html, "property", "og:title") is None
+        assert get_meta_content(html, "property", "og:title") is None

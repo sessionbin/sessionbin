@@ -10,12 +10,12 @@ from sessionbin_cli.config import config_dir
 SESSIONS_FILE = "sessions.json"
 
 
-def _sessions_path() -> Path:
+def sessions_path() -> Path:
     return config_dir() / SESSIONS_FILE
 
 
 def load() -> dict[str, dict]:
-    path = _sessions_path()
+    path = sessions_path()
     if not path.exists():
         return {}
     return json.loads(path.read_text())
@@ -24,7 +24,7 @@ def load() -> dict[str, dict]:
 def save(slug: str, entry: dict) -> None:
     data = load()
     data[slug] = entry
-    _write(data)
+    write_all(data)
 
 
 def get(slug: str) -> dict | None:
@@ -34,7 +34,7 @@ def get(slug: str) -> dict | None:
 def remove(slug: str) -> None:
     data = load()
     data.pop(slug, None)
-    _write(data)
+    write_all(data)
 
 
 def all() -> list[dict]:
@@ -44,8 +44,8 @@ def all() -> list[dict]:
     return entries
 
 
-def _write(data: dict) -> None:
-    path = _sessions_path()
+def write_all(data: dict) -> None:
+    path = sessions_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
     try:

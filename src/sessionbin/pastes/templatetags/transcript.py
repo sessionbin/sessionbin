@@ -92,7 +92,7 @@ def render_markdown(text: str | None) -> str:
     return mark_safe(result)
 
 
-def _is_blank_thinking(block) -> bool:
+def is_blank_thinking(block) -> bool:
     return block.kind == "thinking" and not (block.text or "").strip()
 
 
@@ -103,7 +103,7 @@ def visible_blocks(turn) -> list:
     Models defaulting to omitted reasoning display still emit thinking blocks, but with
     empty text. Rendering those produces blank boxes, so drop them here.
     """
-    return [b for b in turn.blocks if not _is_blank_thinking(b)]
+    return [b for b in turn.blocks if not is_blank_thinking(b)]
 
 
 @register.filter
@@ -113,4 +113,4 @@ def is_omitted_thinking_turn(turn) -> bool:
     Claude Code streams one block per line, so each such block becomes an entire turn.
     The template collapses these to a single line instead of a full turn card.
     """
-    return bool(turn.blocks) and all(_is_blank_thinking(b) for b in turn.blocks)
+    return bool(turn.blocks) and all(is_blank_thinking(b) for b in turn.blocks)

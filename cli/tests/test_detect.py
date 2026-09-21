@@ -12,7 +12,7 @@ from sessionbin_cli.detect import (
 )
 
 
-def _make_project(tmp_path, name, files):
+def make_project(tmp_path, name, files):
     projects = tmp_path / ".claude" / "projects"
     project_dir = projects / name
     project_dir.mkdir(parents=True)
@@ -28,7 +28,7 @@ def test_finds_jsonl_files(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "sessionbin_cli.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects"
     )
-    _make_project(tmp_path, "-home-user-repos-myproject", ["abc.jsonl", "def.jsonl"])
+    make_project(tmp_path, "-home-user-repos-myproject", ["abc.jsonl", "def.jsonl"])
     results = find_claude_sessions()
     names = [s.path.name for s in results]
     assert "abc.jsonl" in names
@@ -55,7 +55,7 @@ def test_sorted_by_mtime_descending(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "sessionbin_cli.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects"
     )
-    paths = _make_project(tmp_path, "-home-user-repos-proj", ["old.jsonl", "new.jsonl"])
+    paths = make_project(tmp_path, "-home-user-repos-proj", ["old.jsonl", "new.jsonl"])
     os.utime(paths[0], (time.time() - 100, time.time() - 100))
     os.utime(paths[1], (time.time(), time.time()))
     results = find_claude_sessions()
@@ -70,7 +70,7 @@ def test_most_recent(tmp_path, monkeypatch):
     monkeypatch.setattr("sessionbin_cli.detect.OPENCODE_DB_PATH", tmp_path / "nonexistent.db")
     monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", tmp_path / "nonexistent")
     monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", tmp_path / "nonexistent")
-    paths = _make_project(tmp_path, "-home-user-repos-proj", ["old.jsonl", "new.jsonl"])
+    paths = make_project(tmp_path, "-home-user-repos-proj", ["old.jsonl", "new.jsonl"])
     os.utime(paths[0], (time.time() - 100, time.time() - 100))
     os.utime(paths[1], (time.time(), time.time()))
     result = most_recent()
@@ -93,7 +93,7 @@ def test_ignores_non_jsonl(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "sessionbin_cli.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects"
     )
-    _make_project(tmp_path, "-home-user-repos-proj", ["readme.md", "session.jsonl"])
+    make_project(tmp_path, "-home-user-repos-proj", ["readme.md", "session.jsonl"])
     results = find_claude_sessions()
     names = [s.path.name for s in results]
     assert "session.jsonl" in names
@@ -125,7 +125,7 @@ def test_project_falls_back_to_dir_name(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "sessionbin_cli.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects"
     )
-    _make_project(tmp_path, "-home-user-repos-myproject", ["session.jsonl"])
+    make_project(tmp_path, "-home-user-repos-myproject", ["session.jsonl"])
     results = find_claude_sessions()
     assert results[0].project == "-home-user-repos-myproject"
 
@@ -146,7 +146,7 @@ def test_reads_custom_title(tmp_path, monkeypatch):
     assert results[0].summary == "do something"
 
 
-def _create_opencode_db(db_path):
+def create_opencode_db(db_path):
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path))
     conn.execute("CREATE TABLE project (  id TEXT PRIMARY KEY,  worktree TEXT NOT NULL)")
@@ -168,14 +168,14 @@ def test_claude_sessions_have_claude_code_harness(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "sessionbin_cli.detect.CLAUDE_PROJECTS_DIR", tmp_path / ".claude" / "projects"
     )
-    _make_project(tmp_path, "-home-user-repos-proj", ["session.jsonl"])
+    make_project(tmp_path, "-home-user-repos-proj", ["session.jsonl"])
     results = find_claude_sessions()
     assert results[0].harness == "claude-code"
 
 
 def test_opencode_finds_sessions(tmp_path, monkeypatch):
     db_path = tmp_path / "opencode.db"
-    conn = _create_opencode_db(db_path)
+    conn = create_opencode_db(db_path)
     conn.execute("INSERT INTO project VALUES ('proj1', '/home/user/repos/myapp')")
     conn.execute(
         "INSERT INTO session VALUES "
@@ -200,7 +200,7 @@ def test_opencode_finds_sessions(tmp_path, monkeypatch):
 
 def test_opencode_excludes_archived(tmp_path, monkeypatch):
     db_path = tmp_path / "opencode.db"
-    conn = _create_opencode_db(db_path)
+    conn = create_opencode_db(db_path)
     conn.execute("INSERT INTO project VALUES ('proj1', '/home/user/repos/myapp')")
     conn.execute(
         "INSERT INTO session VALUES "
@@ -223,7 +223,7 @@ def test_opencode_excludes_archived(tmp_path, monkeypatch):
 
 def test_opencode_empty_db(tmp_path, monkeypatch):
     db_path = tmp_path / "opencode.db"
-    conn = _create_opencode_db(db_path)
+    conn = create_opencode_db(db_path)
     conn.close()
     monkeypatch.setattr("sessionbin_cli.detect.OPENCODE_DB_PATH", db_path)
 
@@ -235,7 +235,7 @@ def test_opencode_missing_db(tmp_path, monkeypatch):
     assert find_opencode_sessions() == []
 
 
-def _codex_rollout(path, session_id="01a0", cwd="/home/user/repos/proj", thread_source="user"):
+def codex_rollout(path, session_id="01a0", cwd="/home/user/repos/proj", thread_source="user"):
     def user_message(text):
         return {
             "timestamp": "2026-09-14T14:20:38.644Z",
@@ -274,12 +274,8 @@ def _codex_rollout(path, session_id="01a0", cwd="/home/user/repos/proj", thread_
 def test_codex_finds_sessions(tmp_path, monkeypatch):
     sessions_dir = tmp_path / ".codex" / "sessions"
     monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", sessions_dir)
-    old = _codex_rollout(
-        sessions_dir / "2026" / "09" / "13" / "rollout-old.jsonl", session_id="old"
-    )
-    new = _codex_rollout(
-        sessions_dir / "2026" / "09" / "14" / "rollout-new.jsonl", session_id="new"
-    )
+    old = codex_rollout(sessions_dir / "2026" / "09" / "13" / "rollout-old.jsonl", session_id="old")
+    new = codex_rollout(sessions_dir / "2026" / "09" / "14" / "rollout-new.jsonl", session_id="new")
     os.utime(old, (time.time() - 100, time.time() - 100))
     os.utime(new, (time.time(), time.time()))
 
@@ -297,8 +293,8 @@ def test_codex_finds_sessions(tmp_path, monkeypatch):
 def test_codex_skips_subagent_rollouts(tmp_path, monkeypatch):
     sessions_dir = tmp_path / ".codex" / "sessions"
     monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", sessions_dir)
-    _codex_rollout(sessions_dir / "2026" / "09" / "14" / "rollout-main.jsonl", session_id="main")
-    _codex_rollout(
+    codex_rollout(sessions_dir / "2026" / "09" / "14" / "rollout-main.jsonl", session_id="main")
+    codex_rollout(
         sessions_dir / "2026" / "09" / "14" / "rollout-sub.jsonl",
         session_id="sub",
         thread_source="guardian_review",
@@ -312,7 +308,7 @@ def test_codex_skips_subagent_rollouts(tmp_path, monkeypatch):
 def test_codex_lists_rollout_without_thread_source(tmp_path, monkeypatch):
     sessions_dir = tmp_path / ".codex" / "sessions"
     monkeypatch.setattr("sessionbin_cli.detect.CODEX_SESSIONS_DIR", sessions_dir)
-    _codex_rollout(sessions_dir / "rollout-old-version.jsonl", session_id="v", thread_source=None)
+    codex_rollout(sessions_dir / "rollout-old-version.jsonl", session_id="v", thread_source=None)
 
     assert [s.session_id for s in find_codex_sessions()] == ["v"]
 
@@ -335,7 +331,7 @@ def test_codex_missing_dir(tmp_path, monkeypatch):
     assert find_codex_sessions() == []
 
 
-def _pi_session(
+def pi_session(
     path, session_id="01a0", cwd="/home/user/repos/proj", name=None, prompt="Fix the bug"
 ):
     lines = [
@@ -382,8 +378,8 @@ def test_pi_finds_sessions(tmp_path, monkeypatch):
     sessions_dir = tmp_path / ".pi" / "agent" / "sessions"
     monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", sessions_dir)
     project_dir = sessions_dir / "--home-user-repos-proj--"
-    old = _pi_session(project_dir / "2026-09-13T10-00-00-000Z_old.jsonl", session_id="old")
-    new = _pi_session(
+    old = pi_session(project_dir / "2026-09-13T10-00-00-000Z_old.jsonl", session_id="old")
+    new = pi_session(
         project_dir / "2026-09-14T10-00-00-000Z_new.jsonl", session_id="new", name="arithmetic"
     )
     os.utime(old, (time.time() - 100, time.time() - 100))
@@ -405,7 +401,7 @@ def test_pi_skips_files_without_session_header(tmp_path, monkeypatch):
     sessions_dir = tmp_path / ".pi" / "agent" / "sessions"
     monkeypatch.setattr("sessionbin_cli.detect.PI_SESSIONS_DIR", sessions_dir)
     project_dir = sessions_dir / "--home-user-repos-proj--"
-    _pi_session(project_dir / "real.jsonl", session_id="real")
+    pi_session(project_dir / "real.jsonl", session_id="real")
     project_dir.mkdir(parents=True, exist_ok=True)
     (project_dir / "other.jsonl").write_text(json.dumps({"type": "user", "message": {}}) + "\n")
     (project_dir / "broken.jsonl").write_text("not json\n")

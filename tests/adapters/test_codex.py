@@ -8,40 +8,40 @@ from sessionbin.adapters.codex import join_text, parse, parse_item
 from sessionbin.adapters.common import parse_timestamp, strip_ansi
 
 
-def _jsonl(*objs: dict) -> bytes:
+def jsonl(*objs: dict) -> bytes:
     return b"\n".join(json.dumps(o).encode() for o in objs)
 
 
-def _line(line_type: str, payload: dict, timestamp="2026-05-01T10:00:00.000Z") -> dict:
+def rollout_line(line_type: str, payload: dict, timestamp="2026-05-01T10:00:00.000Z") -> dict:
     return {"timestamp": timestamp, "type": line_type, "payload": payload}
 
 
-def _session_meta(**extra) -> dict:
-    return _line("session_meta", {"id": "01a0", "cwd": "/home/alice/projects/demo", **extra})
+def session_meta(**extra) -> dict:
+    return rollout_line("session_meta", {"id": "01a0", "cwd": "/home/alice/projects/demo", **extra})
 
 
-def _turn_context(model="gpt-5.6-luna") -> dict:
-    return _line("turn_context", {"turn_id": "t1", "model": model})
+def turn_context(model="gpt-5.6-luna") -> dict:
+    return rollout_line("turn_context", {"turn_id": "t1", "model": model})
 
 
-def _user_line(text="hello", timestamp="2026-05-01T10:00:00.000Z") -> dict:
+def user_line(text="hello", timestamp="2026-05-01T10:00:00.000Z") -> dict:
     payload = {"type": "message", "role": "user", "content": [{"type": "input_text", "text": text}]}
-    return _line("response_item", payload, timestamp)
+    return rollout_line("response_item", payload, timestamp)
 
 
-def _assistant_line(text="hi", timestamp="2026-05-01T10:00:05.000Z") -> dict:
+def assistant_line(text="hi", timestamp="2026-05-01T10:00:05.000Z") -> dict:
     payload = {
         "type": "message",
         "role": "assistant",
         "content": [{"type": "output_text", "text": text}],
         "phase": "final_answer",
     }
-    return _line("response_item", payload, timestamp)
+    return rollout_line("response_item", payload, timestamp)
 
 
 class TestParse:
     def test_minimal_session(self):
-        raw = _jsonl(_session_meta(), _user_line(), _assistant_line())
+        raw = jsonl(session_meta(), user_line(), assistant_line())
         session = parse(raw)
         assert session.harness == "codex"
         assert len(session.turns) == 2
@@ -51,55 +51,55 @@ class TestParse:
         assert session.turns[1].index == 1
 
     def test_turns_carry_the_turn_context_in_force(self):
-        raw = _jsonl(
-            _session_meta(),
-            _turn_context("gpt-5.6-luna"),
-            _user_line(),
-            _assistant_line(),
-            _turn_context("gpt-5.6-sol"),
-            _user_line("again"),
-            _assistant_line("hi again"),
+        raw = jsonl(
+            session_meta(),
+            turn_context("gpt-5.6-luna"),
+            user_line(),
+            assistant_line(),
+            turn_context("gpt-5.6-sol"),
+            user_line("again"),
+            assistant_line("hi again"),
         )
         session = parse(raw)
         assert session.models == ["gpt-5.6-luna", "gpt-5.6-sol"]
         assert [t.model for t in session.turns] == [None, "gpt-5.6-luna", None, "gpt-5.6-sol"]
 
     def test_turn_context_that_produced_no_turn_is_not_reported(self):
-        raw = _jsonl(
-            _session_meta(),
-            _turn_context("gpt-5.6-luna"),
-            _turn_context("gpt-5.6-sol"),
-            _user_line(),
-            _assistant_line(),
+        raw = jsonl(
+            session_meta(),
+            turn_context("gpt-5.6-luna"),
+            turn_context("gpt-5.6-sol"),
+            user_line(),
+            assistant_line(),
         )
         assert parse(raw).models == ["gpt-5.6-sol"]
 
     def test_no_turn_context_leaves_model_unset(self):
-        assert parse(_jsonl(_session_meta(), _user_line(), _assistant_line())).model is None
+        assert parse(jsonl(session_meta(), user_line(), assistant_line())).model is None
 
     def test_bookkeeping_lines_produce_no_turns(self):
         lines = [
-            _session_meta(),
-            _line("event_msg", {"type": "task_started"}),
-            _line("event_msg", {"type": "item_completed", "item": {"type": "UserMessage"}}),
-            _line("world_state", {"full": True, "state": {}}),
-            _line("compacted", {"message": "", "replacement_history": []}),
-            _line("inter_agent_communication_metadata", {"trigger_turn": False}),
+            session_meta(),
+            rollout_line("event_msg", {"type": "task_started"}),
+            rollout_line("event_msg", {"type": "item_completed", "item": {"type": "UserMessage"}}),
+            rollout_line("world_state", {"full": True, "state": {}}),
+            rollout_line("compacted", {"message": "", "replacement_history": []}),
+            rollout_line("inter_agent_communication_metadata", {"trigger_turn": False}),
         ]
-        assert parse(_jsonl(*lines)).turns == []
+        assert parse(jsonl(*lines)).turns == []
 
     def test_unknown_line_type_warns(self, caplog):
-        session = parse(_jsonl({"type": "bogus", "payload": {}}))
+        session = parse(jsonl({"type": "bogus", "payload": {}}))
         assert session.turns == []
         assert "unknown type" in caplog.text
 
     def test_line_without_payload_warns(self, caplog):
-        session = parse(_jsonl({"type": "response_item"}))
+        session = parse(jsonl({"type": "response_item"}))
         assert session.turns == []
         assert "without a payload" in caplog.text
 
     def test_malformed_json_skipped(self, caplog):
-        raw = b"not json\n" + json.dumps(_user_line()).encode()
+        raw = b"not json\n" + json.dumps(user_line()).encode()
         session = parse(raw)
         assert len(session.turns) == 1
         assert "malformed JSON" in caplog.text
@@ -110,9 +110,9 @@ class TestParse:
         assert session.started_at is None
 
     def test_timestamps_from_first_and_last_turn(self):
-        raw = _jsonl(
-            _user_line(timestamp="2026-05-01T09:00:00.000Z"),
-            _assistant_line(timestamp="2026-05-01T09:05:00.000Z"),
+        raw = jsonl(
+            user_line(timestamp="2026-05-01T09:00:00.000Z"),
+            assistant_line(timestamp="2026-05-01T09:05:00.000Z"),
         )
         session = parse(raw)
         assert session.started_at is not None
@@ -122,16 +122,16 @@ class TestParse:
 
 class TestAutoDetect:
     def test_rollout_detected_by_session_meta(self):
-        session, _ = detect_parse(_jsonl(_session_meta(), _user_line()))
+        session, _ = detect_parse(jsonl(session_meta(), user_line()))
         assert session.harness == "codex"
 
     def test_leading_whitespace_tolerated(self):
-        session, _ = detect_parse(b"\n" + _jsonl(_session_meta(), _user_line()))
+        session, _ = detect_parse(b"\n" + jsonl(session_meta(), user_line()))
         assert session.harness == "codex"
 
     def test_claude_code_jsonl_not_mistaken(self):
         line = {"type": "user", "message": {"role": "user", "content": "hi"}}
-        session, _ = detect_parse(_jsonl(line))
+        session, _ = detect_parse(jsonl(line))
         assert session.harness == "claude-code"
 
 
@@ -146,10 +146,10 @@ class TestUserMessages:
         ],
     )
     def test_injected_messages_skipped(self, text):
-        assert parse(_jsonl(_user_line(text))).turns == []
+        assert parse(jsonl(user_line(text))).turns == []
 
     def test_empty_message_skipped(self):
-        assert parse(_jsonl(_user_line(""))).turns == []
+        assert parse(jsonl(user_line(""))).turns == []
 
     def test_multipart_message_joined(self):
         payload = {
@@ -160,7 +160,7 @@ class TestUserMessages:
                 {"type": "input_text", "text": "second"},
             ],
         }
-        session = parse(_jsonl(_line("response_item", payload)))
+        session = parse(jsonl(rollout_line("response_item", payload)))
         assert session.turns[0].blocks[0].text == "first\nsecond"
 
     def test_developer_message_skipped(self):
@@ -171,17 +171,17 @@ class TestUserMessages:
                 {"type": "input_text", "text": "<skills_instructions>...</skills_instructions>"}
             ],
         }
-        assert parse(_jsonl(_line("response_item", payload))).turns == []
+        assert parse(jsonl(rollout_line("response_item", payload))).turns == []
 
     def test_shell_command_kept(self):
         text = "<user_shell_command>\n<command>\nls\n</command>\n<result>\nExit code: 0\n</result>"
-        session = parse(_jsonl(_user_line(text)))
+        session = parse(jsonl(user_line(text)))
         assert session.turns[0].blocks[0].text == text
 
 
 class TestAssistantItems:
     def test_text(self):
-        parsed = parse_item(_assistant_line("**hi**")["payload"], 1)
+        parsed = parse_item(assistant_line("**hi**")["payload"], 1)
         assert parsed is not None
         role, blocks = parsed
         assert role == "assistant"
@@ -189,7 +189,7 @@ class TestAssistantItems:
         assert blocks[0].text == "**hi**"
 
     def test_empty_text_skipped(self):
-        assert parse_item(_assistant_line("")["payload"], 1) is None
+        assert parse_item(assistant_line("")["payload"], 1) is None
 
     def test_reasoning_summary_to_thinking(self):
         item = {
@@ -322,36 +322,36 @@ class TestToolItems:
         assert parsed[1][0].tool_output == "ok"
 
     def test_call_and_result_pair_up(self):
-        call = _line(
+        call = rollout_line(
             "response_item",
             {"type": "custom_tool_call", "name": "exec", "input": "x", "call_id": "c1"},
         )
-        result = _line(
+        result = rollout_line(
             "response_item", {"type": "custom_tool_call_output", "call_id": "c1", "output": "y"}
         )
-        session = parse(_jsonl(_user_line(), call, result))
+        session = parse(jsonl(user_line(), call, result))
         assert [t.role for t in session.turns] == ["user", "assistant"]
         assert [b.kind for b in session.turns[1].blocks] == ["tool_use", "tool_result"]
         assert session.turns[1].blocks[0].tool_use_id == session.turns[1].blocks[1].tool_use_id
         assert session.tool_call_count == 1
 
     def test_parallel_calls_each_get_their_result(self):
-        call_a = _line(
+        call_a = rollout_line(
             "response_item",
             {"type": "custom_tool_call", "name": "exec", "input": "a", "call_id": "ca"},
         )
-        call_b = _line(
+        call_b = rollout_line(
             "response_item",
             {"type": "custom_tool_call", "name": "exec", "input": "b", "call_id": "cb"},
         )
-        reasoning = _line("response_item", {"type": "reasoning", "summary": []})
-        result_a = _line(
+        reasoning = rollout_line("response_item", {"type": "reasoning", "summary": []})
+        result_a = rollout_line(
             "response_item", {"type": "custom_tool_call_output", "call_id": "ca", "output": "A"}
         )
-        result_b = _line(
+        result_b = rollout_line(
             "response_item", {"type": "custom_tool_call_output", "call_id": "cb", "output": "B"}
         )
-        session = parse(_jsonl(_user_line(), call_a, call_b, reasoning, result_a, result_b))
+        session = parse(jsonl(user_line(), call_a, call_b, reasoning, result_a, result_b))
         assert [t.role for t in session.turns] == ["user", "assistant", "assistant", "assistant"]
         assert [b.kind for b in session.turns[1].blocks] == ["tool_use", "tool_result"]
         assert [b.kind for b in session.turns[2].blocks] == ["tool_use", "tool_result"]
@@ -359,10 +359,10 @@ class TestToolItems:
         assert session.turns[2].blocks[1].tool_output == "B"
 
     def test_orphan_result_gets_its_own_turn(self):
-        result = _line(
+        result = rollout_line(
             "response_item", {"type": "custom_tool_call_output", "call_id": "c9", "output": "y"}
         )
-        session = parse(_jsonl(_user_line(), _assistant_line(), result))
+        session = parse(jsonl(user_line(), assistant_line(), result))
         assert [t.role for t in session.turns] == ["user", "assistant", "assistant"]
         assert session.turns[2].blocks[0].kind == "tool_result"
 

@@ -61,7 +61,7 @@ class TestHealthEndpoint:
 @pytest.mark.django_db
 class TestUploadEndpoint:
     def test_returns_slug_url_delete_token(self, client, fixture_bytes):
-        resp = client.post("/api/upload", {"file": _as_upload(fixture_bytes)})
+        resp = client.post("/api/upload", {"file": as_upload(fixture_bytes)})
         assert resp.status_code == 200
         data = resp.json()
         assert "slug" in data
@@ -71,21 +71,21 @@ class TestUploadEndpoint:
 
     def test_file_too_large(self, client, settings):
         settings.SESSIONBIN = {**settings.SESSIONBIN, "MAX_UPLOAD_BYTES": 10}
-        resp = client.post("/api/upload", {"file": _as_upload(b"x" * 11)})
+        resp = client.post("/api/upload", {"file": as_upload(b"x" * 11)})
         assert resp.status_code == 413
         data = resp.json()
         assert data["error"] == "file too large"
         assert data["max_bytes"] == 10
 
     def test_unknown_harness(self, client, fixture_bytes):
-        resp = client.post("/api/upload?harness=bogus", {"file": _as_upload(fixture_bytes)})
+        resp = client.post("/api/upload?harness=bogus", {"file": as_upload(fixture_bytes)})
         assert resp.status_code == 400
         data = resp.json()
         assert data["error"] == "unknown harness: bogus"
         assert data["valid"] == ["claude-code", "codex", "opencode", "pi"]
 
     def test_explicit_harness_accepted(self, client, fixture_bytes):
-        resp = client.post("/api/upload?harness=claude-code", {"file": _as_upload(fixture_bytes)})
+        resp = client.post("/api/upload?harness=claude-code", {"file": as_upload(fixture_bytes)})
         assert resp.status_code == 200
         assert Paste.objects.get(slug=resp.json()["slug"]).harness == "claude-code"
 
@@ -158,7 +158,7 @@ class TestRawPaste:
 @pytest.mark.django_db
 class TestEndToEnd:
     def test_upload_then_view(self, client, fixture_bytes):
-        upload_resp = client.post("/api/upload", {"file": _as_upload(fixture_bytes)})
+        upload_resp = client.post("/api/upload", {"file": as_upload(fixture_bytes)})
         assert upload_resp.status_code == 200
         slug = upload_resp.json()["slug"]
 
@@ -177,13 +177,13 @@ class TestWebUpload:
         assert 'enctype="multipart/form-data"' in content
 
     def test_post_redirects_to_manage(self, client, fixture_bytes):
-        resp = client.post("/", {"file": _as_upload(fixture_bytes)})
+        resp = client.post("/", {"file": as_upload(fixture_bytes)})
         assert resp.status_code == 302
         assert "/manage/" in resp["Location"]
         assert "token=" in resp["Location"]
 
     def test_post_redirect_token_works(self, client, fixture_bytes):
-        resp = client.post("/", {"file": _as_upload(fixture_bytes)})
+        resp = client.post("/", {"file": as_upload(fixture_bytes)})
         manage_resp = client.get(resp["Location"])
         assert manage_resp.status_code == 200
 
@@ -194,7 +194,7 @@ class TestWebUpload:
 
     def test_post_too_large_file(self, client, settings):
         settings.SESSIONBIN = {**settings.SESSIONBIN, "MAX_UPLOAD_BYTES": 10}
-        resp = client.post("/", {"file": _as_upload(b"x" * 11)})
+        resp = client.post("/", {"file": as_upload(b"x" * 11)})
         assert resp.status_code == 200
         content = resp.content.decode()
         assert "too large" in content
@@ -355,7 +355,7 @@ class TestApiDelete:
 @pytest.mark.django_db
 class TestEndToEndDelete:
     def test_web_upload_then_manage_then_delete(self, client, fixture_bytes):
-        upload_resp = client.post("/", {"file": _as_upload(fixture_bytes)})
+        upload_resp = client.post("/", {"file": as_upload(fixture_bytes)})
         manage_url = upload_resp["Location"]
         manage_resp = client.get(manage_url)
         assert manage_resp.status_code == 200
@@ -369,7 +369,7 @@ class TestEndToEndDelete:
         assert client.get(f"/p/{paste.slug}/").status_code == 404
 
     def test_api_upload_then_api_delete(self, client, fixture_bytes):
-        upload_resp = client.post("/api/upload", {"file": _as_upload(fixture_bytes)})
+        upload_resp = client.post("/api/upload", {"file": as_upload(fixture_bytes)})
         data = upload_resp.json()
         assert client.get(f"/p/{data['slug']}/").status_code == 200
 
@@ -381,7 +381,7 @@ class TestEndToEndDelete:
         assert client.get(f"/p/{data['slug']}/").status_code == 404
 
     def test_api_upload_then_web_delete(self, client, fixture_bytes):
-        upload_resp = client.post("/api/upload", {"file": _as_upload(fixture_bytes)})
+        upload_resp = client.post("/api/upload", {"file": as_upload(fixture_bytes)})
         data = upload_resp.json()
 
         manage_url = f"/p/{data['slug']}/manage/?token={data['delete_token']}"
@@ -390,5 +390,5 @@ class TestEndToEndDelete:
         assert client.get(f"/p/{data['slug']}/").status_code == 404
 
 
-def _as_upload(data: bytes, name: str = "session.jsonl"):
+def as_upload(data: bytes, name: str = "session.jsonl"):
     return SimpleUploadedFile(name, data, content_type="application/octet-stream")

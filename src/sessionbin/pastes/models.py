@@ -8,7 +8,7 @@ SLUG_LENGTH = 10
 DELETE_TOKEN_LENGTH = 32
 
 
-def _make_slug() -> str:
+def make_slug() -> str:
     return get_random_string(SLUG_LENGTH, SLUG_ALPHABET)
 
 
@@ -17,7 +17,7 @@ def hash_token(token: str) -> str:
 
 
 class Paste(models.Model):
-    slug = models.CharField(max_length=SLUG_LENGTH, primary_key=True, default=_make_slug)
+    slug = models.CharField(max_length=SLUG_LENGTH, primary_key=True, default=make_slug)
     delete_token_hash = models.CharField(max_length=64)
     sha256 = models.CharField(max_length=64, db_index=True)
     size_bytes = models.PositiveIntegerField()

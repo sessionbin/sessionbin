@@ -11,36 +11,36 @@ from click.testing import CliRunner
 
 from sessionbin_cli import __version__
 from sessionbin_cli.api import APIError, SessionbinClient
-from sessionbin_cli.cli import MAX_UPLOAD_BYTES, _human_size, _time_ago, cli
+from sessionbin_cli.cli import MAX_UPLOAD_BYTES, cli, human_size, time_ago
 from sessionbin_cli.detect import SessionInfo
 
 
 class TestHumanSize:
     def test_bytes(self):
-        assert _human_size(42) == "42 B"
+        assert human_size(42) == "42 B"
 
     def test_kilobytes(self):
-        assert _human_size(2048) == "2.0 KB"
+        assert human_size(2048) == "2.0 KB"
 
     def test_megabytes(self):
-        assert _human_size(5 * 1024 * 1024) == "5.0 MB"
+        assert human_size(5 * 1024 * 1024) == "5.0 MB"
 
     def test_gigabytes(self):
-        assert _human_size(3 * 1024**3) == "3.0 GB"
+        assert human_size(3 * 1024**3) == "3.0 GB"
 
 
 class TestTimeAgo:
     def test_just_now(self):
-        assert _time_ago(time.time()) == "just now"
+        assert time_ago(time.time()) == "just now"
 
     def test_minutes(self):
-        assert _time_ago(time.time() - 120) == "2m ago"
+        assert time_ago(time.time() - 120) == "2m ago"
 
     def test_hours(self):
-        assert _time_ago(time.time() - 7200) == "2h ago"
+        assert time_ago(time.time() - 7200) == "2h ago"
 
     def test_days(self):
-        assert _time_ago(time.time() - 172800) == "2d ago"
+        assert time_ago(time.time() - 172800) == "2d ago"
 
 
 class TestUploadCommand:

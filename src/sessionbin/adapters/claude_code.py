@@ -60,11 +60,11 @@ def parse(raw: bytes) -> Session:
         content = message.get("content", "")
 
         if msg_type == "user" and isinstance(content, str):
-            content = _process_user_text(content)
+            content = process_user_text(content)
             if content is None:
                 continue
 
-        blocks = _parse_content(content, lineno)
+        blocks = parse_content(content, lineno)
 
         if call_turn := find_call_turn(turns, blocks):
             attach_results(call_turn, blocks)
@@ -83,7 +83,7 @@ def parse(raw: bytes) -> Session:
     return session
 
 
-def _process_user_text(text: str) -> str | None:
+def process_user_text(text: str) -> str | None:
     if text.startswith("<local-command-caveat>"):
         return None
 
@@ -96,7 +96,7 @@ def _process_user_text(text: str) -> str | None:
     return text
 
 
-def _parse_content(content, lineno: int) -> list[Block]:
+def parse_content(content, lineno: int) -> list[Block]:
     if isinstance(content, str):
         if content:
             return [Block(kind="text", text=strip_ansi(content))]

@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
                 (
                     "slug",
                     models.CharField(
-                        default=sessionbin.pastes.models._make_slug,
+                        default=sessionbin.pastes.models.make_slug,
                         max_length=10,
                         primary_key=True,
                         serialize=False,

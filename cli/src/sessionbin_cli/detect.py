@@ -26,7 +26,7 @@ class SessionInfo:
     worktree: Path | None = None
 
 
-def _claude_extract_first_user_message(obj: dict) -> str | None:
+def claude_extract_first_user_message(obj: dict) -> str | None:
     if obj.get("type") != "user":
         return None
     msg = obj.get("message", "")
@@ -53,7 +53,7 @@ def _claude_extract_first_user_message(obj: dict) -> str | None:
     return text if text else None
 
 
-def _claude_read_metadata(path: Path) -> tuple[str | None, str | None, str | None]:
+def claude_read_metadata(path: Path) -> tuple[str | None, str | None, str | None]:
     title = None
     summary = None
     cwd = None
@@ -64,7 +64,7 @@ def _claude_read_metadata(path: Path) -> tuple[str | None, str | None, str | Non
                 if obj.get("type") == "custom-title":
                     title = obj.get("customTitle")
                 if summary is None:
-                    summary = _claude_extract_first_user_message(obj)
+                    summary = claude_extract_first_user_message(obj)
                 if cwd is None and "cwd" in obj:
                     cwd = obj["cwd"]
                 if title is not None and summary is not None and cwd is not None:
@@ -83,7 +83,7 @@ def find_claude_sessions() -> list[SessionInfo]:
             continue
         for f in project_dir.iterdir():
             if f.suffix == ".jsonl" and f.is_file():
-                title, summary, cwd = _claude_read_metadata(f)
+                title, summary, cwd = claude_read_metadata(f)
                 project = Path(cwd).name if cwd else project_dir.name
                 results.append(
                     SessionInfo(
