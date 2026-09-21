@@ -97,6 +97,12 @@ For anything touching templates, CSS, upload/delete flows, or API endpoints, als
   are pure Python and run without a database.
 - Fixtures are real session files (redacted as needed) under `tests/fixtures/<harness>/`.
   Reproduce an adapter bug with a fixture and a failing test before fixing it.
+- **Never test against session files from the local system** (`~/.claude/projects/`,
+  `~/.codex/sessions/`, `~/.pi/agent/sessions/`, an OpenCode database, or anything else
+  outside the repo). They are the user's own transcripts and may hold private content.
+  Only ever use the files under `tests/fixtures/`. If no fixture has the shape you need,
+  stop and ask the user either for permission to generate one in the dev container or to
+  supply one themselves.
 
 ## Rendering notes
 
