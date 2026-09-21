@@ -81,6 +81,9 @@ small { font-size: 0.75rem; color: var(--sb-muted); }
 /* Pushes the footer down when the content is shorter than the viewport. */
 main.container { flex: 1 0 auto; }
 
+/* With no footer configured, the content would otherwise end at the page edge. */
+main.container:not(:has(~ footer)) { padding-bottom: 4rem; }
+
 /* Navigation */
 nav.container {
   display: flex;
