@@ -282,6 +282,35 @@ class TestRenderMarkdown:
         assert render_markdown("") == ""
 
 
+class TestAutolinks:
+    def test_bare_url_is_linked(self):
+        result = render_markdown("see http://example.com/ for more")
+        assert '<a href="http://example.com/">http://example.com/</a>' in result
+
+    def test_emphasis_around_a_bare_url_still_pairs(self):
+        """The delimiter must not end up inside the href.
+
+        mistune's own url plugin stops the link on `.,:;"')]` but not on `*` or `_`, so
+        it swallowed the closing delimiter: the emphasis went unpaired and the href
+        picked up two asterisks.
+        """
+        result = render_markdown("Running at **http://example.com/**, live")
+        assert '<strong><a href="http://example.com/">http://example.com/</a></strong>' in result
+        assert "**" not in result
+
+    def test_underscore_emphasis_around_a_bare_url_still_pairs(self):
+        result = render_markdown("__http://example.com/__")
+        assert '<strong><a href="http://example.com/">http://example.com/</a></strong>' in result
+
+    def test_underscore_inside_a_url_is_kept(self):
+        result = render_markdown("https://en.wikipedia.org/wiki/Foo_bar and on")
+        assert 'href="https://en.wikipedia.org/wiki/Foo_bar"' in result
+
+    def test_sentence_punctuation_stays_out_of_the_href(self):
+        result = render_markdown("Go to http://example.com/a.")
+        assert 'href="http://example.com/a"' in result
+
+
 class TestNavigatorLinks:
     def test_every_navigator_link_has_a_turn_to_land_on(self):
         """A turn whose only content was unrecorded reasoning renders without an id.

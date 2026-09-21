@@ -3,6 +3,7 @@ import json
 import mistune
 from django import template
 from django.utils.safestring import mark_safe
+from mistune.plugins.url import parse_url_link
 from pygments import highlight as pygments_highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
@@ -28,8 +29,20 @@ class _HighlightRenderer(mistune.HTMLRenderer):
         return pygments_highlight(code, lexer, _pygments_formatter)
 
 
+# mistune's own url plugin stops a bare link on `. , : ; " ' ) ]` but not on `*` or `_`,
+# so `**https://example.com/**` hands its closing delimiter to the href: the link breaks
+# and the emphasis never pairs. GFM's autolink extension leaves both out, so do the same.
+URL_LINK_PATTERN = r"""https?:\/\/[^\s<]+[^<.,:;"')\]\s*_]"""
+
+
+def url_without_trailing_emphasis(md: mistune.Markdown) -> None:
+    md.inline.register("url_link", URL_LINK_PATTERN, parse_url_link)
+
+
 _markdown = mistune.create_markdown(
-    escape=True, renderer=_HighlightRenderer(), plugins=["url", "table"]
+    escape=True,
+    renderer=_HighlightRenderer(),
+    plugins=[url_without_trailing_emphasis, "table"],
 )
 
 
