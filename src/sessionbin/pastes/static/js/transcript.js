@@ -141,16 +141,16 @@
         });
     }
 
-    // One turn means nothing to step between, so the arrows would only ever be dead.
-    if (items.length > 1) {
-        steppers.forEach(function (button) {
-            button.hidden = false;
-            button.addEventListener('click', function () {
-                if (unavailable(button)) return;
-                go(targetIndex(button));
-            });
+    /* The arrows keep their place on a session with one user turn, where every one of
+       them is a step to nowhere: update() marks them all unavailable, so the header
+       holds one shape whatever the session turns out to be. They are marked that way in
+       the markup too, which is how they read before this script runs, or at all. */
+    steppers.forEach(function (button) {
+        button.addEventListener('click', function () {
+            if (unavailable(button)) return;
+            go(targetIndex(button));
         });
-    }
+    });
 
     items.forEach(function (item, i) {
         item.link.addEventListener('click', function (e) {

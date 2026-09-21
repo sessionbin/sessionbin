@@ -189,8 +189,8 @@ instant for a short window afterwards.
 5. This fixture holds a single user turn, which is the degenerate case for the
    navigator. Verify:
    - [ ] The readout is `1 / 1`
-   - [ ] All four stepper arrows are hidden, not merely dimmed — with one turn there is
-         nothing to step between
+   - [ ] All four stepper arrows are still there, every one of them dimmed, so the header
+         holds the same shape it has on a longer session. Clicking one does nothing
 
 ### 7. API Delete
 

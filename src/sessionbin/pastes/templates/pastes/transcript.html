@@ -13,8 +13,8 @@
     </div>
     {% if prompts %}
     <div class="prompt-nav">
-      <button type="button" class="prompt-step" data-prompt-step="first" title="First user turn" aria-label="First user turn" hidden>&laquo;</button>
-      <button type="button" class="prompt-step" data-prompt-step="-1" title="Previous user turn" aria-label="Previous user turn" hidden>&lsaquo;</button>
+      <button type="button" class="prompt-step" data-prompt-step="first" title="First user turn" aria-label="First user turn" aria-disabled="true">&laquo;</button>
+      <button type="button" class="prompt-step" data-prompt-step="-1" title="Previous user turn" aria-label="Previous user turn" aria-disabled="true">&lsaquo;</button>
       <details class="prompt-index">
         <summary title="User turn navigation"><span class="visually-hidden">User turn navigation,</span> <span class="prompt-marker">{{ prompts|length }} user turn{{ prompts|length|pluralize }}</span></summary>
         <ul class="prompt-panel">
@@ -29,8 +29,8 @@
           {% endfor %}
         </ul>
       </details>
-      <button type="button" class="prompt-step" data-prompt-step="1" title="Next user turn" aria-label="Next user turn" hidden>&rsaquo;</button>
-      <button type="button" class="prompt-step" data-prompt-step="last" title="Last user turn" aria-label="Last user turn" hidden>&raquo;</button>
+      <button type="button" class="prompt-step" data-prompt-step="1" title="Next user turn" aria-label="Next user turn" aria-disabled="true">&rsaquo;</button>
+      <button type="button" class="prompt-step" data-prompt-step="last" title="Last user turn" aria-label="Last user turn" aria-disabled="true">&raquo;</button>
     </div>
     {% endif %}
   </div>
