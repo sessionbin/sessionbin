@@ -35,14 +35,15 @@
     {% endif %}
   </div>
 
-  {% for turn in session.turns %}
-  {% with blocks=turn|visible_blocks %}
-  {% if not blocks and turn|is_omitted_thinking_turn %}
+  {% for row in rows %}
+  {% if row.is_thinking_run %}
   <div class="turn-omitted">
-    {% if turn.timestamp %}<span class="turn-timestamp" title="{{ turn.timestamp|date:'Y-m-d H:i:s T' }}">{{ turn.timestamp|date:"H:i:s" }}</span>{% endif %}
+    {% if row.started_at %}<span class="turn-timestamp" title="{{ row.started_at|date:'Y-m-d H:i:s T' }}{% if row.count > 1 %} &ndash; {{ row.ended_at|date:'Y-m-d H:i:s T' }}{% endif %}">{{ row.started_at|date:"H:i:s" }}{% if row.count > 1 %} &ndash; {{ row.ended_at|date:"H:i:s" }}{% endif %}</span>{% endif %}
     <span title="The model did not record the text of its reasoning.">thinking</span>
+    {% if row.count > 1 %}<span class="thinking-count">&times;{{ row.count }}</span>{% endif %}
   </div>
   {% else %}
+  {% with turn=row blocks=row|visible_blocks %}
   <div class="turn role-{{ turn.role }}" id="turn-{{ turn.index }}">
     <div class="turn-header">
       <span class="role-badge">{{ turn.role }}</span>
@@ -98,7 +99,7 @@
     </div>
     {% endif %}
   </div>
-  {% endif %}
   {% endwith %}
+  {% endif %}
   {% endfor %}
 </div>

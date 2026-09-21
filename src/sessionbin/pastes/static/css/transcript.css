@@ -397,6 +397,12 @@
   opacity: 0.6;
 }
 
+/* Reads as a count beside the word, not as another word. */
+.transcript .thinking-count {
+  font-family: var(--t-mono);
+  font-style: normal;
+}
+
 .transcript details {
   border: 1px solid var(--t-border);
   border-radius: 4px;

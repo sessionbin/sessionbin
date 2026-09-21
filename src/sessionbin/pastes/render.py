@@ -3,9 +3,9 @@ from datetime import datetime
 
 from django.template.loader import render_to_string
 
-from sessionbin.schema.types import Session, Turn
+from sessionbin.schema.types import Block, Session, Turn
 
-RENDERER_VERSION = 7
+RENDERER_VERSION = 8
 
 # Idle long enough that a reader would want to know the session stopped and resumed.
 IDLE_GAP_SECONDS = 3600
@@ -18,8 +18,56 @@ def render(session: Session) -> str:
             "session": session,
             "stats": compute_stats(session),
             "prompts": build_prompt_index(session),
+            "rows": build_rows(session),
         },
     )
+
+
+@dataclass
+class OmittedThinking:
+    """Consecutive turns whose only content was reasoning the model did not record.
+
+    `is_thinking_run` is what the template branches on, since it cannot ask what type a
+    row is. A run of one renders exactly as a single turn always did.
+    """
+
+    count: int
+    started_at: datetime | None
+    ended_at: datetime | None
+    is_thinking_run: bool = True
+
+
+def is_blank_thinking(block: Block) -> bool:
+    return block.kind == "thinking" and not (block.text or "").strip()
+
+
+def is_omitted_thinking_turn(turn: Turn) -> bool:
+    """True when a turn's only content was thinking that the model did not record."""
+    return bool(turn.blocks) and all(is_blank_thinking(b) for b in turn.blocks)
+
+
+def build_rows(session: Session) -> list[Turn | OmittedThinking]:
+    """The session's turns, with unrecorded reasoning gathered into runs.
+
+    Codex returns its reasoning encrypted and its summary empty, so a session can carry a
+    long stretch of turns that each have nothing to say. Given a row apiece they repeat
+    the same nothing down the page, so consecutive ones become one row that reports how
+    many there were and how long they took.
+    """
+    rows: list[Turn | OmittedThinking] = []
+    for turn in session.turns:
+        if not is_omitted_thinking_turn(turn):
+            rows.append(turn)
+            continue
+        last = rows[-1] if rows else None
+        if isinstance(last, OmittedThinking):
+            last.count += 1
+            last.ended_at = turn.timestamp or last.ended_at
+        else:
+            rows.append(
+                OmittedThinking(count=1, started_at=turn.timestamp, ended_at=turn.timestamp)
+            )
+    return rows
 
 
 @dataclass

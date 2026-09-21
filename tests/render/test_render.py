@@ -2,7 +2,9 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from sessionbin.pastes.render import (
+    OmittedThinking,
     build_prompt_index,
+    build_rows,
     compute_stats,
     first_text,
     render,
@@ -311,6 +313,60 @@ class TestAutolinks:
         assert 'href="http://example.com/a"' in result
 
 
+class TestBuildRows:
+    def blank(self, index, second):
+        return Turn(
+            index=index,
+            role="assistant",
+            timestamp=datetime(2026, 9, 2, 12, 30, second, tzinfo=timezone.utc),
+            blocks=[Block(kind="thinking", text="")],
+        )
+
+    def spoken(self, index):
+        return Turn(
+            index=index,
+            role="assistant",
+            timestamp=datetime(2026, 9, 2, 12, 31, 0, tzinfo=timezone.utc),
+            blocks=[Block(kind="text", text="done")],
+        )
+
+    def test_consecutive_blank_thinking_becomes_one_row(self):
+        rows = build_rows(
+            Session(
+                harness="codex", turns=[self.blank(0, 40), self.blank(1, 45), self.blank(2, 50)]
+            )
+        )
+        assert len(rows) == 1
+        assert isinstance(rows[0], OmittedThinking)
+        assert rows[0].count == 3
+        assert rows[0].started_at.second == 40
+        assert rows[0].ended_at.second == 50
+
+    def test_a_turn_with_content_breaks_the_run(self):
+        rows = build_rows(
+            Session(
+                harness="codex",
+                turns=[self.blank(0, 40), self.spoken(1), self.blank(2, 50), self.blank(3, 55)],
+            )
+        )
+        assert [getattr(r, "count", None) for r in rows] == [1, None, 2]
+
+    def test_turns_with_content_pass_through_untouched(self):
+        turns = [self.spoken(0), self.spoken(1)]
+        assert build_rows(Session(harness="codex", turns=turns)) == turns
+
+    def test_a_run_without_timestamps_still_counts(self):
+        turns = [
+            Turn(
+                index=i, role="assistant", timestamp=None, blocks=[Block(kind="thinking", text="")]
+            )
+            for i in range(2)
+        ]
+        rows = build_rows(Session(harness="codex", turns=turns))
+        assert rows[0].count == 2
+        assert rows[0].started_at is None
+
+
 class TestNavigatorLinks:
     def test_every_navigator_link_has_a_turn_to_land_on(self):
         """A turn whose only content was unrecorded reasoning renders without an id.
@@ -534,6 +590,31 @@ class TestRender:
             assert 'class="turn role-assistant"' not in html
             assert 'class="turn-body"' not in html
             assert 'class="thinking-details"' not in html
+
+    def test_a_run_of_omitted_thinking_collapses_to_one_row(self):
+        # Codex returns its reasoning encrypted with an empty summary, so these arrive
+        # in stretches. One row each would repeat the same nothing down the page.
+        start = datetime(2026, 9, 2, 12, 30, 40, tzinfo=timezone.utc)
+        turns = [
+            Turn(
+                index=i,
+                role="assistant",
+                timestamp=start + timedelta(seconds=5 * i),
+                blocks=[Block(kind="thinking", text="")],
+            )
+            for i in range(8)
+        ]
+        html = render(Session(harness="codex", turns=turns))
+        assert html.count('class="turn-omitted"') == 1
+        assert "&times;8" in html
+        assert "12:30:40" in html
+        assert "12:31:15" in html
+
+    def test_a_lone_omitted_thinking_turn_gets_no_count(self):
+        html = self._render_turn(Block(kind="thinking", text=""))
+        assert 'class="turn-omitted"' in html
+        assert "thinking-count" not in html
+        assert "&times;" not in html
 
     def test_empty_thinking_dropped_from_a_turn_that_has_other_content(self):
         html = self._render_turn(

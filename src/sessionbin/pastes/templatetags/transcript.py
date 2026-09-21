@@ -9,6 +9,8 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
 from pygments.util import ClassNotFound
 
+from sessionbin.pastes.render import is_blank_thinking
+
 register = template.Library()
 
 _pygments_formatter = HtmlFormatter(nowrap=False, cssclass="highlight")
@@ -105,10 +107,6 @@ def render_markdown(text: str | None) -> str:
     return mark_safe(result)
 
 
-def is_blank_thinking(block) -> bool:
-    return block.kind == "thinking" and not (block.text or "").strip()
-
-
 @register.filter
 def visible_blocks(turn) -> list:
     """Blocks that have something to show.
@@ -117,13 +115,3 @@ def visible_blocks(turn) -> list:
     empty text. Rendering those produces blank boxes, so drop them here.
     """
     return [b for b in turn.blocks if not is_blank_thinking(b)]
-
-
-@register.filter
-def is_omitted_thinking_turn(turn) -> bool:
-    """True when a turn's only content was thinking that the model did not record.
-
-    Claude Code streams one block per line, so each such block becomes an entire turn.
-    The template collapses these to a single line instead of a full turn card.
-    """
-    return bool(turn.blocks) and all(is_blank_thinking(b) for b in turn.blocks)
