@@ -82,8 +82,8 @@ class TestMetaEscaping:
         # The fixture is a real JSONL; the harness/model fields are auto-escaped
         # by Django. Inject HTML-special chars via the model field directly.
         paste, _ = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
-        paste.session_model = '<script>alert("xss")</script>'
-        paste.save(update_fields=["session_model"])
+        paste.session_models = ['<script>alert("xss")</script>']
+        paste.save(update_fields=["session_models"])
 
         resp = client.get(f"/p/{paste.slug}/")
         html = resp.content.decode()

@@ -27,7 +27,7 @@ class Paste(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True, default=None)
     uploader_ip = models.GenericIPAddressField(null=True, blank=True)
     harness = models.CharField(max_length=64, null=True, blank=True)
-    session_model = models.CharField(max_length=128, null=True, blank=True)
+    session_models = models.JSONField(default=list, blank=True)
     turn_count = models.PositiveIntegerField(null=True, blank=True)
     tool_call_count = models.PositiveIntegerField(null=True, blank=True)
 

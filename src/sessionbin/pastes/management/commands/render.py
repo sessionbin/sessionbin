@@ -48,14 +48,14 @@ class Command(BaseCommand):
         if paste:
             paste.renderer_version = RENDERER_VERSION
             paste.adapter_version = adapter_version
-            paste.session_model = session.model
+            paste.session_models = session.models
             paste.turn_count = session.turn_count
             paste.tool_call_count = session.tool_call_count
             paste.save(
                 update_fields=[
                     "renderer_version",
                     "adapter_version",
-                    "session_model",
+                    "session_models",
                     "turn_count",
                     "tool_call_count",
                 ]

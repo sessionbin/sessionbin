@@ -28,7 +28,7 @@ def create_paste_from_upload(
         adapter_version=adapter_version,
         uploader_ip=uploader_ip,
         harness=session.harness,
-        session_model=session.model,
+        session_models=session.models,
         turn_count=session.turn_count,
         tool_call_count=session.tool_call_count,
         delete_token_hash=hash_token(token),

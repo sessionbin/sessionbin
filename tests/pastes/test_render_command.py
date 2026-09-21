@@ -14,7 +14,7 @@ def test_render_refreshes_paste_stats(fixture_bytes):
         tool_call_count=999,
         renderer_version=1,
         adapter_version=1,
-        session_model="stale-model",
+        session_models=["stale-model"],
     )
 
     call_command("render", paste.slug)
@@ -24,4 +24,4 @@ def test_render_refreshes_paste_stats(fixture_bytes):
     assert paste.tool_call_count != 999
     assert paste.renderer_version == RENDERER_VERSION
     assert paste.adapter_version == 3
-    assert paste.session_model == "claude-sonnet-4-20250514"
+    assert paste.session_models == ["claude-sonnet-4-20250514"]

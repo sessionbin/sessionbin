@@ -38,8 +38,8 @@ def build_og_description(paste: Paste) -> str:
     if not paste.harness:
         return "Agentic coding session transcript on sessionbin."
     parts = [f"{paste.harness} session"]
-    if paste.session_model:
-        parts[0] += f" ({paste.session_model})"
+    if paste.session_models:
+        parts[0] += f" ({', '.join(paste.session_models)})"
     stats = session_stats(paste)
     if stats:
         parts.append(", ".join(stats))
@@ -123,7 +123,9 @@ def manage_paste(request, slug: str):
         delete_paste(paste)
         return redirect(f"{request.path}?token={token}")
 
-    summary = [p for p in (paste.harness, paste.session_model) if p] + session_stats(paste)
+    summary = (
+        ([paste.harness] if paste.harness else []) + paste.session_models + session_stats(paste)
+    )
     return render(
         request,
         "pastes/manage.html",

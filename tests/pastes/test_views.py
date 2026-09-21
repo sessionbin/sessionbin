@@ -37,12 +37,16 @@ class TestOgDescription:
     def test_pluralises_its_counts(self):
         paste = Paste(
             harness="claude-code",
-            session_model="claude-sonnet-4",
+            session_models=["claude-sonnet-4"],
             turn_count=1,
             tool_call_count=1,
         )
         expected = "claude-code session (claude-sonnet-4) — 1 turn, 1 tool call"
         assert build_og_description(paste) == expected
+
+    def test_names_every_model_a_session_used(self):
+        paste = Paste(harness="codex", session_models=["gpt-5.6-luna", "gpt-5.6-sol"])
+        assert build_og_description(paste) == "codex session (gpt-5.6-luna, gpt-5.6-sol)"
 
     def test_omits_stats_it_does_not_have(self):
         assert build_og_description(Paste(harness="codex")) == "codex session"
@@ -241,16 +245,29 @@ class TestManagePaste:
     def test_shows_session_summary(self, client, fixture_bytes):
         paste, token = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
         resp = client.get(f"/p/{paste.slug}/manage/?token={token}")
+        models = " · ".join(paste.session_models)
         summary = (
-            f"{paste.harness} · {paste.session_model} · "
+            f"{paste.harness} · {models} · "
             f"{paste.turn_count} turns · {paste.tool_call_count} tool call"
         )
+        assert summary in resp.content.decode()
+
+    def test_summary_names_every_model_the_way_the_transcript_does(
+        self, client, codex_fixtures_dir
+    ):
+        raw = (
+            codex_fixtures_dir
+            / "rollout-2026-09-14T10-20-48-01a0a04a-bfb2-7e12-8e42-9bdd2783d9d2.jsonl"
+        ).read_bytes()
+        paste, token = create_paste_from_upload(raw=raw, uploader_ip=None)
+        resp = client.get(f"/p/{paste.slug}/manage/?token={token}")
+        summary = "codex · gpt-5.6-luna · gpt-5.6-sol · 10 turns · 2 tool calls"
         assert summary in resp.content.decode()
 
     def test_no_summary_without_metadata(self, client, fixture_bytes):
         paste, token = create_paste_from_upload(raw=fixture_bytes, uploader_ip=None)
         Paste.objects.filter(slug=paste.slug).update(
-            harness=None, session_model=None, turn_count=None, tool_call_count=None
+            harness=None, session_models=[], turn_count=None, tool_call_count=None
         )
         resp = client.get(f"/p/{paste.slug}/manage/?token={token}")
         assert "session-summary" not in resp.content.decode()
