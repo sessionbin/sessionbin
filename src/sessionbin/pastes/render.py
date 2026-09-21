@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 
 from sessionbin.schema.types import Block, Session, Turn
 
-RENDERER_VERSION = 8
+RENDERER_VERSION = 9
 
 # Idle long enough that a reader would want to know the session stopped and resumed.
 IDLE_GAP_SECONDS = 3600

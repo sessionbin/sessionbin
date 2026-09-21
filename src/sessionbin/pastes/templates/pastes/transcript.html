@@ -6,10 +6,10 @@
       {% if session.models %}<span class="header-model">{{ session.models|join:" · " }}</span>{% endif %}
     </div>
     <div class="header-stats">
-      {% if session.started_at %}<span class="header-date">{{ session.started_at|date:"Y-m-d H:i:s T" }}</span>{% endif %}
+      {% if session.started_at %}<span class="header-date">{{ session.started_at|date:"Y-m-d" }} <span class="header-clock">{{ session.started_at|date:"H:i:s T" }}</span></span>{% endif %}
       {% if stats.duration is not None %}<span>{{ stats.duration|duration }}</span>{% endif %}
-      <span>{{ stats.turn_count }} turns</span>
-      <span>{{ stats.tool_call_count }} tool calls</span>
+      <span>{{ stats.turn_count }} turn{{ stats.turn_count|pluralize }}</span>
+      <span>{{ stats.tool_call_count }} tool call{{ stats.tool_call_count|pluralize }}</span>
     </div>
     {% if prompts %}
     <div class="prompt-nav">

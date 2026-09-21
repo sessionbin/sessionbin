@@ -68,14 +68,23 @@
   pointer-events: none;
 }
 
+/* Dropping the date promotes the stat behind it to the front of the line, where the
+   separator it carries would have nothing to separate it from. */
 .transcript .header.is-stuck .header-date {
   display: none;
 }
 
+.transcript .header.is-stuck .header-date + span::before {
+  content: none;
+}
+
+/* Wraps because a long model name next to the harness outruns a phone screen, and a
+   name cut off mid-string says less than one on a line of its own. */
 .transcript .header-left {
   display: flex;
   align-items: baseline;
-  gap: 0.625rem;
+  flex-wrap: wrap;
+  gap: 0 0.625rem;
   min-width: 0;
 }
 
@@ -109,7 +118,9 @@
   white-space: nowrap;
 }
 
-.transcript .header-stats span:not(:last-child)::after {
+/* Carried by the stat that follows rather than the one before, so a line that wraps
+   never ends on a separator with nothing after it. */
+.transcript .header-stats > span:not(:first-child)::before {
   content: "\00b7";
   margin: 0 0.4rem;
 }
@@ -229,6 +240,15 @@
   white-space: nowrap;
 }
 
+/* Narrow enough that the header has to break across lines. Each piece keeps to the
+   right edge the stats already sit on, so the wrapped rows line up as a block instead
+   of alternating sides. */
+@media (max-width: 56rem) {
+  .transcript .prompt-nav {
+    margin-left: auto;
+  }
+}
+
 /* Too narrow to hang the panel off the button without running past the left edge, so
    it spans the header instead. The header is sticky, and therefore already the
    containing block once the navigator stops being one. */
@@ -241,6 +261,23 @@
     left: 0;
     right: 0;
     width: auto;
+  }
+
+  /* The stats fit on one line here only without the wall clock, and the date is the
+     half worth keeping: every turn below carries its own time of day. */
+  .transcript .header-clock {
+    display: none;
+  }
+
+  /* A long session still outruns the line, and a dot that lands at the head of the
+     wrapped line reads as a bullet. Spacing separates them just as well, and buys back
+     enough width that most sessions no longer wrap at all. */
+  .transcript .header-stats {
+    gap: 0.125rem 0.75rem;
+  }
+
+  .transcript .header-stats > span:not(:first-child)::before {
+    content: none;
   }
 
   /* Three rows of chrome is too much to pin to a phone screen. The counts are still

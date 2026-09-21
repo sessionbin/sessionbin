@@ -292,14 +292,6 @@ pre.shell span::before {
   user-select: none;
 }
 
-/* Paste actions */
-.paste-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.5rem;
-  font-size: 0.75rem;
-}
-
 /* Tooltips
    Drawn rather than left to the browser's own title tooltip, which cannot be warmed:
    it waits about a second every time, however recently you read the last one. */
