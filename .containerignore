@@ -1,0 +1,20 @@
+# deploy/Containerfile builds from the repo root and needs four things. Everything else
+# is excluded by default, so new files in the repo cannot reach the image by accident.
+#
+# dev/Containerfile builds with dev/ as its context and is unaffected by this file.
+*
+
+!pyproject.toml
+!uv.lock
+!README.md
+!src
+
+# Dev state living under src/: the database BASE_DIR points at when SESSIONBIN_DB_PATH
+# is unset, the tree collectstatic writes into, and the default paste storage directory.
+src/**/*.sqlite3
+src/**/*.sqlite3-journal
+src/sessionbin/staticfiles
+src/sessionbin/data
+
+src/**/__pycache__
+src/**/*.py[cod]
