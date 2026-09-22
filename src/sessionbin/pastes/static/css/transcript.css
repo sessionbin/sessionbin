@@ -13,6 +13,9 @@
   font-size: 0.875rem;
   line-height: 1.6;
   color: var(--t-text);
+  /* Prose only, so the column can widen for code without dragging sentences out to a
+     measure the eye loses its place on. */
+  --t-measure: 90ch;
 }
 
 [data-theme="dark"] .transcript {
@@ -38,7 +41,10 @@
   margin-bottom: 1rem;
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  /* Applies per flex line, so a navigator pushed onto its own line lands at the right
+     edge rather than the left. The first line's free space collects in header-left's
+     auto margin instead. */
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.25rem 1.5rem;
 }
@@ -79,13 +85,15 @@
 }
 
 /* Wraps because a long model name next to the harness outruns a phone screen, and a
-   name cut off mid-string says less than one on a line of its own. */
+   name cut off mid-string says less than one on a line of its own. The auto margin takes
+   the free space, which keeps the stats and navigator packed against the right edge. */
 .transcript .header-left {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0 0.625rem;
   min-width: 0;
+  margin-right: auto;
 }
 
 .transcript .header h1 {
@@ -102,13 +110,10 @@
   white-space: nowrap;
 }
 
-/* The auto margin sits here rather than on the navigator so the free space collects to
-   the stats' left, leaving them right-aligned with the navigator alongside them. */
 .transcript .header-stats {
   display: flex;
   flex-wrap: wrap;
   gap: 0.125rem 0;
-  margin-left: auto;
   font-size: 0.6875rem;
   color: var(--t-muted);
   font-family: var(--t-mono);
@@ -467,6 +472,22 @@
 .transcript .tool-result-error pre { border-color: var(--t-del); }
 
 /* Markdown text blocks */
+
+/* Capped on the prose elements themselves rather than on .block-text, so code fences,
+   tables and tool output next to them still get the full column. */
+.transcript .block-text > p,
+.transcript .block-text > ul,
+.transcript .block-text > ol,
+.transcript .block-text > blockquote,
+.transcript .block-text > h1,
+.transcript .block-text > h2,
+.transcript .block-text > h3,
+.transcript .block-text > h4,
+.transcript .block-text > h5,
+.transcript .block-text > h6 {
+  max-width: var(--t-measure);
+}
+
 .transcript .block-text p { margin: 0 0 0.5rem; }
 .transcript .block-text p:last-child { margin-bottom: 0; }
 
