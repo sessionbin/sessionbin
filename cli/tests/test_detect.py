@@ -2,14 +2,33 @@ import json
 import os
 import sqlite3
 import time
+from pathlib import Path
 
 from sessionbin_cli.detect import (
+    env_dir,
     find_claude_sessions,
     find_codex_sessions,
     find_opencode_sessions,
     find_pi_sessions,
     most_recent,
 )
+
+
+def test_env_dir_uses_env_var(monkeypatch):
+    monkeypatch.setenv("SESSIONBIN_TEST_DIR", "/custom/dir")
+    assert env_dir("SESSIONBIN_TEST_DIR", Path("/default")) == Path("/custom/dir")
+
+
+def test_env_dir_expands_tilde(monkeypatch):
+    monkeypatch.setenv("SESSIONBIN_TEST_DIR", "~/custom")
+    assert env_dir("SESSIONBIN_TEST_DIR", Path("/default")) == Path.home() / "custom"
+
+
+def test_env_dir_falls_back_when_unset_or_empty(monkeypatch):
+    monkeypatch.delenv("SESSIONBIN_TEST_DIR", raising=False)
+    assert env_dir("SESSIONBIN_TEST_DIR", Path("/default")) == Path("/default")
+    monkeypatch.setenv("SESSIONBIN_TEST_DIR", "")
+    assert env_dir("SESSIONBIN_TEST_DIR", Path("/default")) == Path("/default")
 
 
 def make_project(tmp_path, name, files):

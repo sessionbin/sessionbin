@@ -1,17 +1,27 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Literal
 
-import platformdirs
 
-CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
-OPENCODE_DB_PATH = platformdirs.user_data_path("opencode") / "opencode.db"
-CODEX_SESSIONS_DIR = Path.home() / ".codex" / "sessions"
-PI_SESSIONS_DIR = Path.home() / ".pi" / "agent" / "sessions"
+def env_dir(var: str, default: Path) -> Path:
+    value = os.environ.get(var)
+    return Path(value).expanduser() if value else default
+
+
+CLAUDE_PROJECTS_DIR = env_dir("CLAUDE_CONFIG_DIR", Path.home() / ".claude") / "projects"
+# OpenCode uses XDG paths on every OS, macOS included, and an absolute OPENCODE_DB wins the join.
+OPENCODE_DB_PATH = (
+    env_dir("XDG_DATA_HOME", Path.home() / ".local" / "share")
+    / "opencode"
+    / os.environ.get("OPENCODE_DB", "opencode.db")
+)
+CODEX_SESSIONS_DIR = env_dir("CODEX_HOME", Path.home() / ".codex") / "sessions"
+PI_SESSIONS_DIR = env_dir("PI_CODING_AGENT_DIR", Path.home() / ".pi" / "agent") / "sessions"
 
 
 @dataclass

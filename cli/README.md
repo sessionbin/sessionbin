@@ -4,16 +4,19 @@ CLI for uploading and managing [sessionbin](https://sessionbin.dev) transcripts.
 
 ## Supported harnesses
 
-**Claude Code** sessions are read as files from `~/.claude/projects/`.
+**Claude Code** sessions are read as files from `~/.claude/projects/`, or
+`$CLAUDE_CONFIG_DIR/projects/` if set.
 
-**Codex** sessions are read as files from `~/.codex/sessions/`. Sub-agent rollouts (reviews,
-spawned agents) are skipped.
+**Codex** sessions are read as files from `~/.codex/sessions/`, or `$CODEX_HOME/sessions/`
+if set. Sub-agent rollouts (reviews, spawned agents) are skipped.
 
-**Pi** sessions are read as files from `~/.pi/agent/sessions/`.
+**Pi** sessions are read as files from `~/.pi/agent/sessions/`, or
+`$PI_CODING_AGENT_DIR/sessions/` if set.
 
-**OpenCode** sessions live in a local SQLite database rather than as files, so uploading
-one shells out to `opencode export`. The `opencode` binary must be on your `PATH` (or at
-`~/.opencode/bin/opencode`).
+**OpenCode** sessions live in a local SQLite database rather than as files
+(`~/.local/share/opencode/opencode.db`, following `$XDG_DATA_HOME` and `$OPENCODE_DB`), so
+uploading one shells out to `opencode export`. The `opencode` binary must be on your `PATH`
+(or at `~/.opencode/bin/opencode`).
 
 ## Installation
 
