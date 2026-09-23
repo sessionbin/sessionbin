@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "django>=6.0.4",
-    "django-ninja>=1.4",
+    "django-ninja>=1.7.1",
     "gunicorn>=23.0",
     "mistune>=3.1",
     "pygments>=2.18",
