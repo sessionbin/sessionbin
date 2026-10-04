@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## What is sessionbin
 
@@ -9,7 +9,7 @@ that imply accounts, dashboards, or analytics.
 
 Server-rendered HTML, no frontend SPA. HTMX is acceptable for small dynamic bits.
 
-The CLI lives in `cli/` in this repo and has its own CLAUDE.md. It uploads raw bytes and
+The CLI lives in `cli/` in this repo and has its own AGENTS.md. It uploads raw bytes and
 never parses session files; the HTTP API is the only contract between them.
 
 **The backend and the CLI are two separate uv projects, both distributed as `sessionbin`.**
