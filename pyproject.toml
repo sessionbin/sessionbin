@@ -20,7 +20,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "mypy>=1.16.0",
-    "django-stubs>=6.0.0",
+    "django-stubs>=6.1.2",
     "pytest>=9.0.3",
     "pytest-django>=4.11",
     "ruff>=0.12.0",
